@@ -1,0 +1,10 @@
+[submodule "taglib-sharp"]
+	path = taglib-sharp
+	url = https://github.com/archrival/taglib-sharp
+
+[submodule "UniqueNamespace.SqlBuilder"]
+	path = UniqueNamespace.SqlBuilder
+	url = https://github.com/archrival/UniqueNamespace.SqlBuilder
+[submodule "lastfm"]
+	path = lastfm
+	url = https://github.com/archrival/lastfm

@@ -1,0 +1,31 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard1.6</TargetFramework>
+    <AssemblyName>Resonance.Data.Storage.SQLite</AssemblyName>
+    <PackageId>Resonance.Data.Storage.SQLite</PackageId>
+    <RuntimeIdentifiers>win10-x64;osx.10.10-x64;ubuntu.14.04-x64;ubuntu.16.04-x64;ubuntu.16.10-x64</RuntimeIdentifiers>
+    <NetStandardImplicitPackageVersion>1.6.1</NetStandardImplicitPackageVersion>
+    <PackageTargetFallback>$(PackageTargetFallback);dnxcore50</PackageTargetFallback>
+    <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
+    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
+    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Scripts\*.sql" Exclude="bin\**;obj\**;**\*.xproj;packages\**;@(EmbeddedResource)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Resonance.Data.Models\Resonance.Data.Models.csproj" />
+    <ProjectReference Include="..\Resonance.Data.Storage.Common\Resonance.Data.Storage.Common.csproj" />
+    <ProjectReference Include="..\Resonance.Data.Storage\Resonance.Data.Storage.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Dapper.Contrib" Version="1.50.0" />
+    <PackageReference Include="Dapper" Version="1.50.2" />
+    <PackageReference Include="Dapper.SqlBuilder" Version="1.50.0" />
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="1.1.1" />
+  </ItemGroup>
+</Project>

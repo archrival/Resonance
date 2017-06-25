@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard1.6</TargetFramework>
+    <AssemblyName>Resonance.Data.Storage.Common</AssemblyName>
+    <PackageId>Resonance.Data.Storage.Common</PackageId>
+    <NetStandardImplicitPackageVersion>1.6.1</NetStandardImplicitPackageVersion>
+    <PackageTargetFallback>$(PackageTargetFallback);dnxcore50</PackageTargetFallback>
+    <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
+    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
+    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Resonance.Common\Resonance.Common.csproj" />
+    <ProjectReference Include="..\Resonance.Data.Media.Common\Resonance.Data.Media.Common.csproj" />
+    <ProjectReference Include="..\Resonance.Data.Models\Resonance.Data.Models.csproj" />
+  </ItemGroup>
+</Project>
