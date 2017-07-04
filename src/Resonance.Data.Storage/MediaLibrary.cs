@@ -272,6 +272,8 @@ namespace Resonance.Data.Storage
 
             File.WriteAllBytes(coverArtPath, coverArt.CoverArtData);
 
+            coverArt.MimeType = MimeType.GetMimeType(coverArt.CoverArtData, coverArtPath);
+
             return coverArt;
         }
 
