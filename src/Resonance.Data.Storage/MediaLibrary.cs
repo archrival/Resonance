@@ -259,7 +259,7 @@ namespace Resonance.Data.Storage
                 {
                     var height = (size.Value / image.Width) * image.Height;
 
-                    image.Resize(size.Value, height).Save(imageMemoryStream);
+                    image.Resize(size.Value, height).SaveAsPng(imageMemoryStream);
 
                     coverArt.CoverArtData = imageMemoryStream.ToArray();
                 }
