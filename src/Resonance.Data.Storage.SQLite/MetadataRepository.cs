@@ -708,8 +708,9 @@ namespace Resonance.Data.Storage.SQLite
 			var query = builder.AddTemplate(GetScript("Artist_Select"), new { UserId = userId });
 			builder.Join("[ArtistToAlbum] ata ON ata.ArtistId = a.Id");
 			builder.Where("ata.AlbumId = @AlbumId", new { AlbumId = albumId });
+            builder.OrderBy("ata.[rowid]");
 
-			var commandDefinition = new CommandDefinition(query.RawSql, transaction: _transaction, parameters: query.Parameters, cancellationToken: cancellationToken);
+            var commandDefinition = new CommandDefinition(query.RawSql, transaction: _transaction, parameters: query.Parameters, cancellationToken: cancellationToken);
 
 			var mediaBundles = new List<MediaBundle<Artist>>();
 
@@ -728,6 +729,7 @@ namespace Resonance.Data.Storage.SQLite
 			var query = builder.AddTemplate(GetScript("Artist_Select"), new { UserId = userId });
 			builder.Join("[ArtistToTrack] att ON att.ArtistId = a.Id");
 			builder.Where("att.TrackId = @TrackId", new { TrackId = trackId });
+            builder.OrderBy("att.[rowid]");
 
 			var commandDefinition = new CommandDefinition(query.RawSql, transaction: _transaction, parameters: query.Parameters, cancellationToken: cancellationToken);
 
