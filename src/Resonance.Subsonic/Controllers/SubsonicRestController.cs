@@ -93,7 +93,10 @@ namespace Resonance.SubsonicCompat.Controllers
                     }.CreateAuthorizationFailureResponse();
                 }
 
-                user.Roles = await MetadataRepository.GetRolesForUserAsync(user.Id, cancellationToken).ConfigureAwait(false);
+                if (user.Roles == null || !user.Roles.Any())
+                {
+                    user.Roles = await MetadataRepository.GetRolesForUserAsync(user.Id, cancellationToken).ConfigureAwait(false);
+                }
             }
             else
             {
@@ -1527,7 +1530,11 @@ namespace Resonance.SubsonicCompat.Controllers
                 }
 
                 user = await MetadataRepository.GetUserAsync(username, cancellationToken).ConfigureAwait(false);
-                user.Roles = await MetadataRepository.GetRolesForUserAsync(user.Id, cancellationToken).ConfigureAwait(false);
+
+                if (user.Roles == null || !user.Roles.Any())
+                {
+                    user.Roles = await MetadataRepository.GetRolesForUserAsync(user.Id, cancellationToken).ConfigureAwait(false);
+                }
             }
             else
             {
@@ -1561,7 +1568,11 @@ namespace Resonance.SubsonicCompat.Controllers
 
             foreach (var user in users)
             {
-                user.Roles = await MetadataRepository.GetRolesForUserAsync(user.Id, cancellationToken).ConfigureAwait(false);
+                if (user.Roles == null || !user.Roles.Any())
+                {
+                    user.Roles = await MetadataRepository.GetRolesForUserAsync(user.Id, cancellationToken).ConfigureAwait(false);
+                }
+
                 var subsonicUser = user.ToSubsonicUser();
 
                 subsonicUsers.Items.Add(subsonicUser);
@@ -2148,7 +2159,10 @@ namespace Resonance.SubsonicCompat.Controllers
                 }.CreateAuthorizationFailureResponse();
             }
 
-            user.Roles = await MetadataRepository.GetRolesForUserAsync(user.Id, cancellationToken).ConfigureAwait(false);
+            if (user.Roles == null || !user.Roles.Any())
+            {
+                user.Roles = await MetadataRepository.GetRolesForUserAsync(user.Id, cancellationToken).ConfigureAwait(false);
+            }
 
             if (email != null)
             {

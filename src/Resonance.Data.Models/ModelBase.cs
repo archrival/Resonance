@@ -12,7 +12,7 @@ namespace Resonance.Data.Models
         }
 
         [JsonProperty("id")]
-        public Guid Id { get; set; }
+        public virtual Guid Id { get; set; }
 
         #region HashCode and Equality Overrides
 

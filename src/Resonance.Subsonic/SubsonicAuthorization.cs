@@ -4,6 +4,7 @@ using Resonance.Common.Web;
 using Resonance.Data.Storage;
 using Subsonic.Common.Enums;
 using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -77,7 +78,15 @@ namespace Resonance.SubsonicCompat
             else
             {
                 authenticationContext.IsAuthenticated = true;
-                authenticationContext.Roles = await MetadataRepository.GetRolesForUserAsync(user.Id, cancellationToken);
+
+                if (user.Roles == null || !user.Roles.Any())
+                {
+                    authenticationContext.Roles = await MetadataRepository.GetRolesForUserAsync(user.Id, cancellationToken);
+                }
+                else
+                {
+                    authenticationContext.Roles = user.Roles;
+                }
             }
 
             return authenticationContext;
