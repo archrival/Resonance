@@ -344,6 +344,11 @@ namespace Resonance.Data.Storage.DocumentDB
             throw new NotImplementedException();
         }
 
+        public Task<IEnumerable<MediaBundle<Album>>> GetHighestRatedAlbumsAsync(Guid userId, int size, int offset, string genre, int? fromYear, int? toYear, Guid? collectionId, bool populate, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
         public Task<IEnumerable<Marker>> GetMarkersAsync(Guid userId, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();

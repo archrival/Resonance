@@ -2292,7 +2292,7 @@ namespace Resonance.SubsonicCompat.Controllers
                     break;
 
                 case AlbumListType.Highest:
-                    albumMediaBundles = await MediaLibrary.GetFavoritedAlbumsAsync(userId, size.GetValueOrDefault(), offset.GetValueOrDefault(), genre, fromYear, toYear, musicFolderId, true, cancellationToken).ConfigureAwait(false);
+                    albumMediaBundles = await MediaLibrary.GetHighestRatedAlbumsAsync(userId, size.GetValueOrDefault(), offset.GetValueOrDefault(), genre, fromYear, toYear, musicFolderId, true, cancellationToken).ConfigureAwait(false);
                     break;
 
                 case AlbumListType.Frequent:

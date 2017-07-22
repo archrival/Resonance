@@ -84,6 +84,8 @@ namespace Resonance.Data.Storage
 
         Task<IEnumerable<Genre>> GetGenresByTrackAsync(Guid trackId, CancellationToken cancellationToken);
 
+        Task<IEnumerable<MediaBundle<Album>>> GetHighestRatedAlbumsAsync(Guid userId, int size, int offset, string genre, int? fromYear, int? toYear, Guid? collectionId, bool populate, CancellationToken cancellationToken);
+
         Task<IEnumerable<Marker>> GetMarkersAsync(Guid userId, CancellationToken cancellationToken);
 
         Task<MediaInfo> GetMediaInfoAsync(Guid mediaId, CancellationToken cancellationToken);

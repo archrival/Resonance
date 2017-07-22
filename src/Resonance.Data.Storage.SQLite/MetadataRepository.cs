@@ -444,9 +444,8 @@ namespace Resonance.Data.Storage.SQLite
 			var trackArtistQuery = trackArtistBuilder.AddTemplate(GetScript("Album_Select"), new { UserId = userId });
 
 			trackArtistBuilder.AddClause("firstjoin", "LEFT JOIN [TrackToAlbum] tta ON tta.AlbumId = a.Id");
-			trackArtistBuilder.Where("tta.AlbumId IS NOT NULL");
 			trackArtistBuilder.Join("[ArtistToTrack] att ON att.TrackId = tta.TrackId");
-			trackArtistBuilder.Where("att.ArtistId = @ArtistId", new { ArtistId = artistId });
+			trackArtistBuilder.Where("tta.AlbumId IS NOT NULL AND att.ArtistId = @ArtistId", new { ArtistId = artistId });
 
 			var trackArtistCommandDefinition = new CommandDefinition(trackArtistQuery.RawSql, transaction: _transaction, parameters: trackArtistQuery.Parameters, cancellationToken: cancellationToken);
 
@@ -885,7 +884,75 @@ namespace Resonance.Data.Storage.SQLite
 			return mediaBundles;
 		}
 
-		public async Task<IEnumerable<MediaBundle<T>>> GetFavoritedAsync<T>(Guid userId, Guid? collectionId, bool populate, CancellationToken cancellationToken) where T : MediaBase, ISearchable, ICollectionIdentifier
+        public async Task<IEnumerable<MediaBundle<Album>>> GetHighestRatedAlbumsAsync(Guid userId, int size, int offset, string genre, int? fromYear, int? toYear, Guid? collectionId, bool populate, CancellationToken cancellationToken)
+        {
+            var builder = new SqlBuilder();
+
+            var query = builder.AddTemplate(GetScript("Album_Select"), new { UserId = userId });
+
+            builder.AddClause("firstjoin", "LEFT JOIN [TrackToAlbum] tta ON tta.AlbumId = a.Id");
+            builder.Where("tta.AlbumId IS NOT NULL");
+
+            var yearProvided = fromYear.HasValue || toYear.HasValue;
+
+            if (!string.IsNullOrWhiteSpace(genre) || yearProvided)
+            {
+                if (yearProvided)
+                {
+                    builder.Join("[Track] t ON t.Id = tta.TrackId");
+                }
+            }
+
+            if (collectionId.HasValue)
+            {
+                builder.Where("a.CollectionId = @CollectionId", new { CollectionId = collectionId });
+            }
+
+            if (!string.IsNullOrWhiteSpace(genre))
+            {
+                builder.Join("[GenreToTrack] gtt ON gtt.TrackId = tta.TrackId");
+                builder.Join("[Genre] g ON g.Id = gtt.GenreId");
+                builder.Where("g.Name IN(@Genre)", new { Genre = genre });
+            }
+
+            var reverseYearSort = fromYear.GetValueOrDefault() > toYear.GetValueOrDefault();
+
+            if (fromYear.HasValue)
+            {
+                builder.Where(string.Format("t.ReleaseDate {0} @FromYear", reverseYearSort ? "<=" : ">="), new { FromYear = fromYear });
+            }
+
+            if (toYear.HasValue)
+            {
+                builder.Where(string.Format("t.ReleaseDate {0} @ToYear", reverseYearSort ? ">=" : "<="), new { ToYear = toYear });
+            }
+
+            builder.Where("d.Rating IS NOT NULL");
+
+            builder.OrderBy("d.Rating DESC, a.Name ASC");
+
+            builder.AddClause("limit", "LIMIT @Size OFFSET @Offset", new { Size = size, Offset = offset });
+
+            var commandDefinition = new CommandDefinition(query.RawSql, transaction: _transaction, parameters: query.Parameters, cancellationToken: cancellationToken);
+
+            var mediaBundles = new List<MediaBundle<Album>>();
+
+            foreach (var result in await _dbConnection.QueryAsync(commandDefinition).ConfigureAwait(false))
+            {
+                var mediaBundle = MediaBundle<Album>.FromDynamic(result, userId);
+
+                if (populate)
+                {
+                    await PopulateAlbumAsync(userId, mediaBundle, cancellationToken).ConfigureAwait(false);
+                }
+
+                mediaBundles.Add(mediaBundle);
+            }
+
+            return mediaBundles;
+        }
+
+        public async Task<IEnumerable<MediaBundle<T>>> GetFavoritedAsync<T>(Guid userId, Guid? collectionId, bool populate, CancellationToken cancellationToken) where T : MediaBase, ISearchable, ICollectionIdentifier
 		{
 			var genericType = typeof(T);
 			var builder = new SqlBuilder();
@@ -1041,6 +1108,7 @@ namespace Resonance.Data.Storage.SQLite
 			var query = builder.AddTemplate(GetScript("Genre_Select"));
 			builder.Join("[GenreToTrack] gtt ON gtt.GenreId = g.Id");
 			builder.Where("gtt.TrackId = @TrackId", new { TrackId = trackId });
+            builder.OrderBy("gtt.[rowid]");
 
 			var commandDefinition = new CommandDefinition(query.RawSql, transaction: _transaction, parameters: query.Parameters, cancellationToken: cancellationToken);
 

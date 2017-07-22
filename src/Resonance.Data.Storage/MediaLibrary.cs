@@ -315,6 +315,12 @@ namespace Resonance.Data.Storage
             return genres.Any() ? genres : null;
         }
 
+        public async Task<IEnumerable<MediaBundle<Album>>> GetHighestRatedAlbumsAsync(Guid userId, int size, int offset, string genre, int? fromYear, int? toYear, Guid? collectionId, bool populate, CancellationToken cancellationToken)
+        {
+            return await _metadataRepository.GetHighestRatedAlbumsAsync(userId, size, offset, genre, fromYear, toYear, collectionId, populate, cancellationToken);
+        }
+
+
         public async Task<IEnumerable<MediaBundle<Album>>> GetNewestAlbumsAsync(Guid userId, int size, int offset, string genre, int? fromYear, int? toYear, Guid? collectionId, bool populate, CancellationToken cancellationToken)
         {
             return await _metadataRepository.GetNewestAlbumsAsync(userId, size, offset, genre, fromYear, toYear, collectionId, populate, cancellationToken);
