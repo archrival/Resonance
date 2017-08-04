@@ -3,6 +3,7 @@ using Microsoft.Data.Sqlite;
 using Resonance.Common;
 using Resonance.Data.Models;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
@@ -425,20 +426,6 @@ namespace Resonance.Data.Storage.SQLite
 
 			var commandDefinition = new CommandDefinition(query.RawSql, transaction: _transaction, parameters: query.Parameters, cancellationToken: cancellationToken);
 
-			var mediaBundles = new List<MediaBundle<Album>>();
-
-			foreach (var result in await _dbConnection.QueryAsync(commandDefinition).ConfigureAwait(false))
-			{
-				var mediaBundle = MediaBundle<Album>.FromDynamic(result, userId);
-
-				if (populate)
-				{
-					await PopulateAlbumAsync(userId, mediaBundle, cancellationToken).ConfigureAwait(false);
-				}
-
-				mediaBundles.Add(mediaBundle);
-			}
-
 			var trackArtistBuilder = new SqlBuilder();
 
 			var trackArtistQuery = trackArtistBuilder.AddTemplate(GetScript("Album_Select"), new { UserId = userId });
@@ -449,24 +436,29 @@ namespace Resonance.Data.Storage.SQLite
 
 			var trackArtistCommandDefinition = new CommandDefinition(trackArtistQuery.RawSql, transaction: _transaction, parameters: trackArtistQuery.Parameters, cancellationToken: cancellationToken);
 
-			foreach (var result in await _dbConnection.QueryAsync(trackArtistCommandDefinition).ConfigureAwait(false))
-			{
-				var mediaBundle = MediaBundle<Album>.FromDynamic(result, userId);
+            var albumQueryTasks = new List<Task<IEnumerable<dynamic>>> {
+                _dbConnection.QueryAsync(commandDefinition),
+                _dbConnection.QueryAsync(trackArtistCommandDefinition)
+            };
 
-				if (mediaBundles.Any(mb => mb.Media.Id == mediaBundle.Media.Id))
-				{
-					continue;
-				}
+            var albums = await Task.WhenAll(albumQueryTasks);
 
-				if (populate)
-				{
-					await PopulateAlbumAsync(userId, mediaBundle, cancellationToken).ConfigureAwait(false);
-				}
+            var mediaBundles = new ConcurrentDictionary<Guid, MediaBundle<Album>>();
 
-				mediaBundles.Add(mediaBundle);
-			}
+            Parallel.ForEach(albums.SelectMany(a => a), new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount }, result =>
+            {
+                MediaBundle<Album> mediaBundle = MediaBundle<Album>.FromDynamic(result, userId);
 
-			return mediaBundles;
+                if (mediaBundles.TryAdd(mediaBundle.Media.Id, mediaBundle))
+                { 
+                    if (populate)
+                    {
+                        PopulateAlbumAsync(userId, mediaBundle, cancellationToken).ConfigureAwait(false).GetAwaiter().GetResult();
+                    }
+                }
+            });
+
+			return mediaBundles.Values.OrderBy(m => m.Media.ReleaseDate);
 		}
 
 		public async Task<IEnumerable<MediaBundle<Album>>> GetAlbumsByGenreAsync(Guid userId, Guid genreId, bool populate, CancellationToken cancellationToken)

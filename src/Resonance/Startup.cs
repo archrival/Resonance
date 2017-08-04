@@ -43,6 +43,7 @@ namespace Resonance.Common.Web
             services
                 .AddMvc()
                 .AddApplicationPart(typeof(Resonance.Common.Web.Controllers.MediaLibraryController).GetTypeInfo().Assembly)
+                .AddApplicationPart(typeof(Resonance.Common.Web.Controllers.SettingsController).GetTypeInfo().Assembly)
                 .AddApplicationPart(typeof(SubsonicCompat.Controllers.SubsonicRestController).GetTypeInfo().Assembly)
                 .AddXmlSerializerFormatters()
                 .AddJsonOptions(opt =>
