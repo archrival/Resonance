@@ -28,8 +28,9 @@ namespace Resonance.Data.Storage.SQLite
 			_database = database;
 			_dbConnection = GetConnection();
 			_dbConnection.Open();
+            _dbConnection.ExecuteAsync("PRAGMA foreign_keys = ON; PRAGMA journal_mode = TRUNCATE; PRAGMA optimize;").ConfigureAwait(false).GetAwaiter().GetResult();
 
-			CreateSchemaAsync().Wait();
+            CreateSchemaAsync().ConfigureAwait(false).GetAwaiter().GetResult();
 		}
 
 		public async Task AddChatAsync(Chat chat, CancellationToken cancellationToken)
@@ -118,7 +119,7 @@ namespace Resonance.Data.Storage.SQLite
 
 				await _dbConnection.ExecuteAsync(commandDefinition).ConfigureAwait(false);
 
-				if (_transaction == null)
+                if (_transaction == null)
 				{
 					transaction.Commit();
 				}
@@ -150,7 +151,7 @@ namespace Resonance.Data.Storage.SQLite
 
 				await _dbConnection.ExecuteAsync(commandDefinition).ConfigureAwait(false);
 
-				if (_transaction == null)
+                if (_transaction == null)
 				{
 					transaction.Commit();
 				}
@@ -208,7 +209,7 @@ namespace Resonance.Data.Storage.SQLite
 
 				await _dbConnection.ExecuteAsync(commandDefinition).ConfigureAwait(false);
 
-				if (_transaction == null)
+                if (_transaction == null)
 				{
 					transaction.Commit();
 				}
@@ -252,7 +253,7 @@ namespace Resonance.Data.Storage.SQLite
 
 				await _dbConnection.ExecuteAsync(playlistTrackDeleteCommand).ConfigureAwait(false);
 
-				if (_transaction == null)
+                if (_transaction == null)
 				{
 					transaction.Commit();
 				}
@@ -421,10 +422,10 @@ namespace Resonance.Data.Storage.SQLite
 
 			var query = builder.AddTemplate(GetScript("Album_Select"), new { UserId = userId });
 
-			builder.Join("[ArtistToAlbum] ata ON ata.AlbumId = a.Id");
-			builder.Where("ata.ArtistId = @ArtistId", new { ArtistId = artistId });
+            builder.Join("[ArtistToAlbum] ata ON ata.AlbumId = a.Id");
+            builder.Where("ata.ArtistId = @ArtistId", new { ArtistId = artistId });
 
-			var commandDefinition = new CommandDefinition(query.RawSql, transaction: _transaction, parameters: query.Parameters, cancellationToken: cancellationToken);
+            var commandDefinition = new CommandDefinition(query.RawSql, transaction: _transaction, parameters: query.Parameters, cancellationToken: cancellationToken);
 
 			var trackArtistBuilder = new SqlBuilder();
 
@@ -432,7 +433,7 @@ namespace Resonance.Data.Storage.SQLite
 
 			trackArtistBuilder.AddClause("firstjoin", "LEFT JOIN [TrackToAlbum] tta ON tta.AlbumId = a.Id");
 			trackArtistBuilder.Join("[ArtistToTrack] att ON att.TrackId = tta.TrackId");
-			trackArtistBuilder.Where("tta.AlbumId IS NOT NULL AND att.ArtistId = @ArtistId", new { ArtistId = artistId });
+			trackArtistBuilder.Where("att.ArtistId = @ArtistId AND tta.AlbumId IS NOT NULL", new { ArtistId = artistId });
 
 			var trackArtistCommandDefinition = new CommandDefinition(trackArtistQuery.RawSql, transaction: _transaction, parameters: trackArtistQuery.Parameters, cancellationToken: cancellationToken);
 
@@ -526,15 +527,15 @@ namespace Resonance.Data.Storage.SQLite
 
 			if (fromYear.HasValue)
 			{
-				builder.Where(string.Format("t.ReleaseDate {0} @FromYear", reverseYearSort ? "<=" : ">="), new { FromYear = fromYear });
+				builder.Where($"t.ReleaseDate {(reverseYearSort ? "<=" : ">=")} @FromYear", new { FromYear = fromYear });
 			}
 
 			if (toYear.HasValue)
 			{
-				builder.Where(string.Format("t.ReleaseDate {0} @ToYear", reverseYearSort ? ">=" : "<="), new { ToYear = toYear });
+				builder.Where($"t.ReleaseDate {(reverseYearSort ? ">=" : "<=")} @ToYear", new { ToYear = toYear });
 			}
 
-			builder.OrderBy(yearProvided ? string.Format("t.ReleaseDate {0}, a.Name ASC", reverseYearSort ? "DESC" : "ASC") : "a.Name ASC");
+			builder.OrderBy(yearProvided ? $"t.ReleaseDate {(reverseYearSort ? "DESC" : "ASC")}, a.Name ASC" : "a.Name ASC");
 
 			builder.AddClause("limit", "LIMIT @Size OFFSET @Offset", new { Size = size, Offset = offset });
 
@@ -591,12 +592,12 @@ namespace Resonance.Data.Storage.SQLite
 
 			if (fromYear.HasValue)
 			{
-				builder.Where(string.Format("t.ReleaseDate {0} @FromYear", reverseYearSort ? "<=" : ">="), new { FromYear = fromYear });
+				builder.Where($"t.ReleaseDate {(reverseYearSort ? "<=" : ">=")} @FromYear", new { FromYear = fromYear });
 			}
 
 			if (toYear.HasValue)
 			{
-				builder.Where(string.Format("t.ReleaseDate {0} @ToYear", reverseYearSort ? ">=" : "<="), new { ToYear = toYear });
+				builder.Where($"t.ReleaseDate {(reverseYearSort ? ">=" : "<=")} @ToYear", new { ToYear = toYear });
 			}
 
 			builder.OrderBy("ar.Name ASC");
@@ -843,12 +844,12 @@ namespace Resonance.Data.Storage.SQLite
 
 			if (fromYear.HasValue)
 			{
-				builder.Where(string.Format("t.ReleaseDate {0} @FromYear", reverseYearSort ? "<=" : ">="), new { FromYear = fromYear });
+				builder.Where($"t.ReleaseDate {(reverseYearSort ? "<=" : ">=")} @FromYear", new { FromYear = fromYear });
 			}
 
 			if (toYear.HasValue)
 			{
-				builder.Where(string.Format("t.ReleaseDate {0} @ToYear", reverseYearSort ? ">=" : "<="), new { ToYear = toYear });
+				builder.Where($"t.ReleaseDate {(reverseYearSort ? ">=" : "<=")} @ToYear", new { ToYear = toYear });
 			}
 
 			builder.Where("d.Favorited IS NOT NULL");
@@ -911,12 +912,12 @@ namespace Resonance.Data.Storage.SQLite
 
             if (fromYear.HasValue)
             {
-                builder.Where(string.Format("t.ReleaseDate {0} @FromYear", reverseYearSort ? "<=" : ">="), new { FromYear = fromYear });
+                builder.Where($"t.ReleaseDate {(reverseYearSort ? "<=" : ">=")} @FromYear", new { FromYear = fromYear });
             }
 
             if (toYear.HasValue)
             {
-                builder.Where(string.Format("t.ReleaseDate {0} @ToYear", reverseYearSort ? ">=" : "<="), new { ToYear = toYear });
+                builder.Where($"t.ReleaseDate {(reverseYearSort ? ">=" : "<=")} @ToYear", new { ToYear = toYear });
             }
 
             builder.Where("d.Rating IS NOT NULL");
@@ -948,7 +949,7 @@ namespace Resonance.Data.Storage.SQLite
 		{
 			var genericType = typeof(T);
 			var builder = new SqlBuilder();
-			SqlBuilder.Template query;
+            Dapper.SqlBuilder.Template query;
 
 			if (genericType == typeof(Artist))
 			{
@@ -1202,12 +1203,12 @@ namespace Resonance.Data.Storage.SQLite
 
 			if (fromYear.HasValue)
 			{
-				builder.Where(string.Format("t.ReleaseDate {0} @FromYear", reverseYearSort ? "<=" : ">="), new { FromYear = fromYear });
+				builder.Where($"t.ReleaseDate {(reverseYearSort ? "<=" : ">=")} @FromYear", new { FromYear = fromYear });
 			}
 
 			if (toYear.HasValue)
 			{
-				builder.Where(string.Format("t.ReleaseDate {0} @ToYear", reverseYearSort ? ">=" : "<="), new { ToYear = toYear });
+				builder.Where($"t.ReleaseDate {(reverseYearSort ? ">=" : "<=")} @ToYear", new { ToYear = toYear });
 			}
 
 			builder.AddClause("limit", "LIMIT @Size OFFSET @Offset", new { Size = size, Offset = offset });
@@ -1272,12 +1273,12 @@ namespace Resonance.Data.Storage.SQLite
 
 			if (fromYear.HasValue)
 			{
-				builder.Where(string.Format("t.ReleaseDate {0} @FromYear", reverseYearSort ? "<=" : ">="), new { FromYear = fromYear });
+				builder.Where($"t.ReleaseDate {(reverseYearSort ? "<=" : ">=")} @FromYear", new { FromYear = fromYear });
 			}
 
 			if (toYear.HasValue)
 			{
-				builder.Where(string.Format("t.ReleaseDate {0} @ToYear", reverseYearSort ? ">=" : "<="), new { ToYear = toYear });
+				builder.Where($"t.ReleaseDate {(reverseYearSort ? ">=" : "<=")} @ToYear", new { ToYear = toYear });
 			}
 
 			builder.AddClause("limit", "LIMIT @Size OFFSET @Offset", new { Size = size, Offset = offset });
@@ -1338,12 +1339,12 @@ namespace Resonance.Data.Storage.SQLite
 
 			if (fromYear.HasValue)
 			{
-				builder.Where(string.Format("t.ReleaseDate {0} @FromYear", reverseYearSort ? "<=" : ">="), new { FromYear = fromYear });
+				builder.Where($"t.ReleaseDate {(reverseYearSort ? "<=" : ">=")} @FromYear", new { FromYear = fromYear });
 			}
 
 			if (toYear.HasValue)
 			{
-				builder.Where(string.Format("t.ReleaseDate {0} @ToYear", reverseYearSort ? ">=" : "<="), new { ToYear = toYear });
+				builder.Where($"t.ReleaseDate {(reverseYearSort ? ">=" : "<=")} @ToYear", new { ToYear = toYear });
 			}
 
 			builder.AddClause("limit", "LIMIT @Size OFFSET @Offset", new { Size = size, Offset = offset });
@@ -1385,7 +1386,7 @@ namespace Resonance.Data.Storage.SQLite
 				return null;
 			}
 
-			var playlist = Playlist.FromDynamic(result);
+			Playlist playlist = Playlist.FromDynamic(result);
 			playlist.User = await GetUserAsync(userId, cancellationToken).ConfigureAwait(false);
 
 			if (getTracks)
@@ -1400,21 +1401,21 @@ namespace Resonance.Data.Storage.SQLite
 
 				var trackToPlaylistResults = await _dbConnection.QueryAsync(trackToPlaylistCommandDefinition).ConfigureAwait(false);
 
-				var trackMediaBundles = new List<MediaBundle<Track>>();
+                var trackMediaBundles = new ConcurrentDictionary<int, MediaBundle<Track>>();
+                
+                Parallel.ForEach(trackToPlaylistResults, new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount }, trackToPlaylistResult =>
+                {
+                    Guid trackId = DynamicExtensions.GetGuidFromDynamic(trackToPlaylistResult.TrackId);
 
-				foreach (var trackToPlaylistResult in trackToPlaylistResults)
-				{
-					var trackId = DynamicExtensions.GetGuidFromDynamic(trackToPlaylistResult.TrackId);
+                    MediaBundle<Track> track = GetTrackAsync(userId, trackId, true, cancellationToken).ConfigureAwait(false).GetAwaiter().GetResult();
 
-					var track = await GetTrackAsync(userId, trackId, true, cancellationToken).ConfigureAwait(false);
+                    if (track != null)
+                    {
+                        trackMediaBundles[DynamicExtensions.GetIntFromDynamic(trackToPlaylistResult.Position)] = track;
+                    }
+                });
 
-					if (track != null)
-					{
-						trackMediaBundles.Add(track);
-					}
-				}
-
-				playlist.Tracks = trackMediaBundles;
+                playlist.Tracks = trackMediaBundles.OrderBy(t => t.Key).Select(t => t.Value).ToList();
 			}
 
 			return playlist;
@@ -1544,12 +1545,12 @@ namespace Resonance.Data.Storage.SQLite
 
 			if (fromYear.HasValue)
 			{
-				builder.Where(string.Format("t.ReleaseDate {0} @FromYear", reverseYearSort ? "<=" : ">="), new { FromYear = fromYear });
+				builder.Where($"t.ReleaseDate {(reverseYearSort ? "<=" : ">=")} @FromYear", new { FromYear = fromYear });
 			}
 
 			if (toYear.HasValue)
 			{
-				builder.Where(string.Format("t.ReleaseDate {0} @ToYear", reverseYearSort ? ">=" : "<="), new { ToYear = toYear });
+				builder.Where($"t.ReleaseDate {(reverseYearSort ? ">=" : "<=")} @ToYear", new { ToYear = toYear });
 			}
 
 			builder.Where("a.Id IN (SELECT Id FROM Album ORDER BY RANDOM() LIMIT @Size + @Offset)", new { Size = size });
@@ -1558,7 +1559,7 @@ namespace Resonance.Data.Storage.SQLite
 
 			if (yearProvided)
 			{
-				builder.OrderBy(string.Format("t.ReleaseDate {0}", reverseYearSort ? "DESC" : "ASC"));
+				builder.OrderBy($"t.ReleaseDate {(reverseYearSort ? "DESC" : "ASC")}");
 			}
 
 			var commandDefinition = new CommandDefinition(query.RawSql, transaction: _transaction, parameters: query.Parameters, cancellationToken: cancellationToken);
@@ -2571,7 +2572,7 @@ namespace Resonance.Data.Storage.SQLite
 		{
 			var genericType = typeof(T);
 			var builder = new SqlBuilder();
-            SqlBuilder.Template query;
+            Dapper.SqlBuilder.Template query;
 
 			queryString = queryString.Replace('*', '%');
 			queryString = "%" + queryString + "%";
@@ -2840,7 +2841,7 @@ namespace Resonance.Data.Storage.SQLite
 		{
 			var assembly = GetType().GetTypeInfo().Assembly;
 
-			var resourceStream = assembly.GetManifestResourceStream(string.Format("{0}.Scripts.{1}.sql", assembly.GetName().Name, scriptName));
+			var resourceStream = assembly.GetManifestResourceStream($"{assembly.GetName().Name}.Scripts.{scriptName}.sql");
 
 			if (resourceStream == null)
 			{
@@ -2887,5 +2888,46 @@ namespace Resonance.Data.Storage.SQLite
 				track.Media.Genres = new HashSet<Genre>(trackGenres);
 			}
 		}
-	}
+
+        public async Task DeleteAlbumReferencesAsync(CancellationToken cancellationToken)
+        {
+            var transaction = _transaction ?? _dbConnection.BeginTransaction();
+
+            try
+            {
+                var builder = new SqlBuilder();
+
+                var query = builder.AddTemplate(GetScript("Album_Delete"));
+                builder.Where(
+                    @"Id IN
+                    (
+                        SELECT a.Id
+                        FROM [Album] a
+                        LEFT JOIN [TrackToAlbum] tta ON tta.AlbumId = a.Id
+                        WHERE NOT EXISTS (SELECT NULL FROM [TrackToAlbum] tta WHERE tta.AlbumId = a.Id)
+                        GROUP BY a.Id
+                    )"
+                );
+
+                var commandDefinition = new CommandDefinition(query.RawSql, query.Parameters, transaction, cancellationToken: cancellationToken);
+
+                await _dbConnection.ExecuteAsync(commandDefinition).ConfigureAwait(false);
+
+                if (_transaction == null)
+                {
+                    transaction.Commit();
+                }
+            }
+            catch
+            {
+                transaction.Rollback();
+                throw;
+            }
+
+            if (_transaction == null)
+            {
+                transaction.Dispose();
+            }
+        }
+    }
 }

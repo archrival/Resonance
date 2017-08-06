@@ -13,7 +13,64 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Scripts\*.sql" Exclude="bin\**;obj\**;**\*.xproj;packages\**;@(EmbeddedResource)" />
+    <EmbeddedResource Include="Scripts\Album_Delete.sql" />
+    <EmbeddedResource Include="Scripts\Album_Insert.sql" />
+    <EmbeddedResource Include="Scripts\Album_Select.sql" />
+    <EmbeddedResource Include="Scripts\ArtistToAlbum_Insert.sql" />
+    <EmbeddedResource Include="Scripts\ArtistToTrack_Delete.sql" />
+    <EmbeddedResource Include="Scripts\ArtistToTrack_Insert.sql" />
+    <EmbeddedResource Include="Scripts\Artist_Insert.sql" />
+    <EmbeddedResource Include="Scripts\Artist_Select.sql" />
+    <EmbeddedResource Include="Scripts\Chat_Insert.sql" />
+    <EmbeddedResource Include="Scripts\Chat_Select.sql" />
+    <EmbeddedResource Include="Scripts\Collection_Select.sql" />
+    <EmbeddedResource Include="Scripts\Collection_Upsert.sql" />
+    <EmbeddedResource Include="Scripts\CoverArt_Delete.sql" />
+    <EmbeddedResource Include="Scripts\CoverArt_Insert.sql" />
+    <EmbeddedResource Include="Scripts\Disposition_Select.sql" />
+    <EmbeddedResource Include="Scripts\Disposition_Upsert.sql" />
+    <EmbeddedResource Include="Scripts\FileInfo_Upsert.sql" />
+    <EmbeddedResource Include="Scripts\GenreCounts_Select.sql" />
+    <EmbeddedResource Include="Scripts\GenreToTrack_Delete.sql" />
+    <EmbeddedResource Include="Scripts\GenreToTrack_Insert.sql" />
+    <EmbeddedResource Include="Scripts\Genre_Insert.sql" />
+    <EmbeddedResource Include="Scripts\Genre_Select.sql" />
+    <EmbeddedResource Include="Scripts\LastFm_Upsert.sql" />
+    <EmbeddedResource Include="Scripts\Marker_Delete.sql" />
+    <EmbeddedResource Include="Scripts\Marker_Select.sql" />
+    <EmbeddedResource Include="Scripts\Marker_Upsert.sql" />
+    <EmbeddedResource Include="Scripts\MediaInfo_Select.sql" />
+    <EmbeddedResource Include="Scripts\MediaInfo_Upsert.sql" />
+    <EmbeddedResource Include="Scripts\MediaTypeId_Select.sql" />
+    <EmbeddedResource Include="Scripts\Playback_Insert.sql" />
+    <EmbeddedResource Include="Scripts\Playlist_Delete.sql" />
+    <EmbeddedResource Include="Scripts\Playlist_Select.sql" />
+    <EmbeddedResource Include="Scripts\Playlist_Track_Delete.sql" />
+    <EmbeddedResource Include="Scripts\Playlist_Track_Insert.sql" />
+    <EmbeddedResource Include="Scripts\Playlist_Track_Select.sql" />
+    <EmbeddedResource Include="Scripts\Playlist_Upsert.sql" />
+    <EmbeddedResource Include="Scripts\PlayQueue_Delete.sql" />
+    <EmbeddedResource Include="Scripts\PlayQueue_Select.sql" />
+    <EmbeddedResource Include="Scripts\PlayQueue_Track_Delete.sql" />
+    <EmbeddedResource Include="Scripts\PlayQueue_Track_Insert.sql" />
+    <EmbeddedResource Include="Scripts\PlayQueue_Track_Select.sql" />
+    <EmbeddedResource Include="Scripts\PlayQueue_Upsert.sql" />
+    <EmbeddedResource Include="Scripts\ReplayGain_Delete.sql" />
+    <EmbeddedResource Include="Scripts\ReplayGain_Upsert.sql" />
+    <EmbeddedResource Include="Scripts\Role_Select.sql" />
+    <EmbeddedResource Include="Scripts\Schema.sql" />
+    <EmbeddedResource Include="Scripts\SchemaPopulate.sql" />
+    <EmbeddedResource Include="Scripts\Status_Upsert.sql" />
+    <EmbeddedResource Include="Scripts\TrackToAlbum_Delete.sql" />
+    <EmbeddedResource Include="Scripts\TrackToAlbum_Insert.sql" />
+    <EmbeddedResource Include="Scripts\Track_Select.sql" />
+    <EmbeddedResource Include="Scripts\Track_Select_Extra.sql" />
+    <EmbeddedResource Include="Scripts\Track_Upsert.sql" />
+    <EmbeddedResource Include="Scripts\UserToRole_Delete.sql" />
+    <EmbeddedResource Include="Scripts\UserToRole_Insert.sql" />
+    <EmbeddedResource Include="Scripts\User_Delete.sql" />
+    <EmbeddedResource Include="Scripts\User_Select.sql" />
+    <EmbeddedResource Include="Scripts\User_Upsert.sql" />
   </ItemGroup>
 
   <ItemGroup>

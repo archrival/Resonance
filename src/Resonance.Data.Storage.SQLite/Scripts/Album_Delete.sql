@@ -1,0 +1,2 @@
+﻿DELETE FROM [Album]
+/**where**/

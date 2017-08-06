@@ -22,6 +22,8 @@ namespace Resonance.Data.Storage
 
         Task ClearCollectionAsync<T>(Guid? collectionId, CancellationToken cancellationToken) where T : ModelBase, ICollectionIdentifier;
 
+        Task DeleteAlbumReferencesAsync(CancellationToken cancellationToken);
+
         Task DeleteMarkerAsync(Guid userId, Guid trackId, CancellationToken cancellationToken);
 
         Task DeletePlaylistAsync(Guid userId, Guid id, CancellationToken cancellationToken);

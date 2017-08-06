@@ -490,9 +490,9 @@ namespace Resonance.Data.Storage
                                  }
                              }
                          }
-                     }
 
-                     ScanProgress = null;
+                         await _metadataRepository.DeleteAlbumReferencesAsync(cancellationToken);
+                     }
                  }
                  catch (Exception ex)
                  {
@@ -502,6 +502,7 @@ namespace Resonance.Data.Storage
                  }
                  finally
                  {
+                     ScanProgress = null;
                      UseCache = true;
                  }
              });

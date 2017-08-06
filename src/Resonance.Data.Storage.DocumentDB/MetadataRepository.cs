@@ -68,6 +68,11 @@ namespace Resonance.Data.Storage.DocumentDB
             throw new NotImplementedException();
         }
 
+        public Task DeleteAlbumReferencesAsync(CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
         public async Task DeleteMarkerAsync(Guid userId, Guid trackId, CancellationToken cancellationToken)
         {
             var query = _client.CreateDocumentQuery<Marker>(UriFactory.CreateDocumentCollectionUri(DatabaseConstants.DatabaseId, DatabaseConstants.Marker), _defaultFeedOptions)
