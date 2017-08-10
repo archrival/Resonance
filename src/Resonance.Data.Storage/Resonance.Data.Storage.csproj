@@ -20,6 +20,6 @@
 
   <ItemGroup>
     <PackageReference Include="CacheManager.Microsoft.Extensions.Caching.Memory" Version="1.1.1" />
-    <PackageReference Include="ImageSharp" Version="1.0.0-alpha9-00175" />
+    <PackageReference Include="ImageSharp" Version="1.0.0-alpha9-00176" />
   </ItemGroup>
 </Project>
