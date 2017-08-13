@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26430.15
+VisualStudioVersion = 15.0.26430.16
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{1E586776-0868-46AA-B702-A11D15F90BA1}"
 EndProject
@@ -136,11 +136,5 @@ Global
 		{4BE5A30D-43AD-45C1-94B4-663E61683B33} = {1E586776-0868-46AA-B702-A11D15F90BA1}
 		{CCF29C79-5C40-48F3-B6BA-C9A8940A83A9} = {1E586776-0868-46AA-B702-A11D15F90BA1}
 		{E12346E1-2BF0-48D7-9C01-5BE8C702E377} = {1E586776-0868-46AA-B702-A11D15F90BA1}
-	EndGlobalSection
-	GlobalSection(Performance) = preSolution
-		HasPerformanceSessions = true
-	EndGlobalSection
-	GlobalSection(Performance) = preSolution
-		HasPerformanceSessions = true
 	EndGlobalSection
 EndGlobal
