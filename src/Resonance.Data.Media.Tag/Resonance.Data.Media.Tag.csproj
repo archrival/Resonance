@@ -2,18 +2,15 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard1.6</TargetFramework>
-    <AssemblyName>Resonance.Data.Media.Tag</AssemblyName>
-    <PackageId>Resonance.Data.Media.Tag</PackageId>
-    <NetStandardImplicitPackageVersion>1.6.1</NetStandardImplicitPackageVersion>
-    <PackageTargetFallback>$(PackageTargetFallback);dnxcore50</PackageTargetFallback>
-    <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
-    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
-    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\taglib-sharp\src\taglib-sharp-standard.csproj" />
     <ProjectReference Include="..\Resonance.Common\Resonance.Common.csproj" />
     <ProjectReference Include="..\Resonance.Data.Media.Common\Resonance.Data.Media.Common.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Properties\" />
   </ItemGroup>
 </Project>

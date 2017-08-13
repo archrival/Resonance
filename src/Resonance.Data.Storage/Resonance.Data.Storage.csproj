@@ -2,13 +2,6 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard1.6</TargetFramework>
-    <AssemblyName>Resonance.Data.Storage</AssemblyName>
-    <PackageId>Resonance.Data.Storage</PackageId>
-    <NetStandardImplicitPackageVersion>1.6.1</NetStandardImplicitPackageVersion>
-    <PackageTargetFallback>$(PackageTargetFallback);dnxcore50</PackageTargetFallback>
-    <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
-    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
-    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
   </PropertyGroup>
 
   <ItemGroup>
@@ -20,6 +13,10 @@
 
   <ItemGroup>
     <PackageReference Include="CacheManager.Microsoft.Extensions.Caching.Memory" Version="1.1.1" />
-    <PackageReference Include="ImageSharp" Version="1.0.0-alpha9-00176" />
+    <PackageReference Include="ImageSharp" Version="1.0.0-alpha9-00181" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Properties\" />
   </ItemGroup>
 </Project>
