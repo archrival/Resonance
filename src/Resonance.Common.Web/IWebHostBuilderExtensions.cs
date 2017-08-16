@@ -102,7 +102,7 @@ namespace Resonance.Common.Web
                             {
                                 ClientCertificateMode = ClientCertificateMode.NoCertificate,
                                 ServerCertificate = new X509Certificate2(certificateFile, certificatePassword),
-                                SslProtocols = SslProtocols.Tls | SslProtocols.Tls11 | SslProtocols.Tls12
+                                SslProtocols = SslProtocols.Tls11 | SslProtocols.Tls12
                             };
                         }
                     }
