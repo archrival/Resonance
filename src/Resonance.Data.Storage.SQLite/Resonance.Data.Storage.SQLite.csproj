@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard1.6</TargetFramework>
+    <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
@@ -75,7 +75,8 @@
     <PackageReference Include="Dapper.Contrib" Version="1.50.0" />
     <PackageReference Include="Dapper" Version="1.50.2" />
     <PackageReference Include="Dapper.SqlBuilder" Version="1.50.0" />
-    <PackageReference Include="Microsoft.Data.Sqlite" Version="1.1.1" />
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="2.0.0" />
+    <PackageReference Include="System.Numerics.Vectors" Version="4.4.0" />
   </ItemGroup>
 
   <ItemGroup>
