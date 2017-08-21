@@ -627,7 +627,9 @@ namespace Resonance.SubsonicCompat.Controllers
                 return SubsonicControllerExtensions.CreateFailureResponse(ErrorCode.RequestedDataNotFound, SubsonicConstants.ArtistNotFound);
             }
 
-            var subsonicArtist = artist.ToSubsonicArtistWithAlbumsID3(await MediaLibrary.GetAlbumsByArtistAsync(userId, id, true, cancellationToken).ConfigureAwait(false));
+            var albumMediaBundles = await MediaLibrary.GetAlbumsByArtistAsync(userId, id, true, cancellationToken).ConfigureAwait(false);
+
+            var subsonicArtist = artist.ToSubsonicArtistWithAlbumsID3(albumMediaBundles);
 
             return SubsonicControllerExtensions.CreateResponse(ItemChoiceType.Artist, subsonicArtist);
         }
