@@ -66,25 +66,6 @@ namespace Resonance.SubsonicCompat
             return context.HttpContext.Items[SubsonicConstants.AuthenticationContext] as AuthorizationContext;
         }
 
-        public static string ParsePassword(string password)
-        {
-            if (!password.StartsWith("enc:", StringComparison.OrdinalIgnoreCase))
-            {
-                return password;
-            }
-
-            var decodedPassword = password.Substring(4, password.Length - 4);
-
-            var bytes = new byte[decodedPassword.Length / 2];
-
-            for (var i = 0; i < bytes.Length; i++)
-            {
-                bytes[i] = Convert.ToByte(decodedPassword.Substring(i * 2, 2), 16);
-            }
-
-            return Encoding.UTF8.GetString(bytes);
-        }
-
         public static SubsonicQueryParameters GetSubsonicQueryParameters(this ActionContext context)
         {
             return context.HttpContext.Items[SubsonicConstants.SubsonicQueryParameters] as SubsonicQueryParameters;
@@ -155,6 +136,25 @@ namespace Resonance.SubsonicCompat
                 default:
                     return value;
             }
+        }
+
+        public static string ParsePassword(string password)
+        {
+            if (!password.StartsWith("enc:", StringComparison.OrdinalIgnoreCase))
+            {
+                return password;
+            }
+
+            var decodedPassword = password.Substring(4, password.Length - 4);
+
+            var bytes = new byte[decodedPassword.Length / 2];
+
+            for (var i = 0; i < bytes.Length; i++)
+            {
+                bytes[i] = Convert.ToByte(decodedPassword.Substring(i * 2, 2), 16);
+            }
+
+            return Encoding.UTF8.GetString(bytes);
         }
     }
 }

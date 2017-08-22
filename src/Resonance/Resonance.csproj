@@ -6,7 +6,7 @@
     <AssemblyName>Resonance</AssemblyName>
     <OutputType>exe</OutputType>
     <PackageId>resonance</PackageId>
-	<RuntimeIdentifiers>win10-x64;osx.10.10-x64;ubuntu.14.04-x64;ubuntu.16.04-x64;ubuntu.16.10-x64</RuntimeIdentifiers>
+	<RuntimeIdentifiers>win10-x64;osx.10.10-x64;ubuntu.14.04-x64;ubuntu.16.04-x64;ubuntu.16.10-x64;ubuntu.17.04-x64</RuntimeIdentifiers>
     <PackageTargetFallback>$(PackageTargetFallback);dnxcore50</PackageTargetFallback>
     <ApplicationInsightsResourceId>/subscriptions/ba152101-00b8-45a2-a809-fd3d9f25f523/resourcegroups/Default-ApplicationInsights-EastUS/providers/microsoft.insights/components/Resonance</ApplicationInsightsResourceId>
     <ApplicationInsightsAnnotationResourceId>/subscriptions/ba152101-00b8-45a2-a809-fd3d9f25f523/resourcegroups/Default-ApplicationInsights-EastUS/providers/microsoft.insights/components/Resonance</ApplicationInsightsAnnotationResourceId>

@@ -21,7 +21,7 @@ namespace Resonance.Common.Web
             var configuration = builder.Build();
 
             var noDelay = true;
-            var threadCount = 32;
+            var threadCount = 64;
             var allowSynchronousIO = false;
             var addServerHeader = true;
             var httpEnabled = false;
@@ -113,7 +113,7 @@ namespace Resonance.Common.Web
                 .UseKestrel(options =>
                 {
                     options.AllowSynchronousIO = allowSynchronousIO;
-                    options.ApplicationSchedulingMode = SchedulingMode.Inline;
+                    options.ApplicationSchedulingMode = SchedulingMode.Default;
                     options.AddServerHeader = addServerHeader;
 
                     if (httpEnabled)
