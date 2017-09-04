@@ -1,9 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 using Resonance.Common.Web;
 using Resonance.Data.Models;
 using Resonance.Data.Storage;
-
+using Resonance.Data.Storage.Common;
 using System;
 using System.Threading.Tasks;
 
@@ -12,8 +11,11 @@ namespace Resonance.SubsonicCompat.Controllers
     [Route("subsonic")]
     public class SubsonicController : ResonanceControllerBase
     {
-        public SubsonicController(IOptions<MetadataRepositorySettings> settings) : base(settings)
+        private readonly SubsonicAuthorization _subsonicAuthorization;
+
+        public SubsonicController(IMediaLibrary mediaLibrary, IMetadataRepository metadataRepository, ISettingsRepository settingsRepository) : base(mediaLibrary, metadataRepository, settingsRepository)
         {
+            _subsonicAuthorization = new SubsonicAuthorization(metadataRepository);
         }
 
         [HttpGet("")]
@@ -29,8 +31,7 @@ namespace Resonance.SubsonicCompat.Controllers
 
             var queryParameters = Request.GetSubsonicQueryParameters();
 
-            var subsonicAuthentication = new SubsonicAuthorization(Settings);
-            var authenticationContext = await subsonicAuthentication.AuthorizeRequestAsync(queryParameters, cancellationToken).ConfigureAwait(false);
+            var authenticationContext = await _subsonicAuthorization.AuthorizeRequestAsync(queryParameters, cancellationToken).ConfigureAwait(false);
 
             if (!authenticationContext.IsAuthenticated || !authenticationContext.IsInRole(Role.Settings))
             {

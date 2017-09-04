@@ -1,8 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
+using Resonance.Common.Web;
 using Resonance.Data.Models;
 using Resonance.Data.Storage;
+using Resonance.Data.Storage.Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,12 +11,12 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 
-namespace Resonance.Common.Web.Controllers
+namespace Resonance.Web.Controllers
 {
     [Route("rest/mediaLibrary")]
     public class MediaLibraryController : ResonanceControllerBase
     {
-        public MediaLibraryController(IOptions<MetadataRepositorySettings> settings) : base(settings)
+        public MediaLibraryController(IMediaLibrary mediaLibrary, IMetadataRepository metadataRepository, ISettingsRepository settingsRepository) : base(mediaLibrary, metadataRepository, settingsRepository)
         {
         }
 

@@ -1,16 +1,14 @@
-﻿using Resonance.Data.Media.Common;
-using Resonance.Data.Models;
-using Resonance.Data.Storage.Common;
+﻿using Resonance.Data.Models;
 using System;
 
 namespace Resonance.Data.Storage
 {
-    public class PlaylistRepositoryIdCache<TTagReader> : RepositoryCacheItem<Playlist> where TTagReader : ITagReader, new()
+    public class PlaylistRepositoryIdCache : RepositoryCacheItem<Playlist>
     {
-        public PlaylistRepositoryIdCache(IMetadataRepository metadataRepository, ITagReaderFactory tagReaderFactory, IMediaLibrary mediaLibrary, Guid userId, Guid id, bool getTracks)
+        public PlaylistRepositoryIdCache(IMetadataRepository metadataRepository, Guid userId, Guid id, bool getTracks)
         {
-            var repositoryDelegate = new PlaylistRepositoryIdDelegate<TTagReader>(userId, id, getTracks);
-            repositoryDelegate.Method = repositoryDelegate.CreateMethod(metadataRepository, tagReaderFactory, mediaLibrary);
+            var repositoryDelegate = new PlaylistRepositoryIdDelegate(userId, id, getTracks);
+            repositoryDelegate.Method = repositoryDelegate.CreateMethod(metadataRepository);
             RepositoryDelegate = repositoryDelegate;
         }
     }

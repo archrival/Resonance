@@ -1,7 +1,6 @@
 ﻿using Resonance.Common;
 using Resonance.Data.Media.Common;
 using Resonance.Data.Models;
-using Resonance.Data.Storage.Common;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -10,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Resonance.Data.Storage
 {
-    public class TrackRepositoryPathDelegate<TTagReader> : RepositoryCacheDelegate<MediaBundle<Track>> where TTagReader : ITagReader, new()
+    public class TrackRepositoryPathDelegate : RepositoryCacheDelegate<MediaBundle<Track>>
     {
         public TrackRepositoryPathDelegate(Guid userId, string path, Guid collectionId, bool populate, bool updateCollection)
         {
@@ -27,11 +26,11 @@ namespace Resonance.Data.Storage
         private bool UpdateCollection { get; }
         private Guid UserId { get; }
 
-        public Func<CancellationToken, Task<MediaBundle<Track>>> CreateMethod(IMetadataRepository metadataRepository, ITagReaderFactory tagReaderFactory, IMediaLibrary mediaLibrary)
+        public Func<CancellationToken, Task<MediaBundle<Track>>> CreateMethod(IMetadataRepository metadataRepository, IMetadataRepositoryCache metadataRepositoryCache, ITagReaderFactory tagReaderFactory)
         {
             return async cancellationToken =>
             {
-                var mediaBundle = await metadataRepository.GetTrackAsync(UserId, Path, CollectionId, Populate, cancellationToken);
+                var mediaBundle = await metadataRepository.GetTrackAsync(UserId, Path, CollectionId, Populate, cancellationToken).ConfigureAwait(false);
 
                 Track track = null;
 
@@ -45,7 +44,9 @@ namespace Resonance.Data.Storage
                 }
 
                 if (track != null && track.DateFileModified.ToUniversalTime() >= File.GetLastWriteTimeUtc(Path))
+                {
                     return mediaBundle;
+                }
 
                 var now = DateTime.UtcNow;
                 var dateAdded = now;
@@ -57,9 +58,9 @@ namespace Resonance.Data.Storage
                     dateAdded = track.DateAdded;
                 }
 
-                var tagReader = tagReaderFactory.Create<TTagReader>(Path);
+                var tagReader = tagReaderFactory.Create(Path);
 
-                track = mediaLibrary.TagReaderToTrackModelAsync(UserId, tagReader, CollectionId, cancellationToken).Result;
+                track = await metadataRepositoryCache.TagReaderToTrackModelAsync(UserId, tagReader, CollectionId, cancellationToken).ConfigureAwait(false);
 
                 if (trackId.HasValue)
                 {
@@ -71,7 +72,7 @@ namespace Resonance.Data.Storage
                 track.DateModified = now;
                 track.Visible = true;
 
-                await metadataRepository.InsertOrUpdateTrackAsync(track, cancellationToken);
+                await metadataRepository.InsertOrUpdateTrackAsync(track, cancellationToken).ConfigureAwait(false);
 
                 mediaBundle = new MediaBundle<Track>
                 {
@@ -86,12 +87,12 @@ namespace Resonance.Data.Storage
 
         #region HashCode and Equality Overrides
 
-        public static bool operator !=(TrackRepositoryPathDelegate<TTagReader> left, TrackRepositoryPathDelegate<TTagReader> right)
+        public static bool operator !=(TrackRepositoryPathDelegate left, TrackRepositoryPathDelegate right)
         {
             return !(left == right);
         }
 
-        public static bool operator ==(TrackRepositoryPathDelegate<TTagReader> left, TrackRepositoryPathDelegate<TTagReader> right)
+        public static bool operator ==(TrackRepositoryPathDelegate left, TrackRepositoryPathDelegate right)
         {
             if (ReferenceEquals(null, left))
                 return ReferenceEquals(null, right);
@@ -104,7 +105,7 @@ namespace Resonance.Data.Storage
 
         public override bool Equals(object obj)
         {
-            return obj != null && Equals(obj as TrackRepositoryPathDelegate<TTagReader>);
+            return obj != null && Equals(obj as TrackRepositoryPathDelegate);
         }
 
         public override int GetHashCode()
@@ -112,7 +113,7 @@ namespace Resonance.Data.Storage
             return this.GetHashCodeForObject(Populate, CollectionId, UserId, Path);
         }
 
-        private bool Equals(TrackRepositoryPathDelegate<TTagReader> item)
+        private bool Equals(TrackRepositoryPathDelegate item)
         {
             return item != null && this == item;
         }

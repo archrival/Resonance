@@ -30,9 +30,9 @@ namespace Resonance.Data.Storage
         }
 
         protected IRepositoryCacheDelegate<T> RepositoryDelegate { get; set; }
-        private bool AddNullToCache { get; set; }
         private static IMemoryCache Cache => _memoryCacheLazy.Value;
         private static MemoryCacheEntryOptions MemoryCacheEntryOptions => _memoryCacheEntryOptionsLazy.Value;
+        private bool AddNullToCache { get; set; }
         private TimeSpan Timeout { get; set; }
 
         public virtual async Task<T> GetResultAsync(CancellationToken cancellationToken, bool useCache = true)

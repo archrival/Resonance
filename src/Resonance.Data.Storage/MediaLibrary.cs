@@ -1,7 +1,5 @@
-﻿using ImageSharp;
-using Resonance.Common;
+﻿using Resonance.Common;
 using Resonance.Data.Media.Common;
-using Resonance.Data.Media.Tag;
 using Resonance.Data.Models;
 using Resonance.Data.Storage.Common;
 using System;
@@ -18,25 +16,19 @@ namespace Resonance.Data.Storage
         private static readonly object _mutex = new object();
         private static volatile bool _scanningLibrary = false;
         private static volatile ScanProgress _scanProgress = null;
+        private readonly ICoverArtRepository _coverArtRepository;
         private readonly ILastFmClient _lastFmClient;
         private readonly IMetadataRepository _metadataRepository;
-        private readonly MetadataRepositoryCache<TagLibTagReader> _metadataRepositoryCache;
-        private readonly MetadataRepositorySettings _metadataRepositorySettings;
+        private readonly IMetadataRepositoryCache _metadataRepositoryCache;
         private readonly ISettingsRepository _settingsRepository;
-        private readonly ITagReaderFactory _tagReaderFactory;
 
-        public MediaLibrary(IMetadataRepository metadataRepository, ILastFmClient lastFmClient, MetadataRepositorySettings metadataRepositorySettings) : this(metadataRepository, lastFmClient)
-        {
-            _metadataRepositorySettings = metadataRepositorySettings;
-        }
-
-        public MediaLibrary(IMetadataRepository metadataRepository, ILastFmClient lastFmClient)
+        public MediaLibrary(IMetadataRepository metadataRepository, ILastFmClient lastFmClient, ISettingsRepository settingsRepository, ICoverArtRepository coverArtRepository, IMetadataRepositoryCache metadataRepositoryCache)
         {
             _metadataRepository = metadataRepository;
-            _settingsRepository = new SettingsRepository(_metadataRepository);
-            _tagReaderFactory = new TagReaderFactory();
-            _metadataRepositoryCache = new MetadataRepositoryCache<TagLibTagReader>(_metadataRepository, _tagReaderFactory, this);
             _lastFmClient = lastFmClient;
+            _coverArtRepository = coverArtRepository;
+            _metadataRepositoryCache = metadataRepositoryCache;
+            _settingsRepository = settingsRepository;
         }
 
         public bool ScanInProgress
@@ -72,25 +64,6 @@ namespace Resonance.Data.Storage
                 lock (_mutex)
                 {
                     _scanProgress = value;
-                }
-            }
-        }
-
-        public bool UseCache
-        {
-            get
-            {
-                lock (_mutex)
-                {
-                    return !_scanningLibrary;
-                }
-            }
-
-            set
-            {
-                lock (_mutex)
-                {
-                    _scanningLibrary = !value;
                 }
             }
         }
@@ -221,60 +194,7 @@ namespace Resonance.Data.Storage
                 track = mediaBundle.Media as Track;
             }
 
-            var coverArtDirectory = Path.Combine(Path.Combine(_metadataRepositorySettings.ResonancePath, "CoverArt"), size.HasValue ? size.Value.ToString() : "full");
-
-            var coverArtPath = Path.Combine(coverArtDirectory, id.ToString("n"));
-
-            if (File.Exists(coverArtPath) && track.DateFileModified < File.GetLastWriteTimeUtc(coverArtPath))
-            {
-                var coverArtReturn = new CoverArt()
-                {
-                    CoverArtData = File.ReadAllBytes(coverArtPath),
-                    CoverArtType = CoverArtType.Front,
-                    MediaId = id
-                };
-
-                coverArtReturn.Size = coverArtReturn.CoverArtData.Length;
-                coverArtReturn.MimeType = MimeType.GetMimeType(coverArtReturn.CoverArtData, coverArtPath);
-
-                return coverArtReturn;
-            }
-
-            var tagReader = _tagReaderFactory.Create<TagLibTagReader>(track.Path);
-
-            var coverArt = tagReader.CoverArt.FirstOrDefault(ca => ca.CoverArtType == CoverArtType.Front || ca.CoverArtType == CoverArtType.Other);
-
-            if (coverArt == null)
-            {
-                return null;
-            }
-
-            if (size.HasValue)
-            {
-                var bytes = coverArt.CoverArtData;
-
-                using (var memoryStream = new MemoryStream(bytes))
-                using (var imageMemoryStream = new MemoryStream())
-                using (var image = Image.Load(memoryStream))
-                {
-                    var height = (size.Value / image.Width) * image.Height;
-
-                    image.Resize(size.Value, height).SaveAsPng(imageMemoryStream);
-
-                    coverArt.CoverArtData = imageMemoryStream.ToArray();
-                }
-            }
-
-            if (!Directory.Exists(coverArtDirectory))
-            {
-                Directory.CreateDirectory(coverArtDirectory);
-            }
-
-            File.WriteAllBytes(coverArtPath, coverArt.CoverArtData);
-
-            coverArt.MimeType = MimeType.GetMimeType(coverArt.CoverArtData, coverArtPath);
-
-            return coverArt;
+            return await _coverArtRepository.GetCoverArt(track, size, cancellationToken);
         }
 
         public async Task<IEnumerable<MediaBundle<Album>>> GetFavoritedAlbumsAsync(Guid userId, int size, int offset, string genre, int? fromYear, int? toYear, Guid? collectionId, bool populate, CancellationToken cancellationToken)
@@ -319,7 +239,6 @@ namespace Resonance.Data.Storage
         {
             return await _metadataRepository.GetHighestRatedAlbumsAsync(userId, size, offset, genre, fromYear, toYear, collectionId, populate, cancellationToken);
         }
-
 
         public async Task<IEnumerable<MediaBundle<Album>>> GetNewestAlbumsAsync(Guid userId, int size, int offset, string genre, int? fromYear, int? toYear, Guid? collectionId, bool populate, CancellationToken cancellationToken)
         {
@@ -403,6 +322,7 @@ namespace Resonance.Data.Storage
              {
                  ScanProgress = new ScanProgress();
                  ScanInProgress = true;
+                 _metadataRepositoryCache.UseCache = false;
 
                  try
                  {
@@ -503,7 +423,8 @@ namespace Resonance.Data.Storage
                  finally
                  {
                      ScanProgress = null;
-                     UseCache = true;
+                     ScanInProgress = false;
+                     _metadataRepositoryCache.UseCache = true;
                  }
              });
         }
@@ -531,131 +452,6 @@ namespace Resonance.Data.Storage
         public void StopScanningLibrary(Guid userId, CancellationToken cancellationToken)
         {
             ScanInProgress = false;
-        }
-
-        public async Task<Track> TagReaderToTrackModelAsync(Guid userId, ITagReader tagReader, Guid collectionId, CancellationToken cancellationToken)
-        {
-            var albumArtists = tagReader.AlbumArtists;
-            var trackArtists = tagReader.Artists;
-
-            if (albumArtists == null || !albumArtists.Any())
-            {
-                if (trackArtists != null && trackArtists.Any())
-                {
-                    albumArtists = trackArtists;
-                }
-                else
-                {
-                    albumArtists = new[] { Path.GetDirectoryName(Path.GetDirectoryName(tagReader.Path)) };
-                }
-            }
-
-            var albumMediaBundle = await GetAlbumAsync(userId, albumArtists, tagReader.AlbumName, collectionId, false, cancellationToken);
-
-            Track track = null;
-
-            if (albumMediaBundle == null)
-            {
-                track = new Track();
-            }
-            else
-            {
-                track = new Track(albumMediaBundle.Media as Album);
-            }
-
-            var artists = await GetArtistsFromListAsync(userId, tagReader.Artists, collectionId, cancellationToken);
-
-            if (artists != null && artists.Any())
-            {
-                var artistMediaBundles = new List<MediaBundle<Artist>>();
-
-                foreach (var artist in artists)
-                {
-                    artistMediaBundles.Add(new MediaBundle<Artist>
-                    {
-                        Media = artist
-                    });
-                }
-
-                track.Artists = new HashSet<MediaBundle<Artist>>(artistMediaBundles);
-            }
-            else
-            {
-                track.Artists = new HashSet<MediaBundle<Artist>>();
-            }
-
-            track.Comment = tagReader.Comment;
-            track.DateAdded = DateTime.UtcNow;
-            track.DiscNumber = (int)tagReader.DiscNumber;
-
-            track.DateFileCreated = tagReader.DateCreated;
-            track.DateFileModified = tagReader.DateModified;
-            track.FileHash = tagReader.Hash;
-            track.HashType = tagReader.HashType;
-            track.Path = tagReader.Path;
-            track.Size = tagReader.Size;
-
-            if (tagReader.CoverArt.Any())
-            {
-                track.CoverArt = new HashSet<CoverArt>();
-            }
-
-            foreach (var coverArt in tagReader.CoverArt)
-            {
-                coverArt.MediaId = track.Id;
-                track.CoverArt.Add(coverArt);
-            }
-
-            var genres = await GetGenresFromListAsync(tagReader.Genres, collectionId, cancellationToken);
-
-            if (genres != null && genres.Any())
-            {
-                track.Genres = new HashSet<Genre>(genres);
-            }
-            else
-            {
-                track.Genres = new HashSet<Genre>();
-            }
-
-            track.Number = (int)tagReader.TrackNumber;
-
-            var composers = await GetArtistsFromListAsync(userId, tagReader.Composers, collectionId, cancellationToken);
-
-            if (composers != null && composers.Any())
-            {
-                var composerMediaBundles = new List<MediaBundle<Artist>>();
-
-                foreach (var composer in composers)
-                {
-                    composerMediaBundles.Add(new MediaBundle<Artist>
-                    {
-                        Media = composer
-                    });
-                }
-
-                track.WrittenBy = new HashSet<MediaBundle<Artist>>(composerMediaBundles);
-            }
-            else
-            {
-                track.WrittenBy = new HashSet<MediaBundle<Artist>>();
-            }
-
-            track.Duration = tagReader.Duration;
-
-            track.Bitrate = tagReader.Bitrate;
-            track.Channels = tagReader.Channels;
-            track.ContentType = tagReader.ContentType;
-            track.SampleRate = tagReader.SampleRate;
-
-            track.Name = tagReader.TrackName;
-            track.ReleaseDate = (int)tagReader.ReleaseDate;
-
-            track.AlbumGain = double.IsNaN(tagReader.ReplayGainAlbumGain) ? (double?)null : tagReader.ReplayGainAlbumGain;
-            track.AlbumPeak = double.IsNaN(tagReader.ReplayGainAlbumPeak) ? (double?)null : tagReader.ReplayGainAlbumPeak;
-            track.TrackGain = double.IsNaN(tagReader.ReplayGainTrackGain) ? (double?)null : tagReader.ReplayGainTrackGain;
-            track.TrackPeak = double.IsNaN(tagReader.ReplayGainTrackPeak) ? (double?)null : tagReader.ReplayGainTrackPeak;
-
-            return track;
         }
     }
 }

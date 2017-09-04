@@ -1,14 +1,12 @@
 ﻿using Resonance.Common;
-using Resonance.Data.Media.Common;
 using Resonance.Data.Models;
-using Resonance.Data.Storage.Common;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Resonance.Data.Storage
 {
-    public class AlbumRepositoryIdDelegate<TTagReader> : RepositoryCacheDelegate<MediaBundle<Album>> where TTagReader : ITagReader, new()
+    public class AlbumRepositoryIdDelegate : RepositoryCacheDelegate<MediaBundle<Album>>
     {
         public AlbumRepositoryIdDelegate(Guid userId, Guid id, bool populate)
         {
@@ -21,19 +19,19 @@ namespace Resonance.Data.Storage
         private bool Populate { get; }
         private Guid UserId { get; }
 
-        public Func<CancellationToken, Task<MediaBundle<Album>>> CreateMethod(IMetadataRepository metadataRepository, ITagReaderFactory tagReaderFactory, IMediaLibrary mediaLibrary)
+        public Func<CancellationToken, Task<MediaBundle<Album>>> CreateMethod(IMetadataRepository metadataRepository)
         {
             return async cancelToken => await metadataRepository.GetAlbumAsync(UserId, Id, Populate, cancelToken);
         }
 
         #region HashCode and Equality Overrides
 
-        public static bool operator !=(AlbumRepositoryIdDelegate<TTagReader> left, AlbumRepositoryIdDelegate<TTagReader> right)
+        public static bool operator !=(AlbumRepositoryIdDelegate left, AlbumRepositoryIdDelegate right)
         {
             return !(left == right);
         }
 
-        public static bool operator ==(AlbumRepositoryIdDelegate<TTagReader> left, AlbumRepositoryIdDelegate<TTagReader> right)
+        public static bool operator ==(AlbumRepositoryIdDelegate left, AlbumRepositoryIdDelegate right)
         {
             if (ReferenceEquals(null, left))
                 return ReferenceEquals(null, right);
@@ -46,7 +44,7 @@ namespace Resonance.Data.Storage
 
         public override bool Equals(object obj)
         {
-            return obj != null && Equals(obj as AlbumRepositoryIdDelegate<TTagReader>);
+            return obj != null && Equals(obj as AlbumRepositoryIdDelegate);
         }
 
         public override int GetHashCode()
@@ -54,7 +52,7 @@ namespace Resonance.Data.Storage
             return this.GetHashCodeForObject(Populate, UserId, Id);
         }
 
-        private bool Equals(AlbumRepositoryIdDelegate<TTagReader> item)
+        private bool Equals(AlbumRepositoryIdDelegate item)
         {
             return item != null && this == item;
         }

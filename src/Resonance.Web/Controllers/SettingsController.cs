@@ -1,18 +1,19 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
+using Resonance.Common.Web;
 using Resonance.Data.Models;
 using Resonance.Data.Storage;
+using Resonance.Data.Storage.Common;
 using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Resonance.Common.Web.Controllers
+namespace Resonance.Web.Controllers
 {
     [Route("rest/settings")]
     public class SettingsController : ResonanceControllerBase
     {
-        public SettingsController(IOptions<MetadataRepositorySettings> settings) : base(settings)
+        public SettingsController(IMediaLibrary mediaLibrary, IMetadataRepository metadataRepository, ISettingsRepository settingsRepository) : base(mediaLibrary, metadataRepository, settingsRepository)
         {
         }
 

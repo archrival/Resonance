@@ -2,6 +2,6 @@
 {
     public interface IMetadataRepositoryFactory
     {
-        IMetadataRepository Create(IMetadataRepositorySettings settings);
+        IMetadataRepository CreateMetadataRepository();
     }
 }

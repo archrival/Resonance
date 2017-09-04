@@ -1,8 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 using Resonance.Common;
+using Resonance.Common.Web;
 using Resonance.Data.Models;
 using Resonance.Data.Storage;
+using Resonance.Data.Storage.Common;
 using Subsonic.Common.Classes;
 using Subsonic.Common.Enums;
 using System;
@@ -10,15 +11,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using Artist = Subsonic.Common.Classes.Artist;
-using Directory = Subsonic.Common.Classes.Directory;
-using Playlist = Resonance.Data.Models.Playlist;
-using User = Resonance.Data.Models.User;
-using System.Net.Http;
-using Resonance.Common.Web;
 
 namespace Resonance.SubsonicCompat.Controllers
 {
@@ -27,9 +23,11 @@ namespace Resonance.SubsonicCompat.Controllers
     {
         private static readonly HttpClient _httpClient = new HttpClient();
         private readonly Regex _indexRegex = new Regex("[a-zA-Z]");
+        private readonly SubsonicAuthorization _subsonicAuthorization;
 
-        public SubsonicRestController(IOptions<MetadataRepositorySettings> settings) : base(settings)
+        public SubsonicRestController(IMediaLibrary mediaLibrary, IMetadataRepository metadataRepository, ISettingsRepository settingsRepository) : base(mediaLibrary, metadataRepository, settingsRepository)
         {
+            _subsonicAuthorization = new SubsonicAuthorization(metadataRepository);
         }
 
         [HttpGet("addChatMessage.view"), HttpPost("addChatMessage.view")]
@@ -70,7 +68,7 @@ namespace Resonance.SubsonicCompat.Controllers
                 return authenticationContext.CreateAuthorizationFailureResponse();
             }
 
-            User user;
+            Data.Models.User user;
 
             if (username != authenticationContext.User.Name)
             {
@@ -144,7 +142,7 @@ namespace Resonance.SubsonicCompat.Controllers
 
             var userId = authenticationContext.User.Id;
 
-            Playlist playlist;
+            Data.Models.Playlist playlist;
 
             if (playlistId.HasValue)
             {
@@ -192,7 +190,7 @@ namespace Resonance.SubsonicCompat.Controllers
                     return SubsonicControllerExtensions.CreateFailureResponse(ErrorCode.RequiredParameterMissing, SubsonicConstants.RequiredParameterIsMissing);
                 }
 
-                playlist = new Playlist
+                playlist = new Data.Models.Playlist
                 {
                     Name = name,
                     User = authenticationContext.User,
@@ -260,7 +258,7 @@ namespace Resonance.SubsonicCompat.Controllers
                 }.CreateAuthorizationFailureResponse();
             }
 
-            user = new User
+            user = new Data.Models.User
             {
                 Enabled = true,
                 EmailAddress = email,
@@ -369,8 +367,7 @@ namespace Resonance.SubsonicCompat.Controllers
 
             var queryParameters = Request.GetSubsonicQueryParameters();
 
-            var subsonicAuthorization = new SubsonicAuthorization(Settings);
-            var authenticationContext = await subsonicAuthorization.AuthorizeRequestAsync(queryParameters, cancellationToken).ConfigureAwait(false);
+            var authenticationContext = await _subsonicAuthorization.AuthorizeRequestAsync(queryParameters, cancellationToken).ConfigureAwait(false);
 
             if (!authenticationContext.IsAuthenticated || !authenticationContext.IsInRole(Role.Download))
             {
@@ -727,7 +724,7 @@ namespace Resonance.SubsonicCompat.Controllers
 
             var similarArtists = await MediaLibrary.GetSimilarArtistsAsync(userId, artist.Media, true, count.Value, artist.Media.CollectionId, cancellationToken).ConfigureAwait(false);
 
-            var subsonicSimilarArtists = new List<Artist>();
+            var subsonicSimilarArtists = new List<Subsonic.Common.Classes.Artist>();
 
             foreach (var similarArtist in similarArtists.Where(sa => sa.MediaId != Guid.Empty))
             {
@@ -800,8 +797,7 @@ namespace Resonance.SubsonicCompat.Controllers
 
             var queryParameters = Request.GetSubsonicQueryParameters();
 
-            var subsonicAuthentication = new SubsonicAuthorization(Settings);
-            var authenticationContext = await subsonicAuthentication.AuthorizeRequestAsync(queryParameters, cancellationToken).ConfigureAwait(false);
+            var authenticationContext = await _subsonicAuthorization.AuthorizeRequestAsync(queryParameters, cancellationToken).ConfigureAwait(false);
 
             if (!authenticationContext.IsAuthenticated)
             {
@@ -862,7 +858,7 @@ namespace Resonance.SubsonicCompat.Controllers
 
             var queryParameters = Request.GetSubsonicQueryParameters();
 
-            var subsonicAuthentication = new SubsonicAuthorization(Settings);
+            var subsonicAuthentication = new SubsonicAuthorization(MetadataRepository);
             var authenticationContext = await subsonicAuthentication.AuthorizeRequestAsync(queryParameters, cancellationToken).ConfigureAwait(false);
 
             if (!authenticationContext.IsAuthenticated)
@@ -986,7 +982,7 @@ namespace Resonance.SubsonicCompat.Controllers
 
             var artists = await MediaLibrary.GetArtistsAsync(userId, musicFolderId, cancellationToken).ConfigureAwait(false);
 
-            var indexDictionary = new Dictionary<char, List<Artist>>();
+            var indexDictionary = new Dictionary<char, List<Subsonic.Common.Classes.Artist>>();
 
             var indexes = new Indexes { Items = new List<Index>() };
 
@@ -1018,7 +1014,7 @@ namespace Resonance.SubsonicCompat.Controllers
                 }
                 else
                 {
-                    indexDictionary[indexKey] = new List<Artist> { subsonicArtist };
+                    indexDictionary[indexKey] = new List<Subsonic.Common.Classes.Artist> { subsonicArtist };
                 }
             }
 
@@ -1067,7 +1063,7 @@ namespace Resonance.SubsonicCompat.Controllers
                 return SubsonicControllerExtensions.CreateFailureResponse(ErrorCode.RequestedDataNotFound, SubsonicConstants.DirectoryNotFound);
             }
 
-            var directory = new Directory { Id = id.ToString("n") };
+            var directory = new Subsonic.Common.Classes.Directory { Id = id.ToString("n") };
 
             switch (mediaType)
             {
@@ -1158,13 +1154,13 @@ namespace Resonance.SubsonicCompat.Controllers
 
             var nowPlaying = new NowPlaying { Entries = new List<NowPlayingEntry>() };
 
-            var users = new Dictionary<Guid, User>();
+            var users = new Dictionary<Guid, Data.Models.User>();
 
             foreach (var playback in recentPlayback)
             {
                 var album = await MediaLibrary.GetAlbumAsync(userId, playback.Media.AlbumId, true, cancellationToken).ConfigureAwait(false);
 
-                User user;
+                Data.Models.User user;
 
                 if (users.ContainsKey(playback.Playback.First().UserId))
                 {
@@ -1519,7 +1515,7 @@ namespace Resonance.SubsonicCompat.Controllers
 
             var authenticationContext = ControllerContext.GetAuthorizationContext();
 
-            User user;
+            Data.Models.User user;
 
             if (username != authenticationContext.User.Name)
             {
@@ -1608,8 +1604,7 @@ namespace Resonance.SubsonicCompat.Controllers
 
             var queryParameters = Request.GetSubsonicQueryParameters();
 
-            var subsonicAuthentication = new SubsonicAuthorization(Settings);
-            var authenticationContext = await subsonicAuthentication.AuthorizeRequestAsync(queryParameters, cancellationToken).ConfigureAwait(false);
+            var authenticationContext = await _subsonicAuthorization.AuthorizeRequestAsync(queryParameters, cancellationToken).ConfigureAwait(false);
 
             if (!authenticationContext.IsAuthenticated || !authenticationContext.IsInRole(Role.Playback))
             {
@@ -2003,8 +1998,7 @@ namespace Resonance.SubsonicCompat.Controllers
 
             var queryParameters = Request.GetSubsonicQueryParameters();
 
-            var subsonicAuthentication = new SubsonicAuthorization(Settings);
-            var authenticationContext = await subsonicAuthentication.AuthorizeRequestAsync(queryParameters, cancellationToken).ConfigureAwait(false);
+            var authenticationContext = await _subsonicAuthorization.AuthorizeRequestAsync(queryParameters, cancellationToken).ConfigureAwait(false);
 
             if (!authenticationContext.IsAuthenticated || !authenticationContext.IsInRole(Role.Playback))
             {

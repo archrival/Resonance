@@ -1,7 +1,5 @@
 ﻿using Resonance.Common;
-using Resonance.Data.Media.Common;
 using Resonance.Data.Models;
-using Resonance.Data.Storage.Common;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -9,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Resonance.Data.Storage
 {
-    public class PlaylistsRepositoryIdDelegate<TTagReader> : RepositoryCacheDelegate<IEnumerable<Playlist>> where TTagReader : ITagReader, new()
+    public class PlaylistsRepositoryIdDelegate : RepositoryCacheDelegate<IEnumerable<Playlist>>
     {
         public PlaylistsRepositoryIdDelegate(Guid userId, string username, bool getTracks)
         {
@@ -22,19 +20,19 @@ namespace Resonance.Data.Storage
         private Guid UserId { get; }
         private string Username { get; }
 
-        public Func<CancellationToken, Task<IEnumerable<Playlist>>> CreateMethod(IMetadataRepository metadataRepository, ITagReaderFactory tagReaderFactory, IMediaLibrary mediaLibrary)
+        public Func<CancellationToken, Task<IEnumerable<Playlist>>> CreateMethod(IMetadataRepository metadataRepository)
         {
             return async cancellationToken => await metadataRepository.GetPlaylistsAsync(UserId, Username, GetTracks, cancellationToken);
         }
 
         #region HashCode and Equality Overrides
 
-        public static bool operator !=(PlaylistsRepositoryIdDelegate<TTagReader> left, PlaylistsRepositoryIdDelegate<TTagReader> right)
+        public static bool operator !=(PlaylistsRepositoryIdDelegate left, PlaylistsRepositoryIdDelegate right)
         {
             return !(left == right);
         }
 
-        public static bool operator ==(PlaylistsRepositoryIdDelegate<TTagReader> left, PlaylistsRepositoryIdDelegate<TTagReader> right)
+        public static bool operator ==(PlaylistsRepositoryIdDelegate left, PlaylistsRepositoryIdDelegate right)
         {
             if (ReferenceEquals(null, left))
                 return ReferenceEquals(null, right);
@@ -49,7 +47,7 @@ namespace Resonance.Data.Storage
 
         public override bool Equals(object obj)
         {
-            var equals = obj != null && Equals(obj as PlaylistsRepositoryIdDelegate<TTagReader>);
+            var equals = obj != null && Equals(obj as PlaylistsRepositoryIdDelegate);
 
             return equals;
         }
@@ -61,7 +59,7 @@ namespace Resonance.Data.Storage
             return hashCode;
         }
 
-        private bool Equals(PlaylistsRepositoryIdDelegate<TTagReader> item)
+        private bool Equals(PlaylistsRepositoryIdDelegate item)
         {
             var equals = item != null && this == item;
 

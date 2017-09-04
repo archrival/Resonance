@@ -33,8 +33,10 @@
   <ItemGroup>
     <ProjectReference Include="..\Resonance.Common.Web\Resonance.Common.Web.csproj" />
     <ProjectReference Include="..\Resonance.Common\Resonance.Common.csproj" />
+    <ProjectReference Include="..\Resonance.Data.Media.Image\Resonance.Data.Media.Image.csproj" />
     <ProjectReference Include="..\Resonance.Data.Storage.SQLite\Resonance.Data.Storage.SQLite.csproj" />
     <ProjectReference Include="..\Resonance.Subsonic\Resonance.Subsonic.csproj" />
+    <ProjectReference Include="..\Resonance.Web\Resonance.Web.csproj" />
   </ItemGroup>
   <ItemGroup>
     <WCFMetadata Include="Connected Services" />

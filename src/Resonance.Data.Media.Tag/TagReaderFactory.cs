@@ -3,11 +3,11 @@ using System;
 
 namespace Resonance.Data.Media.Tag
 {
-    public class TagReaderFactory : ITagReaderFactory
+    public class TagReaderFactory<TTagReader> : ITagReaderFactory where TTagReader : ITagReader, new()
     {
-        public ITagReader Create<T>(string path) where T : ITagReader, new()
+        public ITagReader Create(string path)
         {
-            var tagReader = (T)Activator.CreateInstance(typeof(T));
+            var tagReader = (TTagReader)Activator.CreateInstance(typeof(TTagReader));
             tagReader.ReadTag(path);
 
             return tagReader;

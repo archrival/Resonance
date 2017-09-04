@@ -1,9 +1,7 @@
-﻿using Microsoft.Extensions.Options;
-using Resonance.Common;
+﻿using Resonance.Common;
 using Resonance.Common.Web;
 using Resonance.Data.Storage;
 using Subsonic.Common.Enums;
-using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -12,21 +10,12 @@ namespace Resonance.SubsonicCompat
 {
     public class SubsonicAuthorization
     {
-        private static readonly Lazy<IMetadataRepository> MetadataRepositoryLazy = new Lazy<IMetadataRepository>(() =>
+        private readonly IMetadataRepository _metadataRepository;
+
+        public SubsonicAuthorization(IMetadataRepository metadataRepository)
         {
-            var metadataRepositoryFactory = new MetadataRepositoryFactory();
-
-            return metadataRepositoryFactory.Create(_settings.Value);
-        });
-
-        private static IOptions<MetadataRepositorySettings> _settings;
-
-        public SubsonicAuthorization(IOptions<MetadataRepositorySettings> settings)
-        {
-            _settings = settings;
+            _metadataRepository = metadataRepository;
         }
-
-        private IMetadataRepository MetadataRepository => MetadataRepositoryLazy.Value;
 
         public async Task<AuthorizationContext> AuthorizeRequestAsync(SubsonicQueryParameters parameters, CancellationToken cancellationToken)
         {
@@ -41,7 +30,7 @@ namespace Resonance.SubsonicCompat
                 return authenticationContext;
             }
 
-            var user = await MetadataRepository.GetUserAsync(parameters.Username, cancellationToken);
+            var user = await _metadataRepository.GetUserAsync(parameters.Username, cancellationToken);
 
             if (user == null || !user.Enabled)
             {
@@ -81,7 +70,7 @@ namespace Resonance.SubsonicCompat
 
                 if (user.Roles == null || !user.Roles.Any())
                 {
-                    authenticationContext.Roles = await MetadataRepository.GetRolesForUserAsync(user.Id, cancellationToken);
+                    authenticationContext.Roles = await _metadataRepository.GetRolesForUserAsync(user.Id, cancellationToken);
                 }
                 else
                 {
