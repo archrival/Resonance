@@ -10,6 +10,8 @@ namespace Resonance.Windows
     {
         public static void Main(string[] args)
         {
+            System.IO.Directory.SetCurrentDirectory(System.AppDomain.CurrentDomain.BaseDirectory);
+
             var isService = !(Debugger.IsAttached || args.Contains("--console"));
 
             var host = ResonanceWebHostBuilderExtensions.GetWebHostBuilder()
@@ -19,7 +21,6 @@ namespace Resonance.Windows
 
             if (isService)
             {
-                System.IO.Directory.SetCurrentDirectory(System.AppDomain.CurrentDomain.BaseDirectory);
                 host.RunAsService();
             }
             else
