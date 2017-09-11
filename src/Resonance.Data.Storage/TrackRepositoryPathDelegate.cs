@@ -58,7 +58,7 @@ namespace Resonance.Data.Storage
                     dateAdded = track.DateAdded;
                 }
 
-                var tagReader = tagReaderFactory.Create(Path);
+                var tagReader = tagReaderFactory.CreateTagReader(Path);
 
                 track = await metadataRepositoryCache.TagReaderToTrackModelAsync(UserId, tagReader, CollectionId, cancellationToken).ConfigureAwait(false);
 

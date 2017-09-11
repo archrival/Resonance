@@ -1,17 +1,22 @@
-﻿using Resonance.Common;
+﻿using ImageSharp;
+using ImageSharp.Processing;
+using Resonance.Common;
 using Resonance.Data.Media.Common;
 using Resonance.Data.Models;
 using Resonance.Data.Storage;
-using ImageSharp;
+using SixLabors.Primitives;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Resonance.Data.Media.Image
 {
     public class CoverArtRepository : ICoverArtRepository
     {
+        private const string Full = "full";
+        private static object _lockObject;
+        private readonly string _coverArtPath;
         private readonly IMetadataRepositorySettings _metadataRepositorySettings;
         private readonly ITagReaderFactory _tagReaderFactory;
 
@@ -19,32 +24,33 @@ namespace Resonance.Data.Media.Image
         {
             _metadataRepositorySettings = metadataRepositorySettings;
             _tagReaderFactory = tagReaderFactory;
+            _coverArtPath = Path.Combine(_metadataRepositorySettings.ResonancePath, "CoverArt");
         }
 
         public async Task<CoverArt> GetCoverArt(Track track, int? size, CancellationToken cancellationToken)
         {
-            await Task.CompletedTask;
+            var coverArtDirectory = Path.Combine(_coverArtPath, size.HasValue ? size.Value.ToString() : Full);
+            var trackCoverArtPath = Path.Combine(coverArtDirectory, track.Id.ToString("n"));
 
-            var coverArtDirectory = Path.Combine(Path.Combine(_metadataRepositorySettings.ResonancePath, "CoverArt"), size.HasValue ? size.Value.ToString() : "full");
-
-            var coverArtPath = Path.Combine(coverArtDirectory, track.Id.ToString("n"));
-
-            if (File.Exists(coverArtPath) && track.DateFileModified < File.GetLastWriteTimeUtc(coverArtPath))
+            // Return the album art on disk if the file exists and is newer than the last modified date of the track
+            if (File.Exists(trackCoverArtPath) && track.DateFileModified.ToUniversalTime() < File.GetLastWriteTimeUtc(trackCoverArtPath))
             {
+                var coverArtData = await ReadCoverArtFromDiskAsync(trackCoverArtPath, cancellationToken);
+
                 var coverArtReturn = new CoverArt()
                 {
-                    CoverArtData = File.ReadAllBytes(coverArtPath),
+                    CoverArtData = coverArtData,
                     CoverArtType = CoverArtType.Front,
                     MediaId = track.Id
                 };
 
-                coverArtReturn.Size = coverArtReturn.CoverArtData.Length;
-                coverArtReturn.MimeType = MimeType.GetMimeType(coverArtReturn.CoverArtData, coverArtPath);
+                coverArtReturn.Size = coverArtData.Length;
+                coverArtReturn.MimeType = MimeType.GetMimeType(coverArtData, trackCoverArtPath);
 
                 return coverArtReturn;
             }
 
-            var tagReader = _tagReaderFactory.Create(track.Path);
+            var tagReader = _tagReaderFactory.CreateTagReader(track.Path);
 
             var coverArt = tagReader.CoverArt.FirstOrDefault(ca => ca.CoverArtType == CoverArtType.Front || ca.CoverArtType == CoverArtType.Other);
 
@@ -53,6 +59,7 @@ namespace Resonance.Data.Media.Image
                 return null;
             }
 
+            // Resize the image if requested
             if (size.HasValue)
             {
                 var bytes = coverArt.CoverArtData;
@@ -61,9 +68,12 @@ namespace Resonance.Data.Media.Image
                 using (var imageMemoryStream = new MemoryStream())
                 using (var image = ImageSharp.Image.Load(memoryStream))
                 {
-                    var height = (size.Value / image.Width) * image.Height;
+                    var resizeOptions = new ResizeOptions { Size = new Size { Height = size.Value, Width = size.Value }, Mode = ResizeMode.Max };
 
-                    image.Resize(size.Value, height).SaveAsPng(imageMemoryStream);
+                    var resizedImageData = image.Resize(resizeOptions);
+
+                    // Save to PNG to retain quality at the expense of file size
+                    resizedImageData.SaveAsPng(imageMemoryStream);
 
                     coverArt.CoverArtData = imageMemoryStream.ToArray();
                 }
@@ -74,11 +84,25 @@ namespace Resonance.Data.Media.Image
                 Directory.CreateDirectory(coverArtDirectory);
             }
 
-            File.WriteAllBytes(coverArtPath, coverArt.CoverArtData);
+            File.WriteAllBytes(trackCoverArtPath, coverArt.CoverArtData);
 
-            coverArt.MimeType = MimeType.GetMimeType(coverArt.CoverArtData, coverArtPath);
+            coverArt.MimeType = MimeType.GetMimeType(coverArt.CoverArtData, trackCoverArtPath);
 
             return coverArt;
+        }
+
+        private static async Task<byte[]> ReadCoverArtFromDiskAsync(string trackCoverArtPath, CancellationToken cancellationToken)
+        {
+            byte[] result;
+
+            using (var stream = File.Open(trackCoverArtPath, FileMode.Open, FileAccess.Read, FileShare.Read))
+            {
+                result = new byte[stream.Length];
+
+                await stream.ReadAsync(result, 0, (int)stream.Length, cancellationToken).ConfigureAwait(false);
+            }
+
+            return result;
         }
     }
 }

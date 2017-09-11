@@ -2,6 +2,6 @@
 {
     public interface ITagReaderFactory
     {
-        ITagReader Create(string path);
+        ITagReader CreateTagReader(string path);
     }
 }
