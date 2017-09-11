@@ -11,9 +11,13 @@ namespace Resonance.Common
 {
     public static class XmlExtensions
     {
-        private static readonly Lazy<ConcurrentDictionary<Type, XmlSerializer>> _xmlSerializersLazy = new Lazy<ConcurrentDictionary<Type, XmlSerializer>>();
+        private static readonly XmlQualifiedName EmptyNamespace = new XmlQualifiedName(string.Empty, string.Empty);
+        private static readonly XmlSerializerNamespaces IgnoredXmlSerializerNamespaces = new XmlSerializerNamespaces(new[] { EmptyNamespace });
+        private static readonly Regex IgnoreNamespacesRegex = new Regex(@"(xmlns:?[^=]*=[""][^""]*[""])", RegexOptions.IgnoreCase | RegexOptions.Multiline);
+        private static readonly XmlSerializerNamespaces XmlSerializerNamespaces = new XmlSerializerNamespaces();
+        private static readonly Lazy<ConcurrentDictionary<Type, XmlSerializer>> XmlSerializersLazy = new Lazy<ConcurrentDictionary<Type, XmlSerializer>>();
 
-        private static readonly XmlWriterSettings _xmlWriterSettings = new XmlWriterSettings
+        private static readonly XmlWriterSettings XmlWriterSettings = new XmlWriterSettings
         {
             Async = true,
             ConformanceLevel = ConformanceLevel.Document,
@@ -23,12 +27,7 @@ namespace Resonance.Common
             NamespaceHandling = NamespaceHandling.OmitDuplicates
         };
 
-        private static readonly XmlQualifiedName _emptyNamespace = new XmlQualifiedName(string.Empty, string.Empty);
-        private static readonly XmlSerializerNamespaces _ignoredXmlSerializerNamespaces = new XmlSerializerNamespaces(new XmlQualifiedName[1] { _emptyNamespace });
-        private static readonly Regex _ignoreNamespacesRegex = new Regex(@"(xmlns:?[^=]*=[""][^""]*[""])", RegexOptions.IgnoreCase | RegexOptions.Multiline);
-        private static readonly XmlSerializerNamespaces _xmlSerializerNamespaces = new XmlSerializerNamespaces();
-
-        private static ConcurrentDictionary<Type, XmlSerializer> XmlSerializers => _xmlSerializersLazy.Value;
+        private static ConcurrentDictionary<Type, XmlSerializer> XmlSerializers => XmlSerializersLazy.Value;
 
         /// <summary>
         /// Deserialize XML string into object type specified.
@@ -42,12 +41,16 @@ namespace Resonance.Common
             T result;
 
             if (ignoreNamespace)
-                xml = _ignoreNamespacesRegex.Replace(xml, string.Empty);
+            {
+                xml = IgnoreNamespacesRegex.Replace(xml, string.Empty);
+            }
 
             var xmlSerializer = GetXmlSerializer(typeof(T));
 
-            using (var sr = new StringReader(xml))
-                result = (T)xmlSerializer.Deserialize(sr);
+            using (var stringReader = new StringReader(xml))
+            {
+                result = (T)xmlSerializer.Deserialize(stringReader);
+            }
 
             return result;
         }
@@ -61,27 +64,31 @@ namespace Resonance.Common
         /// <returns>Deserialized object T</returns>
         public static async Task<T> DeserializeFromXmlAsync<T>(this string xml, bool ignoreNamespace = true) where T : class, new()
         {
-            return await Task.Run(() => xml.DeserializeFromXml<T>(ignoreNamespace)).ConfigureAwait(false);
+            await Task.CompletedTask;
+
+            return xml.DeserializeFromXml<T>(ignoreNamespace);
         }
 
         public static string SerializeToXml<T>(this T graph, bool ignoreNamespace = true) where T : class, new()
         {
             var xmlSerializer = GetXmlSerializer(graph.GetType());
-            XmlSerializerNamespaces ns = ignoreNamespace ? _ignoredXmlSerializerNamespaces : _xmlSerializerNamespaces;
+            var xmlSerializerNamespaces = ignoreNamespace ? IgnoredXmlSerializerNamespaces : XmlSerializerNamespaces;
 
-            var sb = new StringBuilder();
+            var stringBuilder = new StringBuilder();
 
-            using (var textWriter = new Utf8StringWriter(sb))
-            using (var xmlWriter = XmlWriter.Create(textWriter, _xmlWriterSettings))
+            using (var textWriter = new Utf8StringWriter(stringBuilder))
+            using (var xmlWriter = XmlWriter.Create(textWriter, XmlWriterSettings))
             {
-                xmlSerializer.Serialize(xmlWriter, graph, ns);
-                return sb.ToString();
+                xmlSerializer.Serialize(xmlWriter, graph, xmlSerializerNamespaces);
+                return stringBuilder.ToString();
             }
         }
 
         public static async Task<string> SerializeToXmlAsync<T>(this T xml, bool ignoreNamespace = true) where T : class, new()
         {
-            return await Task.Run(() => SerializeToXml(xml, ignoreNamespace)).ConfigureAwait(false);
+            await Task.CompletedTask;
+
+            return SerializeToXml(xml, ignoreNamespace);
         }
 
         private static XmlSerializer GetXmlSerializer(Type type)
@@ -97,9 +104,6 @@ namespace Resonance.Common
         }
 
         // Use UTF8 encoding but write no BOM
-        public override Encoding Encoding
-        {
-            get { return new UTF8Encoding(false); }
-        }
+        public override Encoding Encoding => new UTF8Encoding(false);
     }
 }

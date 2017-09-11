@@ -30,17 +30,17 @@ namespace Resonance.Common
 
             // Declare the string used to hold
             // the decrypted text.
-            SecureString secureString = new SecureString();
+            var secureString = new SecureString();
 
             try
             {
                 // generate the key from the shared secret and the salt
-                Rfc2898DeriveBytes key = new Rfc2898DeriveBytes(sharedSecret, Salt);
+                var key = new Rfc2898DeriveBytes(sharedSecret, Salt);
 
                 // Create the streams used for decryption.
-                byte[] bytes = Convert.FromBase64String(cipherText);
+                var bytes = Convert.FromBase64String(cipherText);
 
-                using (MemoryStream msDecrypt = new MemoryStream(bytes))
+                using (var msDecrypt = new MemoryStream(bytes))
                 {
                     // Create a RijndaelManaged object
                     // with the specified key and IV.
@@ -49,16 +49,14 @@ namespace Resonance.Common
                     // Get the initialization vector from the encrypted stream
                     aesAlg.IV = ReadByteArray(msDecrypt);
                     // Create a decryptor to perform the stream transform.
-                    ICryptoTransform decryptor = aesAlg.CreateDecryptor(aesAlg.Key, aesAlg.IV);
+                    var decryptor = aesAlg.CreateDecryptor(aesAlg.Key, aesAlg.IV);
 
-                    using (CryptoStream csDecrypt = new CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Read))
-                    using (StreamReader srDecrypt = new StreamReader(csDecrypt))
+                    using (var csDecrypt = new CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Read))
+                    using (var srDecrypt = new StreamReader(csDecrypt))
                     {
                         // Read the decrypted bytes from the decrypting stream
                         // and place them in a SecureString.
-                        char[] f = new char[1];
-
-                        int i = 0;
+                        var f = new char[1];
 
                         while (true)
                         {
@@ -72,8 +70,6 @@ namespace Resonance.Common
                             {
                                 break;
                             }
-
-                            i++;
                         }
                     }
                 }
@@ -113,12 +109,12 @@ namespace Resonance.Common
             try
             {
                 // generate the key from the shared secret and the salt
-                Rfc2898DeriveBytes key = new Rfc2898DeriveBytes(sharedSecret, Salt);
+                var key = new Rfc2898DeriveBytes(sharedSecret, Salt);
 
                 // Create the streams used for decryption.
-                byte[] bytes = Convert.FromBase64String(cipherText);
+                var bytes = Convert.FromBase64String(cipherText);
 
-                using (MemoryStream msDecrypt = new MemoryStream(bytes))
+                using (var msDecrypt = new MemoryStream(bytes))
                 {
                     // Create a RijndaelManaged object
                     // with the specified key and IV.
@@ -127,10 +123,10 @@ namespace Resonance.Common
                     // Get the initialization vector from the encrypted stream
                     aesAlg.IV = ReadByteArray(msDecrypt);
                     // Create a decryptor to perform the stream transform.
-                    ICryptoTransform decryptor = aesAlg.CreateDecryptor(aesAlg.Key, aesAlg.IV);
+                    var decryptor = aesAlg.CreateDecryptor(aesAlg.Key, aesAlg.IV);
 
-                    using (CryptoStream csDecrypt = new CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Read))
-                    using (StreamReader srDecrypt = new StreamReader(csDecrypt))
+                    using (var csDecrypt = new CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Read))
+                    using (var srDecrypt = new StreamReader(csDecrypt))
                     {
                         // Read the decrypted bytes from the decrypting stream
                         // and place them in a string.
@@ -168,23 +164,23 @@ namespace Resonance.Common
             try
             {
                 // generate the key from the shared secret and the salt
-                Rfc2898DeriveBytes key = new Rfc2898DeriveBytes(sharedSecret, Salt);
+                var key = new Rfc2898DeriveBytes(sharedSecret, Salt);
 
                 // Create a RijndaelManaged object
                 aesAlg = Aes.Create();
                 aesAlg.Key = key.GetBytes(aesAlg.KeySize / 8);
 
                 // Create a decryptor to perform the stream transform.
-                ICryptoTransform encryptor = aesAlg.CreateEncryptor(aesAlg.Key, aesAlg.IV);
+                var encryptor = aesAlg.CreateEncryptor(aesAlg.Key, aesAlg.IV);
 
                 // Create the streams used for encryption.
-                using (MemoryStream msEncrypt = new MemoryStream())
+                using (var msEncrypt = new MemoryStream())
                 {
                     // prepend the IV
                     msEncrypt.Write(BitConverter.GetBytes(aesAlg.IV.Length), 0, sizeof(int));
                     msEncrypt.Write(aesAlg.IV, 0, aesAlg.IV.Length);
-                    using (CryptoStream csEncrypt = new CryptoStream(msEncrypt, encryptor, CryptoStreamMode.Write))
-                    using (StreamWriter swEncrypt = new StreamWriter(csEncrypt))
+                    using (var csEncrypt = new CryptoStream(msEncrypt, encryptor, CryptoStreamMode.Write))
+                    using (var swEncrypt = new StreamWriter(csEncrypt))
                     {
                         //Write all data to the stream.
                         swEncrypt.Write(plainText);
@@ -205,13 +201,13 @@ namespace Resonance.Common
 
         private static byte[] ReadByteArray(Stream s)
         {
-            byte[] rawLength = new byte[sizeof(int)];
+            var rawLength = new byte[sizeof(int)];
             if (s.Read(rawLength, 0, rawLength.Length) != rawLength.Length)
             {
                 throw new Exception("Stream did not contain properly formatted byte array");
             }
 
-            byte[] buffer = new byte[BitConverter.ToInt32(rawLength, 0)];
+            var buffer = new byte[BitConverter.ToInt32(rawLength, 0)];
             if (s.Read(buffer, 0, buffer.Length) != buffer.Length)
             {
                 throw new Exception("Did not read byte array properly");

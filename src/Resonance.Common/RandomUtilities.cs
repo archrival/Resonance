@@ -15,7 +15,7 @@ namespace Resonance.Common
                 count = max;
             }
 
-            for (int i = 0; i < count; i++)
+            for (var i = 0; i < count; i++)
             {
                 result.Add(random.Next(min, max));
             }

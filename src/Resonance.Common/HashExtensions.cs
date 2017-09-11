@@ -13,17 +13,17 @@ namespace Resonance.Common
             saltBytes = saltBytes ?? GenerateSalt();
 
             // Convert plain text into a byte array.
-            byte[] plainTextBytes = Encoding.UTF8.GetBytes(plainText);
+            var plainTextBytes = Encoding.UTF8.GetBytes(plainText);
 
             // Allocate array, which will hold plain text and salt.
-            byte[] plainTextWithSaltBytes = new byte[plainTextBytes.Length + saltBytes.Length];
+            var plainTextWithSaltBytes = new byte[plainTextBytes.Length + saltBytes.Length];
 
             // Copy plain text bytes into resulting array.
-            for (int i = 0; i < plainTextBytes.Length; i++)
+            for (var i = 0; i < plainTextBytes.Length; i++)
                 plainTextWithSaltBytes[i] = plainTextBytes[i];
 
             // Append salt bytes to the resulting array.
-            for (int i = 0; i < saltBytes.Length; i++)
+            for (var i = 0; i < saltBytes.Length; i++)
                 plainTextWithSaltBytes[plainTextBytes.Length + i] = saltBytes[i];
 
             HashAlgorithm hash;
@@ -53,21 +53,21 @@ namespace Resonance.Common
             }
 
             // Compute hash value of our plain text with appended salt.
-            byte[] hashBytes = hash.ComputeHash(plainTextWithSaltBytes);
+            var hashBytes = hash.ComputeHash(plainTextWithSaltBytes);
 
             // Create array which will hold hash and original salt bytes.
-            byte[] hashWithSaltBytes = new byte[hashBytes.Length + saltBytes.Length];
+            var hashWithSaltBytes = new byte[hashBytes.Length + saltBytes.Length];
 
             // Copy hash bytes into resulting array.
-            for (int i = 0; i < hashBytes.Length; i++)
+            for (var i = 0; i < hashBytes.Length; i++)
                 hashWithSaltBytes[i] = hashBytes[i];
 
             // Append salt bytes to the result.
-            for (int i = 0; i < saltBytes.Length; i++)
+            for (var i = 0; i < saltBytes.Length; i++)
                 hashWithSaltBytes[hashBytes.Length + i] = saltBytes[i];
 
             // Convert result into a base64-encoded string.
-            string hashValue = Convert.ToBase64String(hashWithSaltBytes);
+            var hashValue = Convert.ToBase64String(hashWithSaltBytes);
 
             // Return the result.
             return hashValue;
@@ -80,8 +80,8 @@ namespace Resonance.Common
             const int maxSaltSize = 24;
 
             // Generate a random number for the size of the salt.
-            Random random = new Random();
-            int saltSize = random.Next(minSaltSize, maxSaltSize);
+            var random = new Random();
+            var saltSize = random.Next(minSaltSize, maxSaltSize);
 
             // Allocate a byte array, which will hold the salt.
             var saltBytes = new byte[saltSize];
@@ -97,7 +97,7 @@ namespace Resonance.Common
 
         public static string GetHash(this byte[] bytes, HashType hashType)
         {
-            StringBuilder sb = new StringBuilder();
+            var sb = new StringBuilder();
 
             HashAlgorithm hashAlgorithm;
 
@@ -157,7 +157,7 @@ namespace Resonance.Common
 
                 var sBuilder = new StringBuilder();
 
-                foreach (byte t in hash)
+                foreach (var t in hash)
                 {
                     sBuilder.Append(t.ToString("x2"));
                 }
@@ -169,7 +169,7 @@ namespace Resonance.Common
         public static bool VerifyHash(string plainText, HashType hashType, string hashValue)
         {
             // Convert base64-encoded hash value into a byte array.
-            byte[] hashWithSaltBytes = Convert.FromBase64String(hashValue);
+            var hashWithSaltBytes = Convert.FromBase64String(hashValue);
 
             // We must know size of hash (without salt).
             int hashSizeInBits, hashSizeInBytes;
@@ -206,14 +206,14 @@ namespace Resonance.Common
                 return false;
 
             // Allocate array to hold original salt bytes retrieved from hash.
-            byte[] saltBytes = new byte[hashWithSaltBytes.Length - hashSizeInBytes];
+            var saltBytes = new byte[hashWithSaltBytes.Length - hashSizeInBytes];
 
             // Copy salt from the end of the hash to the new array.
-            for (int i = 0; i < saltBytes.Length; i++)
+            for (var i = 0; i < saltBytes.Length; i++)
                 saltBytes[i] = hashWithSaltBytes[hashSizeInBytes + i];
 
             // Compute a new hash string.
-            string expectedHashString = ComputeHash(plainText, hashType, saltBytes);
+            var expectedHashString = ComputeHash(plainText, hashType, saltBytes);
 
             // If the computed hash matches the specified hash,
             // the plain text value must be correct.
