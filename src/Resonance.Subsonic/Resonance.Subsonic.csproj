@@ -13,7 +13,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\SubsonicSharp\Subsonic.Common\Subsonic.Common.csproj" />
-    <ProjectReference Include="..\..\taglib-sharp\src\taglib-sharp-standard.csproj" />
     <ProjectReference Include="..\Resonance.Common.Web\Resonance.Common.Web.csproj" />
   </ItemGroup>
 

@@ -76,10 +76,5 @@
     <PackageReference Include="Dapper" Version="1.50.2" />
     <PackageReference Include="Dapper.SqlBuilder" Version="1.50.0" />
     <PackageReference Include="Microsoft.Data.Sqlite" Version="2.0.0" />
-    <PackageReference Include="System.Numerics.Vectors" Version="4.4.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Properties\" />
   </ItemGroup>
 </Project>

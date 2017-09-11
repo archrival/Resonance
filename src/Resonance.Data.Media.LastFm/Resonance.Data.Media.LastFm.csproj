@@ -14,8 +14,4 @@
     <PackageReference Include="Inflatable.Lastfm" Version="1.0.1.307" />
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
   </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Properties\" />
-  </ItemGroup>
 </Project>
