@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Hosting.WindowsServices;
 using Resonance.Common.Web;
 using System.Diagnostics;
 using System.Linq;
-using WebHostBuilderExtensions = Resonance.Common.Web.WebHostBuilderExtensions;
 
 namespace Resonance.Windows
 {
@@ -11,17 +10,16 @@ namespace Resonance.Windows
     {
         public static void Main(string[] args)
         {
-            System.IO.Directory.SetCurrentDirectory(System.AppDomain.CurrentDomain.BaseDirectory);
-
             var isService = !(Debugger.IsAttached || args.Contains("--console"));
 
-            var host = WebHostBuilderExtensions.GetWebHostBuilder()
+            var host = ResonanceWebHostBuilderExtensions.GetWebHostBuilder()
                 .UseStartup<Startup>()
                 .UseApplicationInsights()
                 .Build();
 
             if (isService)
             {
+                System.IO.Directory.SetCurrentDirectory(System.AppDomain.CurrentDomain.BaseDirectory);
                 host.RunAsService();
             }
             else

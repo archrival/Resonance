@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Hosting;
 using Resonance.Common.Web;
-using WebHostBuilderExtensions = Resonance.Common.Web.WebHostBuilderExtensions;
 
 namespace Resonance
 {
@@ -8,7 +7,7 @@ namespace Resonance
     {
         public static void Main(string[] args)
         {
-            var host = WebHostBuilderExtensions.GetWebHostBuilder()
+            var host = ResonanceWebHostBuilderExtensions.GetWebHostBuilder()
                 .UseStartup<Startup>()
                 .UseIISIntegration()
                 .Build();
