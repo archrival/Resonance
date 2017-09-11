@@ -1195,8 +1195,6 @@ namespace Resonance.Data.Storage.SQLite
 
             var commandDefinition = new CommandDefinition(query.RawSql, transaction: _transaction, parameters: query.Parameters, cancellationToken: cancellationToken);
 
-            var mediaBundles = new List<MediaBundle<Album>>();
-
             var results = await _dbConnection.QueryAsync(commandDefinition).ConfigureAwait(false);
 
             return await GetMediaBundleAsync<Album>(results, userId, populate, cancellationToken).ConfigureAwait(false);
@@ -2386,7 +2384,7 @@ namespace Resonance.Data.Storage.SQLite
 
                 await _dbConnection.ExecuteAsync(roleDeleteCommand).ConfigureAwait(false);
 
-                if (user?.Roles?.Any() == true)
+                if (user.Roles?.Any() == true)
                 {
                     foreach (var role in user.Roles)
                     {

@@ -1,11 +1,9 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Resonance.Common;
 using Resonance.Common.Web;
 using Subsonic.Common.Classes;
 using Subsonic.Common.Enums;
 using System;
-using System.Security;
 using System.Text;
 
 namespace Resonance.SubsonicCompat

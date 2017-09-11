@@ -6,7 +6,7 @@ using System.Collections.Generic;
 namespace Resonance.Data.Models
 {
     [JsonObject("user")]
-    public class User : SettingBase
+    public class User : SettingBase, IDisposable
     {
         [JsonProperty("emailAddress")]
         public string EmailAddress { get; set; }
@@ -70,5 +70,13 @@ namespace Resonance.Data.Models
         }
 
         #endregion HashCode and Equality Overrides
+
+        public void Dispose()
+        {
+            EmailAddress = null;
+            Name = null;
+            Password = null;
+            Roles = null;
+        }
     }
 }

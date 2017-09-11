@@ -6,6 +6,6 @@ namespace Resonance.Data.Media.Common
 {
     public interface ICoverArtRepository
     {
-        Task<CoverArt> GetCoverArt(Track track, int? size, CancellationToken cancellationToken);
+        Task<CoverArt> GetCoverArtAsync(Track track, int? size, CancellationToken cancellationToken);
     }
 }

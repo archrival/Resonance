@@ -34,7 +34,7 @@ namespace Resonance.SubsonicCompat
 
             if (user == null || !user.Enabled)
             {
-                user = null;
+                user?.Dispose();
 
                 authenticationContext.IsAuthenticated = false;
                 authenticationContext.ErrorCode = (int)ErrorCode.WrongUsernameOrPassword;

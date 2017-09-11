@@ -1,13 +1,20 @@
-﻿using Resonance.Data.Models;
+﻿using Resonance.Common;
+using Resonance.Data.Models;
+using Resonance.Data.Storage.Common;
+using Subsonic.Common.Classes;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Resonance.Common;
-using Resonance.Data.Storage.Common;
-using Subsonic.Common.Classes;
+using Artist = Subsonic.Common.Classes.Artist;
+using Directory = System.IO.Directory;
+using Genre = Subsonic.Common.Classes.Genre;
+using MediaType = Subsonic.Common.Enums.MediaType;
+using Playlist = Subsonic.Common.Classes.Playlist;
+using PlayQueue = Subsonic.Common.Classes.PlayQueue;
+using User = Resonance.Data.Models.User;
 
 namespace Resonance.SubsonicCompat
 {
@@ -37,7 +44,7 @@ namespace Resonance.SubsonicCompat
 
             subsonicAlbum.Id = album.Id.ToString("n");
 
-            if (album?.Genres?.Any() == true)
+            if (album.Genres?.Any() == true)
             {
                 subsonicAlbum.Genre = string.Join(" / ", album.Genres.Select(g => g.Name));
             }
@@ -82,7 +89,7 @@ namespace Resonance.SubsonicCompat
 
             subsonicAlbum.Id = album.Id.ToString("n");
 
-            if (album?.Genres?.Any() == true)
+            if (album.Genres?.Any() == true)
             {
                 subsonicAlbum.Genre = string.Join(" / ", album.Genres.Select(g => g.Name));
             }
@@ -105,9 +112,9 @@ namespace Resonance.SubsonicCompat
             return subsonicAlbum;
         }
 
-        public static Subsonic.Common.Classes.Artist ToSubsonicArtist(this MediaBundle<Data.Models.Artist> artistMediaBundle)
+        public static Artist ToSubsonicArtist(this MediaBundle<Data.Models.Artist> artistMediaBundle)
         {
-            var subsonicArtist = new Subsonic.Common.Classes.Artist();
+            var subsonicArtist = new Artist();
 
             var artist = artistMediaBundle.Media;
 
@@ -174,20 +181,22 @@ namespace Resonance.SubsonicCompat
                 }
             }
 
-            subsonicArtist.AlbumCount = albumMediaBundles.Count();
-            subsonicArtist.Albums = albumMediaBundles.Select(a => a.ToSubsonicAlbumID3()).AsParallel().ToList();
+            var subsonicArtistAlbums = albumMediaBundles.Select(a => a.ToSubsonicAlbumID3()).AsParallel().ToList();
+
+            subsonicArtist.Albums = subsonicArtistAlbums;
+            subsonicArtist.AlbumCount = subsonicArtistAlbums.Count;
 
             return subsonicArtist;
         }
 
-        public static async Task<Subsonic.Common.Classes.Bookmark> ToSubsonicBookmarkAsync(this Marker marker, IMediaLibrary mediaLibrary, CancellationToken cancellationToken)
+        public static async Task<Bookmark> ToSubsonicBookmarkAsync(this Marker marker, IMediaLibrary mediaLibrary, CancellationToken cancellationToken)
         {
             var userId = marker.User.Id;
 
             var track = await mediaLibrary.GetTrackAsync(userId, marker.TrackId, false, cancellationToken).ConfigureAwait(false);
             var subsonicSong = track.ToSubsonicSong(await mediaLibrary.GetAlbumAsync(userId, track.Media.AlbumId, false, cancellationToken).ConfigureAwait(false));
 
-            var subsonicBookmark = new Subsonic.Common.Classes.Bookmark
+            var subsonicBookmark = new Bookmark
             {
                 Position = marker.Position,
                 Comment = marker.Comment ?? string.Empty,
@@ -203,7 +212,7 @@ namespace Resonance.SubsonicCompat
             return subsonicBookmark;
         }
 
-        public static async Task<Subsonic.Common.Classes.Bookmarks> ToSubsonicBookmarksAsync(this IEnumerable<Marker> markers, IMediaLibrary mediaLibrary, CancellationToken cancellationToken)
+        public static async Task<Bookmarks> ToSubsonicBookmarksAsync(this IEnumerable<Marker> markers, IMediaLibrary mediaLibrary, CancellationToken cancellationToken)
         {
             var subsonicBookmarkItems = new List<Bookmark>();
 
@@ -213,7 +222,7 @@ namespace Resonance.SubsonicCompat
                 subsonicBookmarkItems.Add(subsonicBookmark);
             }
 
-            var subsonicBookmarks = new Subsonic.Common.Classes.Bookmarks
+            var subsonicBookmarks = new Bookmarks
             {
                 Items = subsonicBookmarkItems
             };
@@ -221,9 +230,9 @@ namespace Resonance.SubsonicCompat
             return subsonicBookmarks;
         }
 
-        public static Subsonic.Common.Classes.ChatMessage ToSubsonicChatMessage(this Chat chat)
+        public static ChatMessage ToSubsonicChatMessage(this Chat chat)
         {
-            var subsonicChatMessage = new Subsonic.Common.Classes.ChatMessage
+            var subsonicChatMessage = new ChatMessage
             {
                 Time = DateTimeExtensions.GetUnixTimestampMillis(chat.Timestamp),
                 Message = chat.Message,
@@ -233,9 +242,9 @@ namespace Resonance.SubsonicCompat
             return subsonicChatMessage;
         }
 
-        public static Subsonic.Common.Classes.Child ToSubsonicChild(this MediaBundle<Album> albumMediaBundle)
+        public static Child ToSubsonicChild(this MediaBundle<Album> albumMediaBundle)
         {
-            var subsonicChild = new Subsonic.Common.Classes.Child();
+            var subsonicChild = new Child();
 
             var album = albumMediaBundle.Media;
 
@@ -261,7 +270,7 @@ namespace Resonance.SubsonicCompat
             subsonicChild.Title = album.Name;
             subsonicChild.IsDir = true;
 
-            if (album?.Genres?.Any() == true)
+            if (album.Genres?.Any() == true)
             {
                 subsonicChild.Genre = string.Join(" / ", album.Genres.Select(g => g.Name));
             }
@@ -291,9 +300,9 @@ namespace Resonance.SubsonicCompat
             return subsonicChild;
         }
 
-        public static Subsonic.Common.Classes.Genre ToSubsonicGenre(this Data.Models.Genre genre, int albumCount, int songCount)
+        public static Genre ToSubsonicGenre(this Data.Models.Genre genre, int albumCount, int songCount)
         {
-            var subsonicGenre = new Subsonic.Common.Classes.Genre
+            var subsonicGenre = new Genre
             {
                 AlbumCount = albumCount,
                 Name = genre.Name,
@@ -303,9 +312,9 @@ namespace Resonance.SubsonicCompat
             return subsonicGenre;
         }
 
-        public static Subsonic.Common.Classes.NowPlayingEntry ToSubsonicNowPlayingEntry(this MediaBundle<Track> trackMediaBundle, MediaBundle<Album> albumMediaBundle, Disposition disposition, Playback playback, Data.Models.User user)
+        public static NowPlayingEntry ToSubsonicNowPlayingEntry(this MediaBundle<Track> trackMediaBundle, MediaBundle<Album> albumMediaBundle, Disposition disposition, Playback playback, User user)
         {
-            var nowPlayingEntry = new Subsonic.Common.Classes.NowPlayingEntry();
+            var nowPlayingEntry = new NowPlayingEntry();
 
             var track = trackMediaBundle.Media;
 
@@ -336,8 +345,8 @@ namespace Resonance.SubsonicCompat
                 nowPlayingEntry.Genre = string.Join(" / ", track.Genres.Select(g => g.Name));
             }
 
-            var parentDirectory = System.IO.Directory.GetParent(track.Path);
-            var grandParentDirectory = System.IO.Directory.GetParent(parentDirectory.FullName);
+            var parentDirectory = Directory.GetParent(track.Path);
+            var grandParentDirectory = Directory.GetParent(parentDirectory.FullName);
 
             nowPlayingEntry.Id = track.Id.ToString("n");
             nowPlayingEntry.IsDir = false;
@@ -361,7 +370,7 @@ namespace Resonance.SubsonicCompat
             nowPlayingEntry.Suffix = Path.GetExtension(track.Path);
             nowPlayingEntry.Title = track.Name;
             nowPlayingEntry.Track = track.Number;
-            nowPlayingEntry.Type = Subsonic.Common.Enums.MediaType.Music;
+            nowPlayingEntry.Type = MediaType.Music;
             nowPlayingEntry.Year = track.ReleaseDate;
 
             nowPlayingEntry.MinutesAgo = (DateTime.UtcNow - playback.PlaybackDateTime).Minutes;
@@ -371,9 +380,9 @@ namespace Resonance.SubsonicCompat
             return nowPlayingEntry;
         }
 
-        public static Subsonic.Common.Classes.Playlist ToSubsonicPlaylist(this Data.Models.Playlist playlist)
+        public static Playlist ToSubsonicPlaylist(this Data.Models.Playlist playlist)
         {
-            var subsonicPlaylist = new Subsonic.Common.Classes.Playlist
+            var subsonicPlaylist = new Playlist
             {
                 Changed = playlist.DateModified ?? playlist.DateAdded,
                 Comment = playlist.Comment,
@@ -417,21 +426,21 @@ namespace Resonance.SubsonicCompat
             return subsonicPlaylist;
         }
 
-        public static Subsonic.Common.Classes.PlayQueue ToSubsonicPlayQueue(this Data.Models.PlayQueue playQueue)
+        public static PlayQueue ToSubsonicPlayQueue(this Data.Models.PlayQueue playQueue)
         {
             if (playQueue == null)
             {
-                return new Subsonic.Common.Classes.PlayQueue();
+                return new PlayQueue();
             }
 
-            var subsonicPlayQueue = new Subsonic.Common.Classes.PlayQueue
+            var subsonicPlayQueue = new PlayQueue
             {
                 Changed = playQueue.DateModified ?? playQueue.DateAdded,
                 ChangedBy = playQueue.ClientName,
                 Current = playQueue.CurrentTrackId?.ToString("n"),
                 Position = playQueue.Position ?? 0,
                 Username = playQueue.User.Name,
-                Entries = new System.Collections.Generic.List<Subsonic.Common.Classes.Child>()
+                Entries = new List<Child>()
             };
 
             if (playQueue.Tracks == null)
@@ -445,14 +454,14 @@ namespace Resonance.SubsonicCompat
             return subsonicPlayQueue;
         }
 
-        public static Subsonic.Common.Classes.Child ToSubsonicSong(this MediaBundle<Track> track, MediaBundle<Album> album)
+        public static Child ToSubsonicSong(this MediaBundle<Track> track, MediaBundle<Album> album)
         {
             return track.Media.ToSubsonicSong(album?.Media, track.Dispositions.FirstOrDefault());
         }
 
-        public static Subsonic.Common.Classes.Child ToSubsonicSong(this Track track, Album album, Disposition disposition)
+        public static Child ToSubsonicSong(this Track track, Album album, Disposition disposition)
         {
-            var subsonicSong = new Subsonic.Common.Classes.Child();
+            var subsonicSong = new Child();
 
             if (album != null)
             {
@@ -476,13 +485,13 @@ namespace Resonance.SubsonicCompat
             subsonicSong.DiscNumber = track.DiscNumber;
             subsonicSong.Duration = (int)track.Duration.TotalSeconds;
 
-            if (track?.Genres?.Any() == true)
+            if (track.Genres?.Any() == true)
             {
                 subsonicSong.Genre = string.Join(" / ", track.Genres.Select(g => g.Name));
             }
 
-            var parentDirectory = System.IO.Directory.GetParent(track.Path);
-            var grandParentDirectory = System.IO.Directory.GetParent(parentDirectory.FullName);
+            var parentDirectory = Directory.GetParent(track.Path);
+            var grandParentDirectory = Directory.GetParent(parentDirectory.FullName);
 
             subsonicSong.Id = track.Id.ToString("n");
             subsonicSong.IsDir = false;
@@ -506,13 +515,13 @@ namespace Resonance.SubsonicCompat
             subsonicSong.Suffix = Path.GetExtension(track.Path);
             subsonicSong.Title = track.Name;
             subsonicSong.Track = track.Number;
-            subsonicSong.Type = Subsonic.Common.Enums.MediaType.Music;
+            subsonicSong.Type = MediaType.Music;
             subsonicSong.Year = track.ReleaseDate;
 
             return subsonicSong;
         }
 
-        public static Subsonic.Common.Classes.User ToSubsonicUser(this Data.Models.User user)
+        public static Subsonic.Common.Classes.User ToSubsonicUser(this User user)
         {
             var subsonicUser = new Subsonic.Common.Classes.User
             {

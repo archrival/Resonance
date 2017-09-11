@@ -13,9 +13,9 @@ namespace Resonance.Data.Storage
 {
     public class MediaLibrary : IMediaLibrary
     {
-        private static readonly object _mutex = new object();
-        private static volatile bool _scanningLibrary = false;
-        private static volatile ScanProgress _scanProgress = null;
+        private static readonly object Mutex = new object();
+        private static volatile bool _scanningLibrary;
+        private static volatile ScanProgress _scanProgress;
         private readonly ICoverArtRepository _coverArtRepository;
         private readonly ILastFmClient _lastFmClient;
         private readonly IMetadataRepository _metadataRepository;
@@ -35,14 +35,14 @@ namespace Resonance.Data.Storage
         {
             get
             {
-                lock (_mutex)
+                lock (Mutex)
                 {
                     return _scanningLibrary;
                 }
             }
             set
             {
-                lock (_mutex)
+                lock (Mutex)
                 {
                     _scanningLibrary = value;
                 }
@@ -53,7 +53,7 @@ namespace Resonance.Data.Storage
         {
             get
             {
-                lock (_mutex)
+                lock (Mutex)
                 {
                     return _scanProgress;
                 }
@@ -61,7 +61,7 @@ namespace Resonance.Data.Storage
 
             set
             {
-                lock (_mutex)
+                lock (Mutex)
                 {
                     _scanProgress = value;
                 }
@@ -138,10 +138,7 @@ namespace Resonance.Data.Storage
             {
                 return await _metadataRepositoryCache.GetArtistAsync(userId, name, collectionId, cancellationToken);
             }
-            else
-            {
-                return await _metadataRepository.GetArtistAsync(userId, name, collectionId, cancellationToken);
-            }
+            return await _metadataRepository.GetArtistAsync(userId, name, collectionId, cancellationToken);
         }
 
         public async Task<MediaInfo> GetArtistInfoAsync(Artist artist, CancellationToken cancellationToken)
@@ -183,18 +180,14 @@ namespace Resonance.Data.Storage
         {
             var mediaBundle = await _metadataRepositoryCache.GetTrackAsync(userId, id, false, cancellationToken);
 
-            Track track = null;
-
             if (mediaBundle == null)
             {
                 return null;
             }
-            else
-            {
-                track = mediaBundle.Media as Track;
-            }
 
-            return await _coverArtRepository.GetCoverArt(track, size, cancellationToken);
+            var track = mediaBundle.Media;
+
+            return await _coverArtRepository.GetCoverArtAsync(track, size, cancellationToken);
         }
 
         public async Task<IEnumerable<MediaBundle<Album>>> GetFavoritedAlbumsAsync(Guid userId, int size, int offset, string genre, int? fromYear, int? toYear, Guid? collectionId, bool populate, CancellationToken cancellationToken)
@@ -330,14 +323,14 @@ namespace Resonance.Data.Storage
 
                      int collectionCount = 0;
 
-                     var collectionsToScan = collections.Where(c => c.Enabled);
+                     var collectionsToScan = collections.Where(c => c.Enabled).ToList();
 
                      if (collectionId.HasValue)
                      {
-                         collectionsToScan = collectionsToScan.Where(c => c.Id == collectionId);
+                         collectionsToScan = collectionsToScan.Where(c => c.Id == collectionId).ToList();
                      }
 
-                     int totalCollectionCount = collectionsToScan.Count();
+                     int totalCollectionCount = collectionsToScan.Count;
 
                      ScanProgress.TotalCollectionCount = totalCollectionCount;
 
@@ -359,7 +352,7 @@ namespace Resonance.Data.Storage
                              await _metadataRepository.InsertOrUpdateCollectionAsync(collection, cancellationToken);
                          }
 
-                         var files = FileUtilities.FindFiles(collection.Path, collection.Filter, true);
+                         var files = FileUtilities.FindFiles(collection.Path, collection.Filter);
 
                          int fileCount = 0;
                          int totalFileCount = files.Count;
@@ -426,7 +419,7 @@ namespace Resonance.Data.Storage
                      ScanInProgress = false;
                      _metadataRepositoryCache.UseCache = true;
                  }
-             });
+             }, cancellationToken);
         }
 
         public async Task<IEnumerable<MediaBundle<Album>>> SearchAlbumsAsync(Guid userId, string query, int size, int offset, Guid? collectionId, bool populate, CancellationToken cancellationToken)

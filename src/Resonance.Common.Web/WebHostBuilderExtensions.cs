@@ -10,7 +10,7 @@ using System.Security.Cryptography.X509Certificates;
 
 namespace Resonance.Common.Web
 {
-    public class IWebHostBuilderExtensions
+    public class WebHostBuilderExtensions
     {
         public static IWebHostBuilder GetWebHostBuilder()
         {

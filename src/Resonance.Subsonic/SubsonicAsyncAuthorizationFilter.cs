@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc.Filters;
-using Microsoft.Extensions.Options;
 using Resonance.Common.Web;
 using Resonance.Data.Storage;
 using System.Threading.Tasks;
