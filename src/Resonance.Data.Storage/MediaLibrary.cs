@@ -178,16 +178,14 @@ namespace Resonance.Data.Storage
 
         public async Task<CoverArt> GetCoverArtAsync(Guid userId, Guid id, int? size, CancellationToken cancellationToken)
         {
-            var mediaBundle = await _metadataRepositoryCache.GetTrackAsync(userId, id, false, cancellationToken);
+            var mediaBundle = await _metadataRepositoryCache.GetTrackAsync(userId, id, false, cancellationToken).ConfigureAwait(false);
 
             if (mediaBundle == null)
             {
                 return null;
             }
 
-            var track = mediaBundle.Media;
-
-            return await _coverArtRepository.GetCoverArtAsync(track, size, cancellationToken);
+            return await _coverArtRepository.GetCoverArtAsync(mediaBundle.Media, size, cancellationToken).ConfigureAwait(false);
         }
 
         public async Task<IEnumerable<MediaBundle<Album>>> GetFavoritedAlbumsAsync(Guid userId, int size, int offset, string genre, int? fromYear, int? toYear, Guid? collectionId, bool populate, CancellationToken cancellationToken)
@@ -372,7 +370,7 @@ namespace Resonance.Data.Storage
                                  _metadataRepository.BeginTransaction(cancellationToken);
                              }
 
-                             var track = await _metadataRepositoryCache.GetTrackAsync(userId, file.FullName, collection.Id, false, true, cancellationToken);
+                             await _metadataRepositoryCache.GetTrackAsync(userId, file.FullName, collection.Id, false, true, cancellationToken).ConfigureAwait(false);
 
                              if (!ScanInProgress)
                              {
