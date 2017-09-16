@@ -9,7 +9,7 @@ namespace Resonance
         {
             var host = ResonanceWebHostBuilderExtensions.GetWebHostBuilder()
                 .UseStartup<Startup>()
-                .UseIISIntegration()
+                .UseApplicationInsights()
                 .Build();
 
             host.Run();
