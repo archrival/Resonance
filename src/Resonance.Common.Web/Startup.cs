@@ -41,6 +41,7 @@ namespace Resonance.Common.Web
         {
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
+            loggerFactory.AddFile("resonance-{Date}.log");
 
             app.UseCors(CorsPolicyName);
             app.UseMvc();

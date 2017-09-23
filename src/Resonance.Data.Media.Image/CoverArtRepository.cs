@@ -5,7 +5,7 @@ using Resonance.Data.Media.Common;
 using Resonance.Data.Models;
 using Resonance.Data.Storage;
 using SixLabors.Primitives;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -17,8 +17,8 @@ namespace Resonance.Data.Media.Image
     {
         private const string CoverArt = "CoverArt";
         private const string Full = "full";
+        private static readonly ConcurrentDictionary<string, object> ProcessingFiles = new ConcurrentDictionary<string, object>();
 
-        private static readonly HashSet<string> Processing = new HashSet<string>();
         private readonly string _coverArtPath;
         private readonly string _fullCoverArtPath;
         private readonly ITagReaderFactory _tagReaderFactory;
@@ -32,39 +32,32 @@ namespace Resonance.Data.Media.Image
 
         public async Task<CoverArt> GetCoverArtAsync(Track track, int? size, CancellationToken cancellationToken)
         {
+            await Task.CompletedTask;
+
+            var fullTrackCoverPath = Path.Combine(_fullCoverArtPath, track.Id.ToString("n"));
             var coverArtPath = size.HasValue ? Path.Combine(_coverArtPath, size.Value.ToString()) : _fullCoverArtPath;
             var trackCoverArtPath = Path.Combine(coverArtPath, track.Id.ToString("n"));
 
-            // Return the album art on disk if the file exists and is newer than the last modified date of the track
-            if (File.Exists(trackCoverArtPath) && track.DateFileModified.ToUniversalTime() < File.GetLastWriteTimeUtc(trackCoverArtPath))
+            var coverArt = GetScaledCoverArt(track, trackCoverArtPath);
+
+            if (coverArt != null)
             {
-                var coverArtData = await ReadCoverArtFromDiskAsync(trackCoverArtPath, cancellationToken);
-
-                var coverArtReturn = new CoverArt
-                {
-                    CoverArtData = coverArtData,
-                    CoverArtType = CoverArtType.Front,
-                    MediaId = track.Id,
-                    Size = coverArtData.Length,
-                    MimeType = MimeType.GetMimeType(coverArtData, trackCoverArtPath)
-                };
-
-                return coverArtReturn;
+                return coverArt;
             }
 
-            lock (Processing)
+            coverArt = GetScaledCoverArt(track, fullTrackCoverPath);
+
+            if (coverArt == null)
             {
-                if (Processing.Contains(track.Path))
+                var tagReader = _tagReaderFactory.CreateTagReader(track.Path);
+
+                coverArt = tagReader.CoverArt.FirstOrDefault(ca => ca.CoverArtType == CoverArtType.Front || ca.CoverArtType == CoverArtType.Other);
+
+                if (coverArt != null)
                 {
-                    return GetCoverArtAsync(track, size, cancellationToken).GetAwaiter().GetResult();
+                    WriteCoverArtToDisk(fullTrackCoverPath, coverArt.CoverArtData);
                 }
-
-                Processing.Add(track.Path);
             }
-
-            var tagReader = _tagReaderFactory.CreateTagReader(track.Path);
-
-            var coverArt = tagReader.CoverArt.FirstOrDefault(ca => ca.CoverArtType == CoverArtType.Front || ca.CoverArtType == CoverArtType.Other);
 
             if (coverArt == null)
             {
@@ -88,19 +81,9 @@ namespace Resonance.Data.Media.Image
                     resizedImageData.SaveAsPng(imageMemoryStream);
 
                     coverArt.CoverArtData = imageMemoryStream.ToArray();
+
+                    WriteCoverArtToDisk(trackCoverArtPath, coverArt.CoverArtData);
                 }
-            }
-
-            if (!Directory.Exists(coverArtPath))
-            {
-                Directory.CreateDirectory(coverArtPath);
-            }
-
-            await WriteCoverArtToDiskAsync(trackCoverArtPath, coverArt.CoverArtData, cancellationToken);
-
-            lock (Processing)
-            {
-                Processing.Remove(track.Path);
             }
 
             coverArt.MimeType = MimeType.GetMimeType(coverArt.CoverArtData, trackCoverArtPath);
@@ -108,25 +91,68 @@ namespace Resonance.Data.Media.Image
             return coverArt;
         }
 
-        private static async Task<byte[]> ReadCoverArtFromDiskAsync(string path, CancellationToken cancellationToken)
+        private static CoverArt GetScaledCoverArt(Track track, string trackCoverArtPath)
         {
+            var lockObject = ProcessingFiles.GetOrAdd(trackCoverArtPath, new object());
+
+            lock (lockObject)
+            {
+                if (!(File.Exists(trackCoverArtPath) && track.DateFileModified.ToUniversalTime() < File.GetLastWriteTimeUtc(trackCoverArtPath)))
+                {
+                    return null;
+                }
+            }
+
+            // Return the album art on disk if the file exists and is newer than the last modified date of the track
+
+            var coverArtData = ReadCoverArtFromDisk(trackCoverArtPath);
+
+            var coverArtReturn = new CoverArt
+            {
+                CoverArtData = coverArtData,
+                CoverArtType = CoverArtType.Front,
+                MediaId = track.Id,
+                Size = coverArtData.Length,
+                MimeType = MimeType.GetMimeType(coverArtData, trackCoverArtPath)
+            };
+
+            return coverArtReturn;
+        }
+
+        private static byte[] ReadCoverArtFromDisk(string path)
+        {
+            var lockObject = ProcessingFiles.GetOrAdd(path, new object());
+
             byte[] result;
 
-            using (var stream = File.Open(path, FileMode.Open, FileAccess.Read, FileShare.Read))
+            lock (lockObject)
             {
-                result = new byte[stream.Length];
+                using (var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
+                {
+                    result = new byte[stream.Length];
 
-                await stream.ReadAsync(result, 0, (int)stream.Length, cancellationToken).ConfigureAwait(false);
+                    stream.Read(result, 0, (int)stream.Length);
+                }
             }
 
             return result;
         }
 
-        private static async Task WriteCoverArtToDiskAsync(string path, byte[] bytes, CancellationToken cancellationToken)
+        private static void WriteCoverArtToDisk(string path, byte[] bytes)
         {
-            using (var stream = new FileStream(path, FileMode.OpenOrCreate, FileAccess.Write, FileShare.Read, 4096, true))
+            var lockObject = ProcessingFiles.GetOrAdd(path, new object());
+
+            lock (lockObject)
             {
-                await stream.WriteAsync(bytes, 0, bytes.Length, cancellationToken).ConfigureAwait(false);
+                if (!Directory.Exists(Path.GetDirectoryName(path)))
+                {
+                    Directory.CreateDirectory(Path.GetDirectoryName(path));
+                }
+
+                using (var stream = new FileStream(path, FileMode.OpenOrCreate, FileAccess.Write, FileShare.Read))
+                {
+                    stream.Write(bytes, 0, bytes.Length);
+                }
             }
         }
     }
