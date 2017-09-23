@@ -103,6 +103,8 @@ namespace Resonance.Data.Media.Image
                 }
             }
 
+            ProcessingFiles.TryRemove(trackCoverArtPath, out lockObject);
+
             // Return the album art on disk if the file exists and is newer than the last modified date of the track
 
             var coverArtData = ReadCoverArtFromDisk(trackCoverArtPath);
@@ -135,6 +137,8 @@ namespace Resonance.Data.Media.Image
                 }
             }
 
+            ProcessingFiles.TryRemove(path, out lockObject);
+
             return result;
         }
 
@@ -149,11 +153,13 @@ namespace Resonance.Data.Media.Image
                     Directory.CreateDirectory(Path.GetDirectoryName(path));
                 }
 
-                using (var stream = new FileStream(path, FileMode.OpenOrCreate, FileAccess.Write, FileShare.Read))
+                using (var stream = new FileStream(path, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None))
                 {
                     stream.Write(bytes, 0, bytes.Length);
                 }
             }
+
+            ProcessingFiles.TryRemove(path, out lockObject);
         }
     }
 }
