@@ -478,7 +478,7 @@ namespace Resonance.Data.Storage.SQLite
 
             var albumResults = await Task.WhenAll(albumQueryTasks);
 
-            Dictionary<Guid, dynamic> uniqueResults = new Dictionary<Guid, dynamic>();
+            var uniqueResults = new Dictionary<Guid, dynamic>();
 
             foreach (var result in albumResults.SelectMany(a => a))
             {
@@ -765,18 +765,9 @@ namespace Resonance.Data.Storage.SQLite
 
             var commandDefinition = new CommandDefinition(query.RawSql, transaction: _transaction, cancellationToken: cancellationToken);
 
-            var collections = new List<Collection>();
-
             var results = await _dbConnection.QueryAsync(commandDefinition).ConfigureAwait(false);
 
-            foreach (var result in results)
-            {
-                Collection collection = Collection.FromDynamic(result);
-
-                collections.Add(collection);
-            }
-
-            return collections;
+            return results.Select(result => (Collection)Collection.FromDynamic(result)).ToList();
         }
 
         public async Task<Disposition> GetDispositionAsync(Guid userId, Guid mediaId, CancellationToken cancellationToken)
@@ -994,18 +985,9 @@ namespace Resonance.Data.Storage.SQLite
 
             var commandDefinition = new CommandDefinition(query.RawSql, transaction: _transaction, parameters: query.Parameters, cancellationToken: cancellationToken);
 
-            var genres = new List<Genre>();
-
             var results = await _dbConnection.QueryAsync(commandDefinition).ConfigureAwait(false);
 
-            foreach (var result in results)
-            {
-                Genre genre = Genre.FromDynamic(result);
-
-                genres.Add(genre);
-            }
-
-            return genres;
+            return results.Select(result => (Genre)Genre.FromDynamic(result)).ToList();
         }
 
         public async Task<IEnumerable<Genre>> GetGenresByTrackAsync(Guid trackId, CancellationToken cancellationToken)
@@ -1019,18 +1001,9 @@ namespace Resonance.Data.Storage.SQLite
 
             var commandDefinition = new CommandDefinition(query.RawSql, transaction: _transaction, parameters: query.Parameters, cancellationToken: cancellationToken);
 
-            var genres = new List<Genre>();
-
             var results = await _dbConnection.QueryAsync(commandDefinition).ConfigureAwait(false);
 
-            foreach (var result in results)
-            {
-                Genre genre = Genre.FromDynamic(result);
-
-                genres.Add(genre);
-            }
-
-            return genres;
+            return results.Select(result => (Genre)Genre.FromDynamic(result)).ToList();
         }
 
         public async Task<IEnumerable<MediaBundle<Album>>> GetHighestRatedAlbumsAsync(Guid userId, int size, int offset, string genre, int? fromYear, int? toYear, Guid? collectionId, bool populate, CancellationToken cancellationToken)
@@ -1098,18 +1071,9 @@ namespace Resonance.Data.Storage.SQLite
 
             var commandDefinition = new CommandDefinition(query.RawSql, transaction: _transaction, parameters: query.Parameters, cancellationToken: cancellationToken);
 
-            var markers = new List<Marker>();
-
             var results = await _dbConnection.QueryAsync(commandDefinition).ConfigureAwait(false);
 
-            foreach (var result in results)
-            {
-                Marker marker = Marker.FromDynamic(result);
-
-                markers.Add(marker);
-            }
-
-            return markers;
+            return results.Select(result => (Marker)Marker.FromDynamic(result)).ToList();
         }
 
         public async Task<MediaInfo> GetMediaInfoAsync(Guid mediaId, CancellationToken cancellationToken)
@@ -1136,7 +1100,7 @@ namespace Resonance.Data.Storage.SQLite
 
             var result = await _dbConnection.ExecuteScalarAsync<int?>(commandDefinition).ConfigureAwait(false);
 
-            MediaType? mediaType = (MediaType?)result;
+            var mediaType = (MediaType?)result;
 
             return mediaType;
         }
@@ -1349,7 +1313,7 @@ namespace Resonance.Data.Storage.SQLite
                 {
                     Guid trackId = DynamicExtensions.GetGuidFromDynamic(trackToPlaylistResult.TrackId);
 
-                    MediaBundle<Track> track = GetTrackAsync(userId, trackId, true, cancellationToken).ConfigureAwait(false).GetAwaiter().GetResult();
+                    var track = GetTrackAsync(userId, trackId, true, cancellationToken).ConfigureAwait(false).GetAwaiter().GetResult();
 
                     if (track != null)
                     {
@@ -1536,20 +1500,11 @@ namespace Resonance.Data.Storage.SQLite
             builder.Join("[UserToRole] utr ON utr.RoleId = r.Id");
             builder.Where("utr.UserId = @UserId", new { UserId = userId });
 
-            var roles = new List<Role>();
-
             var commandDefinition = new CommandDefinition(query.RawSql, transaction: _transaction, parameters: query.Parameters, cancellationToken: cancellationToken);
 
             var results = await _dbConnection.QueryAsync(commandDefinition).ConfigureAwait(false);
 
-            foreach (var result in results)
-            {
-                Role role = (Role)result.Id;
-
-                roles.Add(role);
-            }
-
-            return roles;
+            return results.Select(result => (Role)result.Id).ToList();
         }
 
         public async Task<MediaBundle<Track>> GetTrackAsync(Guid userId, Guid id, bool populate, CancellationToken cancellationToken)
@@ -1764,19 +1719,11 @@ namespace Resonance.Data.Storage.SQLite
 
             var query = builder.AddTemplate(GetScript("User_Select"));
 
-            var users = new List<User>();
-
             var commandDefinition = new CommandDefinition(query.RawSql, transaction: _transaction, cancellationToken: cancellationToken);
 
             var results = await _dbConnection.QueryAsync(commandDefinition).ConfigureAwait(false);
 
-            foreach (var result in results)
-            {
-                User user = User.FromDynamic(result);
-                users.Add(user);
-            }
-
-            return users;
+            return results.Select(result => (User)User.FromDynamic(result)).ToList();
         }
 
         public async Task InsertChatAsync(Chat chat, CancellationToken cancellationToken)
@@ -2459,7 +2406,7 @@ namespace Resonance.Data.Storage.SQLite
             Dapper.SqlBuilder.Template query;
 
             queryString = queryString.Replace('*', '%');
-            queryString = "%" + queryString + "%";
+            queryString = $"%{queryString}%";
 
             if (genericType == typeof(Artist))
             {

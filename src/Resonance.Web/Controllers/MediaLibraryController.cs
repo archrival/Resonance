@@ -26,7 +26,9 @@ namespace Resonance.Web.Controllers
             var cancellationToken = new CancellationTokenSource();
 
             if (areYouSure)
+            {
                 MediaLibrary.ClearLibraryAsync(Guid.Empty, collectionId, cancellationToken.Token);
+            }
         }
 
         [HttpGet("scanProgress")]
@@ -43,14 +45,14 @@ namespace Resonance.Web.Controllers
                 return;
             }
 
-            var user = await MetadataRepository.GetUserAsync(username, CancellationToken.None);
+            var user = await MetadataRepository.GetUserAsync(username, CancellationToken.None).ConfigureAwait(false);
 
             if (user == null)
             {
                 return;
             }
 
-            var playlists = await MetadataRepository.GetPlaylistsAsync(user.Id, null, true, CancellationToken.None);
+            var playlists = await MetadataRepository.GetPlaylistsAsync(user.Id, null, true, CancellationToken.None).ConfigureAwait(false);
 
             if (playlists.Any(p => p.Name == playlistName))
             {
@@ -67,7 +69,7 @@ namespace Resonance.Web.Controllers
 
             foreach (var file in files)
             {
-                var track = await MetadataRepository.GetTrackAsync(user.Id, file, null, false, CancellationToken.None);
+                var track = await MetadataRepository.GetTrackAsync(user.Id, file, null, false, CancellationToken.None).ConfigureAwait(false);
 
                 if (track == null)
                 {
@@ -79,7 +81,7 @@ namespace Resonance.Web.Controllers
 
             if (playlist.Tracks.Any())
             {
-                await MetadataRepository.UpdatePlaylistAsync(playlist, CancellationToken.None);
+                await MetadataRepository.UpdatePlaylistAsync(playlist, CancellationToken.None).ConfigureAwait(false);
             }
         }
 
@@ -89,7 +91,9 @@ namespace Resonance.Web.Controllers
             var cancellationToken = new CancellationTokenSource();
 
             if (clearLibrary)
-                MediaLibrary.ClearLibraryAsync(Guid.Empty, collectionId, cancellationToken.Token);
+            {
+                MediaLibrary.ClearLibraryAsync(Guid.Empty, collectionId, cancellationToken.Token).ConfigureAwait(false);
+            }
 
             MediaLibrary.ScanLibrary(Guid.Empty, collectionId, clearLibrary, cancellationToken.Token);
         }

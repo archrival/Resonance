@@ -27,7 +27,7 @@ namespace Resonance.Data.Storage
                 Path = path
             };
 
-            await _metadataRepository.AddCollectionAsync(collection, cancelToken);
+            await _metadataRepository.AddCollectionAsync(collection, cancelToken).ConfigureAwait(false);
 
             return collection;
         }
@@ -40,12 +40,12 @@ namespace Resonance.Data.Storage
                 Password = password
             };
 
-            await _metadataRepository.AddUserAsync(user, cancelToken);
+            await _metadataRepository.AddUserAsync(user, cancelToken).ConfigureAwait(false);
         }
 
         public async Task<IEnumerable<Collection>> GetCollectionsAsync(CancellationToken cancelToken)
         {
-            return await _metadataRepository.GetCollectionsAsync(cancelToken);
+            return await _metadataRepository.GetCollectionsAsync(cancelToken).ConfigureAwait(false);
         }
 
         public Task<User> GetUserAsync(string username, CancellationToken cancelToken)
@@ -55,13 +55,13 @@ namespace Resonance.Data.Storage
 
         public async Task RemoveCollectionAsync(Guid id, CancellationToken cancelToken)
         {
-            var collections = await _metadataRepository.GetCollectionsAsync(cancelToken);
+            var collections = await _metadataRepository.GetCollectionsAsync(cancelToken).ConfigureAwait(false);
 
             var collection = collections.FirstOrDefault(c => c.Id == id);
 
             if (collection != null)
             {
-                await _metadataRepository.RemoveCollectionAsync(collection, cancelToken);
+                await _metadataRepository.RemoveCollectionAsync(collection, cancelToken).ConfigureAwait(false);
             }
         }
 

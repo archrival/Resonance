@@ -17,15 +17,10 @@ namespace Resonance.Data.Storage
 
         protected RepositoryCacheItem(TimeSpan timeout)
         {
-            Timeout = timeout;
-
-            _memoryCacheEntryOptionsLazy = new Lazy<MemoryCacheEntryOptions>(() =>
+            _memoryCacheEntryOptionsLazy = new Lazy<MemoryCacheEntryOptions>(() => new MemoryCacheEntryOptions
             {
-                return new MemoryCacheEntryOptions
-                {
-                    SlidingExpiration = TimeSpan.FromMinutes(5),
-                    AbsoluteExpirationRelativeToNow = timeout
-                };
+                SlidingExpiration = TimeSpan.FromMinutes(5),
+                AbsoluteExpirationRelativeToNow = timeout
             });
         }
 
@@ -33,7 +28,6 @@ namespace Resonance.Data.Storage
         private static IMemoryCache Cache => _memoryCacheLazy.Value;
         private static MemoryCacheEntryOptions MemoryCacheEntryOptions => _memoryCacheEntryOptionsLazy.Value;
         private bool AddNullToCache { get; set; }
-        private TimeSpan Timeout { get; set; }
 
         public virtual async Task<T> GetResultAsync(CancellationToken cancellationToken, bool useCache = true)
         {
@@ -78,7 +72,6 @@ namespace Resonance.Data.Storage
 
         public virtual void SetTimeout(TimeSpan timeout)
         {
-            Timeout = timeout;
         }
 
         private static IMemoryCache GetDefaultMemoryCache()

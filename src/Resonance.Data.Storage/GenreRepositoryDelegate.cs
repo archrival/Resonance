@@ -21,10 +21,12 @@ namespace Resonance.Data.Storage
         {
             return async cancellationToken =>
             {
-                var genre = await metadataRepository.GetGenreAsync(Genre, CollectionId, cancellationToken);
+                var genre = await metadataRepository.GetGenreAsync(Genre, CollectionId, cancellationToken).ConfigureAwait(false);
 
                 if (genre != null)
+                {
                     return genre;
+                }
 
                 var now = DateTime.UtcNow;
 

@@ -28,7 +28,7 @@ namespace Resonance.Data.Storage
         {
             return async cancelToken =>
             {
-                var mediaBundle = await metadataRepository.GetAlbumAsync(UserId, Artists, Name, CollectionId, Populate, cancelToken);
+                var mediaBundle = await metadataRepository.GetAlbumAsync(UserId, Artists, Name, CollectionId, Populate, cancelToken).ConfigureAwait(false);
 
                 Album album = null;
 
@@ -38,7 +38,9 @@ namespace Resonance.Data.Storage
                 }
 
                 if (album != null)
+                {
                     return mediaBundle;
+                }
 
                 var now = DateTime.UtcNow;
 
@@ -63,7 +65,7 @@ namespace Resonance.Data.Storage
                     DateModified = now
                 };
 
-                await metadataRepository.InsertOrUpdateAlbumAsync(album, cancelToken);
+                await metadataRepository.InsertOrUpdateAlbumAsync(album, cancelToken).ConfigureAwait(false);
 
                 mediaBundle = new MediaBundle<Album>
                 {

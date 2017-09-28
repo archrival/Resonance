@@ -16,10 +16,10 @@ namespace Resonance.Data.Storage
 
         public IMetadataRepository CreateMetadataRepository()
         {
-            AssemblyName assemblyName = new AssemblyName(_settings.AssemblyName);
-            Assembly assembly = Assembly.Load(assemblyName);
+            var assemblyName = new AssemblyName(_settings.AssemblyName);
+            var assembly = Assembly.Load(assemblyName);
 
-            string typeName = _settings.TypeName;
+            var typeName = _settings.TypeName;
 
             if (_settings.TypeName == null)
             {

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Hosting.WindowsServices;
 using Resonance.Common.Web;
 using System.Diagnostics;
 using System.Linq;
+using System.Net;
 
 namespace Resonance.Windows
 {
@@ -10,6 +11,9 @@ namespace Resonance.Windows
     {
         public static void Main(string[] args)
         {
+            ServicePointManager.DefaultConnectionLimit = 4000;
+            ServicePointManager.UseNagleAlgorithm = true;
+
             System.IO.Directory.SetCurrentDirectory(System.AppDomain.CurrentDomain.BaseDirectory);
 
             var isService = !(Debugger.IsAttached || args.Contains("--console"));

@@ -165,7 +165,7 @@ namespace Resonance.Data.Storage
 
         public async Task<HashSet<Artist>> GetArtistsFromListAsync(Guid userId, IEnumerable<string> artistNames, Guid collectionId, CancellationToken cancellationToken)
         {
-            HashSet<Artist> artists = new HashSet<Artist>();
+            var artists = new HashSet<Artist>();
 
             foreach (var artistName in artistNames)
             {
@@ -200,26 +200,26 @@ namespace Resonance.Data.Storage
                 return null;
             }
 
-            return await _metadataRepositoryCache.GetGenreAsync(name, collectionId, cancellationToken);
+            return await _metadataRepositoryCache.GetGenreAsync(name, collectionId, cancellationToken).ConfigureAwait(false);
         }
 
         public async Task<Dictionary<string, Tuple<int, int>>> GetGenreCountsAsync(Guid? collectionId, CancellationToken cancellationToken)
         {
-            return await _metadataRepositoryCache.GetGenreCountsAsync(collectionId, cancellationToken);
+            return await _metadataRepositoryCache.GetGenreCountsAsync(collectionId, cancellationToken).ConfigureAwait(false);
         }
 
         public async Task<IEnumerable<Genre>> GetGenresAsync(Guid? collectionId, CancellationToken cancellationToken)
         {
-            return await _metadataRepositoryCache.GetGenresAsync(collectionId, cancellationToken);
+            return await _metadataRepositoryCache.GetGenresAsync(collectionId, cancellationToken).ConfigureAwait(false);
         }
 
         public async Task<HashSet<Genre>> GetGenresFromListAsync(IEnumerable<string> genreNames, Guid collectionId, CancellationToken cancellationToken)
         {
-            HashSet<Genre> genres = new HashSet<Genre>();
+            var genres = new HashSet<Genre>();
 
             foreach (var genreName in genreNames)
             {
-                var genre = await GetGenreAsync(genreName, collectionId, cancellationToken);
+                var genre = await GetGenreAsync(genreName, collectionId, cancellationToken).ConfigureAwait(false);
                 genres.Add(genre);
             }
 
@@ -228,38 +228,38 @@ namespace Resonance.Data.Storage
 
         public async Task<IEnumerable<MediaBundle<Album>>> GetHighestRatedAlbumsAsync(Guid userId, int size, int offset, string genre, int? fromYear, int? toYear, Guid? collectionId, bool populate, CancellationToken cancellationToken)
         {
-            return await _metadataRepository.GetHighestRatedAlbumsAsync(userId, size, offset, genre, fromYear, toYear, collectionId, populate, cancellationToken);
+            return await _metadataRepository.GetHighestRatedAlbumsAsync(userId, size, offset, genre, fromYear, toYear, collectionId, populate, cancellationToken).ConfigureAwait(false);
         }
 
         public async Task<IEnumerable<MediaBundle<Album>>> GetNewestAlbumsAsync(Guid userId, int size, int offset, string genre, int? fromYear, int? toYear, Guid? collectionId, bool populate, CancellationToken cancellationToken)
         {
-            return await _metadataRepository.GetNewestAlbumsAsync(userId, size, offset, genre, fromYear, toYear, collectionId, populate, cancellationToken);
+            return await _metadataRepository.GetNewestAlbumsAsync(userId, size, offset, genre, fromYear, toYear, collectionId, populate, cancellationToken).ConfigureAwait(false);
         }
 
         public async Task<Playlist> GetPlaylistAsync(Guid userId, Guid id, bool getTracks, CancellationToken cancellationToken)
         {
-            return await _metadataRepositoryCache.GetPlaylistAsync(userId, id, getTracks, cancellationToken);
+            return await _metadataRepositoryCache.GetPlaylistAsync(userId, id, getTracks, cancellationToken).ConfigureAwait(false);
         }
 
         public async Task<IEnumerable<Playlist>> GetPlaylistsAsync(Guid userId, string username, bool getTracks, CancellationToken cancellationToken)
         {
-            return await _metadataRepositoryCache.GetPlaylistsAsync(userId, username, getTracks, cancellationToken);
+            return await _metadataRepositoryCache.GetPlaylistsAsync(userId, username, getTracks, cancellationToken).ConfigureAwait(false);
         }
 
         public async Task<IEnumerable<MediaBundle<Album>>> GetRandomAlbumsAsync(Guid userId, int size, int offset, string genre, int? fromYear, int? toYear, Guid? collectionId, bool populate, CancellationToken cancellationToken)
         {
-            return await _metadataRepository.GetRandomAlbumsAsync(userId, size, offset, genre, fromYear, toYear, collectionId, populate, cancellationToken);
+            return await _metadataRepository.GetRandomAlbumsAsync(userId, size, offset, genre, fromYear, toYear, collectionId, populate, cancellationToken).ConfigureAwait(false);
         }
 
         public async Task<IEnumerable<MediaInfo>> GetSimilarArtistsAsync(Guid userId, Artist artist, bool autocorrect, int limit, Guid collectionId, CancellationToken cancellationToken)
         {
-            List<MediaInfo> mediaInfo = new List<MediaInfo>();
+            var mediaInfo = new List<MediaInfo>();
 
-            var similarArtists = await _lastFmClient.GetSimilarArtistsAsync(artist, autocorrect, limit, cancellationToken);
+            var similarArtists = await _lastFmClient.GetSimilarArtistsAsync(artist, autocorrect, limit, cancellationToken).ConfigureAwait(false);
 
             foreach (var similarArtist in similarArtists)
             {
-                var artistModel = await GetArtistAsync(userId, similarArtist.LastFm.Name, collectionId, false, cancellationToken);
+                var artistModel = await GetArtistAsync(userId, similarArtist.LastFm.Name, collectionId, false, cancellationToken).ConfigureAwait(false);
 
                 if (artistModel != null)
                 {
@@ -274,22 +274,22 @@ namespace Resonance.Data.Storage
 
         public async Task<IEnumerable<MediaInfo>> GetTopTracksAsync(string artist, int count, CancellationToken cancellationToken)
         {
-            return await _lastFmClient.GetTopTracksAsync(artist, count, cancellationToken);
+            return await _lastFmClient.GetTopTracksAsync(artist, count, cancellationToken).ConfigureAwait(false);
         }
 
         public async Task<MediaBundle<Track>> GetTrackAsync(Guid userId, Guid id, bool populate, CancellationToken cancellationToken)
         {
-            return await _metadataRepositoryCache.GetTrackAsync(userId, id, populate, cancellationToken);
+            return await _metadataRepositoryCache.GetTrackAsync(userId, id, populate, cancellationToken).ConfigureAwait(false);
         }
 
         public async Task<MediaBundle<Track>> GetTrackAsync(Guid userId, string artist, string track, Guid? collectionId, bool populate, CancellationToken cancellationToken)
         {
-            return await _metadataRepositoryCache.GetTrackAsync(userId, artist, track, collectionId, populate, cancellationToken);
+            return await _metadataRepositoryCache.GetTrackAsync(userId, artist, track, collectionId, populate, cancellationToken).ConfigureAwait(false);
         }
 
         public async Task<IEnumerable<MediaBundle<Track>>> GetTracksAsync(Guid userId, int size, int offset, string genre, int? fromYear, int? toYear, Guid? collectionId, bool populate, bool randomize, CancellationToken cancellationToken)
         {
-            return await _metadataRepository.GetTracksAsync(userId, size, offset, genre, fromYear, toYear, collectionId, populate, randomize, cancellationToken);
+            return await _metadataRepository.GetTracksAsync(userId, size, offset, genre, fromYear, toYear, collectionId, populate, randomize, cancellationToken).ConfigureAwait(false);
         }
 
         public Task<IEnumerable<MediaBundle<Track>>> GetTracksAsync(Guid userId, Guid? collectionId, bool populate, CancellationToken cancellationToken)
@@ -317,9 +317,9 @@ namespace Resonance.Data.Storage
 
                  try
                  {
-                     var collections = await _settingsRepository.GetCollectionsAsync(cancellationToken);
+                     var collections = await _settingsRepository.GetCollectionsAsync(cancellationToken).ConfigureAwait(false);
 
-                     int collectionCount = 0;
+                     var collectionCount = 0;
 
                      var collectionsToScan = collections.Where(c => c.Enabled).ToList();
 
@@ -328,7 +328,7 @@ namespace Resonance.Data.Storage
                          collectionsToScan = collectionsToScan.Where(c => c.Id == collectionId).ToList();
                      }
 
-                     int totalCollectionCount = collectionsToScan.Count;
+                     var totalCollectionCount = collectionsToScan.Count;
 
                      ScanProgress.TotalCollectionCount = totalCollectionCount;
 
@@ -352,8 +352,8 @@ namespace Resonance.Data.Storage
 
                          var files = FileUtilities.FindFiles(collection.Path, collection.Filter);
 
-                         int fileCount = 0;
-                         int totalFileCount = files.Count;
+                         var fileCount = 0;
+                         var totalFileCount = files.Count;
 
                          ScanProgress.TotalFileCount = totalFileCount;
 
@@ -385,7 +385,7 @@ namespace Resonance.Data.Storage
 
                          _metadataRepository.EndTransaction(true, cancellationToken);
 
-                         foreach (var track in await _metadataRepository.GetTracksAsync(userId, collection.Id, cancellationToken))
+                         foreach (var track in await _metadataRepository.GetTracksAsync(userId, collection.Id, cancellationToken).ConfigureAwait(false))
                          {
                              var fileExists = File.Exists(track.Media.Path);
 
@@ -393,16 +393,16 @@ namespace Resonance.Data.Storage
                              {
                                  track.Media.Visible = fileExists;
 
-                                 await _metadataRepository.InsertOrUpdateFileInfoAsync(track.Media, cancellationToken);
+                                 await _metadataRepository.InsertOrUpdateFileInfoAsync(track.Media, cancellationToken).ConfigureAwait(false);
 
                                  if (!fileExists)
                                  {
-                                     await _metadataRepository.DeleteTrackReferencesAsync(track.Media, cancellationToken);
+                                     await _metadataRepository.DeleteTrackReferencesAsync(track.Media, cancellationToken).ConfigureAwait(false);
                                  }
                              }
                          }
 
-                         await _metadataRepository.DeleteAlbumReferencesAsync(cancellationToken);
+                         await _metadataRepository.DeleteAlbumReferencesAsync(cancellationToken).ConfigureAwait(false);
                      }
                  }
                  catch (Exception ex)
@@ -422,17 +422,17 @@ namespace Resonance.Data.Storage
 
         public async Task<IEnumerable<MediaBundle<Album>>> SearchAlbumsAsync(Guid userId, string query, int size, int offset, Guid? collectionId, bool populate, CancellationToken cancellationToken)
         {
-            return await _metadataRepository.SearchAsync<Album>(userId, query, size, offset, collectionId, populate, cancellationToken);
+            return await _metadataRepository.SearchAsync<Album>(userId, query, size, offset, collectionId, populate, cancellationToken).ConfigureAwait(false);
         }
 
         public async Task<IEnumerable<MediaBundle<Artist>>> SearchArtistsAsync(Guid userId, string query, int size, int offset, Guid? collectionId, bool populate, CancellationToken cancellationToken)
         {
-            return await _metadataRepository.SearchAsync<Artist>(userId, query, size, offset, collectionId, populate, cancellationToken);
+            return await _metadataRepository.SearchAsync<Artist>(userId, query, size, offset, collectionId, populate, cancellationToken).ConfigureAwait(false);
         }
 
         public async Task<IEnumerable<MediaBundle<Track>>> SearchTracksAsync(Guid userId, string query, int size, int offset, Guid? collectionId, bool populate, CancellationToken cancellationToken)
         {
-            return await _metadataRepository.SearchAsync<Track>(userId, query, size, offset, collectionId, populate, cancellationToken);
+            return await _metadataRepository.SearchAsync<Track>(userId, query, size, offset, collectionId, populate, cancellationToken).ConfigureAwait(false);
         }
 
         public Task SetPasswordAsync(string username, string password)

@@ -30,7 +30,7 @@ namespace Resonance.SubsonicCompat
                 return authenticationContext;
             }
 
-            var user = await _metadataRepository.GetUserAsync(parameters.Username, cancellationToken);
+            var user = await _metadataRepository.GetUserAsync(parameters.Username, cancellationToken).ConfigureAwait(false);
 
             if (user == null || !user.Enabled)
             {
@@ -70,7 +70,7 @@ namespace Resonance.SubsonicCompat
 
                 if (user.Roles == null || !user.Roles.Any())
                 {
-                    authenticationContext.Roles = await _metadataRepository.GetRolesForUserAsync(user.Id, cancellationToken);
+                    authenticationContext.Roles = await _metadataRepository.GetRolesForUserAsync(user.Id, cancellationToken).ConfigureAwait(false);
                 }
                 else
                 {

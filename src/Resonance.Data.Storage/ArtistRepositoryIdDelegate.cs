@@ -19,7 +19,7 @@ namespace Resonance.Data.Storage
 
         public Func<CancellationToken, Task<MediaBundle<Artist>>> CreateMethod(IMetadataRepository metadataRepository)
         {
-            return async cancelToken => await metadataRepository.GetArtistAsync(UserId, Id, cancelToken);
+            return async cancelToken => await metadataRepository.GetArtistAsync(UserId, Id, cancelToken).ConfigureAwait(false);
         }
 
         #region HashCode and Equality Overrides

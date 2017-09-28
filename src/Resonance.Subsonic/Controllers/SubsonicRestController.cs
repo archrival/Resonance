@@ -21,7 +21,7 @@ namespace Resonance.SubsonicCompat.Controllers
     [Route("subsonic/rest")]
     public class SubsonicRestController : ResonanceControllerBase
     {
-        private static readonly HttpClient _httpClient = new HttpClient();
+        private static readonly HttpClient HttpClient = new HttpClient();
         private readonly Regex _indexRegex = new Regex("[a-zA-Z]");
         private readonly SubsonicAuthorization _subsonicAuthorization;
 
@@ -920,7 +920,7 @@ namespace Resonance.SubsonicCompat.Controllers
 
                 if (artistInfo?.LastFm?.LargestImageUrl != null)
                 {
-                    coverArtData = await _httpClient.GetByteArrayAsync(artistInfo.LastFm.LargestImageUrl);
+                    coverArtData = await HttpClient.GetByteArrayAsync(artistInfo.LastFm.LargestImageUrl);
 
                     if (coverArtData == null)
                     {
@@ -1287,6 +1287,8 @@ namespace Resonance.SubsonicCompat.Controllers
         [ServiceFilter(typeof(SubsonicAsyncResultFilter))]
         public async Task<Response> GetScanStatusAsync()
         {
+            await Task.CompletedTask;
+
             var cancellationToken = ControllerContext.HttpContext.GetCancellationToken();
 
             var scanProgress = MediaLibrary.ScanProgress;

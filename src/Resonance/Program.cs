@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Hosting;
+﻿using System.Net;
+using Microsoft.AspNetCore.Hosting;
 using Resonance.Common.Web;
 
 namespace Resonance
@@ -7,6 +8,9 @@ namespace Resonance
     {
         public static void Main(string[] args)
         {
+            ServicePointManager.DefaultConnectionLimit = 4000;
+            ServicePointManager.UseNagleAlgorithm = true;
+
             var host = ResonanceWebHostBuilderExtensions.GetWebHostBuilder()
                 .UseStartup<Startup>()
                 .UseApplicationInsights()

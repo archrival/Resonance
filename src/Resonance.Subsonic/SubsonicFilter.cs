@@ -13,21 +13,29 @@ namespace Resonance.SubsonicCompat
     {
         public async Task<IActionResult> ConvertToResultFormatAsync(Response response, SubsonicQueryParameters queryParameters)
         {
-            string xmlString = await response.SerializeToXmlAsync();
+            var xmlString = await response.SerializeToXmlAsync();
 
             switch (queryParameters.Format)
             {
                 case SubsonicReturnFormat.Json:
-                    return CreateContentResult(GetJsonResponse(xmlString), "application/json", Encoding.UTF8);
+                    {
+                        return CreateContentResult(GetJsonResponse(xmlString), "application/json", Encoding.UTF8);
+                    }
 
                 case SubsonicReturnFormat.Jsonp:
-                    return CreateContentResult($"{queryParameters.Callback}({GetJsonResponse(xmlString)});", "text/javascript", Encoding.UTF8);
+                    {
+                        return CreateContentResult($"{queryParameters.Callback}({GetJsonResponse(xmlString)});", "text/javascript", Encoding.UTF8);
+                    }
 
                 case SubsonicReturnFormat.Xml:
-                    return CreateContentResult(xmlString, "text/xml", Encoding.UTF8);
+                    {
+                        return CreateContentResult(xmlString, "text/xml", Encoding.UTF8);
+                    }
 
                 default:
-                    return null;
+                    {
+                        return null;
+                    }
             }
         }
 

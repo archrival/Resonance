@@ -10,143 +10,151 @@ using System.Threading.Tasks;
 
 namespace Resonance.Data.Media.LastFm
 {
-	public class LastFmClient : ILastFmClient
-	{
-		private readonly LastfmClient _client;
+    public class LastFmClient : ILastFmClient
+    {
+        private readonly LastfmClient _client;
 
-		public LastFmClient(string apiKey, string apiSecret)
-		{
-			_client = new LastfmClient(apiKey, apiSecret);
-		}
+        public LastFmClient(string apiKey, string apiSecret)
+        {
+            _client = new LastfmClient(apiKey, apiSecret);
+        }
 
-		public async Task<MediaInfo> GetAlbumInfoAsync(Album album, CancellationToken cancellationToken)
-		{
-			MediaInfo mediaInfo = null;
+        public async Task<MediaInfo> GetAlbumInfoAsync(Album album, CancellationToken cancellationToken)
+        {
+            var artist = album.Artists.FirstOrDefault();
 
-			var artist = album.Artists.FirstOrDefault();
+            var response = await _client.Album.GetInfoAsync(artist.Media.Name, album.Name).ConfigureAwait(false);
 
-			var response = await _client.Album.GetInfoAsync(artist.Media.Name, album.Name);
+            if (response.Status != LastResponseStatus.Successful)
+            {
+                return null;
+            }
 
-			if (response.Status == LastResponseStatus.Successful)
-			{
-				var albumInfo = response.Content;
+            var albumInfo = response.Content;
 
-				mediaInfo = new MediaInfo
-				{
-					LastFm = new Models.LastFm
-					{
-						LastFmId = albumInfo.Id,
-						Url = albumInfo.Url,
-						SmallImageUrl = albumInfo.Images.Small,
-						MediumImageUrl = albumInfo.Images.Medium,
-						LargeImageUrl = albumInfo.Images.Large,
-						LargestImageUrl = albumInfo.Images.Largest
-					},
-					MediaId = artist.Media.Id,
-					MusicBrainzId = albumInfo.Mbid,
-				};
-			}
+            var mediaInfo = new MediaInfo
+            {
+                LastFm = new Models.LastFm
+                {
+                    LastFmId = albumInfo.Id,
+                    Url = albumInfo.Url,
+                    SmallImageUrl = albumInfo.Images.Small,
+                    MediumImageUrl = albumInfo.Images.Medium,
+                    LargeImageUrl = albumInfo.Images.Large,
+                    LargestImageUrl = albumInfo.Images.Largest
+                },
+                MediaId = artist.Media.Id,
+                MusicBrainzId = albumInfo.Mbid,
+            };
 
-			return mediaInfo;
-		}
+            return mediaInfo;
+        }
 
-		public async Task<MediaInfo> GetArtistInfoAsync(Artist artist, CancellationToken cancellationToken)
-		{
-			var response = await _client.Artist.GetInfoAsync(artist.Name, "en", true);
+        public async Task<MediaInfo> GetArtistInfoAsync(Artist artist, CancellationToken cancellationToken)
+        {
+            var response = await _client.Artist.GetInfoAsync(artist.Name, "en", true).ConfigureAwait(false);
 
-			if (response.Status != LastResponseStatus.Successful)
-				return null;
+            if (response.Status != LastResponseStatus.Successful)
+            {
+                return null;
+            }
 
-			var artistInfo = response.Content;
+            var artistInfo = response.Content;
 
-			var mediaInfo = ConvertFromLastArtist(artistInfo);
+            var mediaInfo = ConvertFromLastArtist(artistInfo);
 
-			if (mediaInfo != null)
-			{
-				mediaInfo.MediaId = artist.Id;
-			}
+            if (mediaInfo != null)
+            {
+                mediaInfo.MediaId = artist.Id;
+            }
 
-			return mediaInfo;
-		}
+            return mediaInfo;
+        }
 
-		public async Task<IEnumerable<MediaInfo>> GetSimilarArtistsAsync(Artist artist, bool autocorrect, int limit, CancellationToken cancellationToken)
-		{
-			var similarArtists = new List<MediaInfo>();
+        public async Task<IEnumerable<MediaInfo>> GetSimilarArtistsAsync(Artist artist, bool autocorrect, int limit, CancellationToken cancellationToken)
+        {
+            var similarArtists = new List<MediaInfo>();
 
-			var response = await _client.Artist.GetSimilarAsync(artist.Name, autocorrect, limit);
+            var response = await _client.Artist.GetSimilarAsync(artist.Name, autocorrect, limit).ConfigureAwait(false);
 
-			if (response.Status != LastResponseStatus.Successful)
-				return similarArtists;
+            if (response.Status != LastResponseStatus.Successful)
+            {
+                return similarArtists;
+            }
 
-			var artists = response.Content;
+            var artists = response.Content;
 
-			similarArtists.AddRange(artists.Select(ConvertFromLastArtist).Where(mediaInfo => mediaInfo != null));
+            similarArtists.AddRange(artists.Select(ConvertFromLastArtist).Where(mediaInfo => mediaInfo != null));
 
-			return similarArtists;
-		}
+            return similarArtists;
+        }
 
-		public async Task<IEnumerable<MediaInfo>> GetTopTracksAsync(string artist, int count, CancellationToken cancellationToken)
-		{
-			var topSongs = new List<MediaInfo>();
+        public async Task<IEnumerable<MediaInfo>> GetTopTracksAsync(string artist, int count, CancellationToken cancellationToken)
+        {
+            var topSongs = new List<MediaInfo>();
 
-			var response = await _client.Artist.GetTopTracksAsync(artist, true, 1, count);
+            var response = await _client.Artist.GetTopTracksAsync(artist, true, 1, count).ConfigureAwait(false);
 
-			if (response.Status != LastResponseStatus.Successful)
-				return topSongs;
+            if (response.Status != LastResponseStatus.Successful)
+            {
+                return topSongs;
+            }
 
-			topSongs.AddRange(response.Content.Select(ConvertFromLastTrack).Where(mediaInfo => mediaInfo != null));
+            topSongs.AddRange(response.Content.Select(ConvertFromLastTrack).Where(mediaInfo => mediaInfo != null));
 
-			return topSongs;
-		}
+            return topSongs;
+        }
 
-		private static MediaInfo ConvertFromLastArtist(LastArtist lastArtist)
-		{
-			var mediaInfo = new MediaInfo
-			{
-				LastFm = new Models.LastFm
-				{
-					LastFmId = lastArtist.Id,
-					Url = lastArtist.Url,
-					Details = lastArtist.Bio?.Content,
-					Name = lastArtist.Name
-				},
-				MusicBrainzId = lastArtist.Mbid,
-			};
+        private static MediaInfo ConvertFromLastArtist(LastArtist lastArtist)
+        {
+            var mediaInfo = new MediaInfo
+            {
+                LastFm = new Models.LastFm
+                {
+                    LastFmId = lastArtist.Id,
+                    Url = lastArtist.Url,
+                    Details = lastArtist.Bio?.Content,
+                    Name = lastArtist.Name
+                },
+                MusicBrainzId = lastArtist.Mbid,
+            };
 
-			if (lastArtist.MainImage == null)
-				return mediaInfo;
+            if (lastArtist.MainImage == null)
+            {
+                return mediaInfo;
+            }
 
-			mediaInfo.LastFm.SmallImageUrl = lastArtist.MainImage.Small;
-			mediaInfo.LastFm.MediumImageUrl = lastArtist.MainImage.Medium;
-			mediaInfo.LastFm.LargeImageUrl = lastArtist.MainImage.Large;
-			mediaInfo.LastFm.LargestImageUrl = lastArtist.MainImage.Largest;
+            mediaInfo.LastFm.SmallImageUrl = lastArtist.MainImage.Small;
+            mediaInfo.LastFm.MediumImageUrl = lastArtist.MainImage.Medium;
+            mediaInfo.LastFm.LargeImageUrl = lastArtist.MainImage.Large;
+            mediaInfo.LastFm.LargestImageUrl = lastArtist.MainImage.Largest;
 
-			return mediaInfo;
-		}
+            return mediaInfo;
+        }
 
-		private static MediaInfo ConvertFromLastTrack(LastTrack lastTrack)
-		{
-			MediaInfo mediaInfo = null;
+        private static MediaInfo ConvertFromLastTrack(LastTrack lastTrack)
+        {
+            MediaInfo mediaInfo = null;
 
-			if (!string.IsNullOrWhiteSpace(lastTrack.Mbid) || !string.IsNullOrWhiteSpace(lastTrack.Id))
-			{
-				mediaInfo = new MediaInfo
-				{
-					LastFm = new Models.LastFm
-					{
-						LastFmId = lastTrack.Id,
-						Url = lastTrack.Url,
-						SmallImageUrl = lastTrack.Images.Small,
-						MediumImageUrl = lastTrack.Images.Medium,
-						LargeImageUrl = lastTrack.Images.Large,
-						LargestImageUrl = lastTrack.Images.Largest,
-						Name = lastTrack.Name
-					},
-					MusicBrainzId = lastTrack.Mbid,
-				};
-			}
+            if (!string.IsNullOrWhiteSpace(lastTrack.Mbid) || !string.IsNullOrWhiteSpace(lastTrack.Id))
+            {
+                mediaInfo = new MediaInfo
+                {
+                    LastFm = new Models.LastFm
+                    {
+                        LastFmId = lastTrack.Id,
+                        Url = lastTrack.Url,
+                        SmallImageUrl = lastTrack.Images.Small,
+                        MediumImageUrl = lastTrack.Images.Medium,
+                        LargeImageUrl = lastTrack.Images.Large,
+                        LargestImageUrl = lastTrack.Images.Largest,
+                        Name = lastTrack.Name
+                    },
+                    MusicBrainzId = lastTrack.Mbid,
+                };
+            }
 
-			return mediaInfo;
-		}
-	}
+            return mediaInfo;
+        }
+    }
 }
