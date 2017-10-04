@@ -5,11 +5,19 @@ using Subsonic.Common.Classes;
 using Subsonic.Common.Enums;
 using System;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Resonance.SubsonicCompat
 {
     public static class SubsonicControllerExtensions
     {
+        public static async Task<IActionResult> GetActionResultAsync(this ActionContext context, Response response)
+        {
+            var queryParameters = context.GetSubsonicQueryParameters();
+
+            return await SubsonicFilter.ConvertToResultFormatAsync(response, queryParameters).ConfigureAwait(false);
+        }
+
         public static Response CreateAuthorizationFailureResponse(this AuthorizationContext authenticationContext)
         {
             var response = CreateResponse();

@@ -4,6 +4,7 @@ using Resonance.Data.Models;
 using Resonance.Data.Storage;
 using Resonance.Data.Storage.Common;
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Resonance.SubsonicCompat.Controllers
@@ -19,16 +20,14 @@ namespace Resonance.SubsonicCompat.Controllers
         }
 
         [HttpGet("")]
-        public StatusCodeResult Get()
+        public StatusCodeResult Get(CancellationToken cancellationToken)
         {
             return StatusCode(204);
         }
 
         [HttpGet("musicFolderSettings.view"), HttpPost("musicFolderSettings.view")]
-        public async Task<IActionResult> MusicFolderSettingsAsync()
+        public async Task<IActionResult> MusicFolderSettingsAsync(CancellationToken cancellationToken)
         {
-            var cancellationToken = ControllerContext.HttpContext.GetCancellationToken();
-
             var queryParameters = Request.GetSubsonicQueryParameters();
 
             var authenticationContext = await _subsonicAuthorization.AuthorizeRequestAsync(queryParameters, cancellationToken).ConfigureAwait(false);

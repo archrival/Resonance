@@ -1,7 +1,7 @@
-﻿using System;
-using System.Linq;
+﻿using Microsoft.Extensions.Primitives;
+using System;
 using System.Collections.Generic;
-using Microsoft.Extensions.Primitives;
+using System.Linq;
 
 namespace Resonance.SubsonicCompat
 {
@@ -24,7 +24,7 @@ namespace Resonance.SubsonicCompat
             {
                 var value = kvp.Value.FirstOrDefault();
 
-                if (string.IsNullOrWhiteSpace(value))
+                if (string.IsNullOrEmpty(value))
                 {
                     continue;
                 }

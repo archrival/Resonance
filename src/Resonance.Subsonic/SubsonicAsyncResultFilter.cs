@@ -13,9 +13,7 @@ namespace Resonance.SubsonicCompat
 
 			if (result?.Value is Response response)
 			{
-				var queryParameters = context.GetSubsonicQueryParameters();
-
-				context.Result = await ConvertToResultFormatAsync(response, queryParameters).ConfigureAwait(false);
+			    context.Result = await context.GetActionResultAsync(response).ConfigureAwait(false);
 			}
 
 			await next().ConfigureAwait(false);

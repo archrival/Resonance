@@ -1,6 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc.Filters;
+﻿using Microsoft.AspNetCore.Authorization.Infrastructure;
+using Microsoft.AspNetCore.Mvc.Authorization;
+using Microsoft.AspNetCore.Mvc.Filters;
 using Resonance.Common.Web;
 using Resonance.Data.Storage;
+using Subsonic.Common.Enums;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Resonance.SubsonicCompat
@@ -26,9 +30,26 @@ namespace Resonance.SubsonicCompat
             }
             else
             {
+                var authorizeFilter = context.Filters.OfType<AuthorizeFilter>().FirstOrDefault();
+
+                var authorizationRequirement = authorizeFilter?.Policy.Requirements.OfType<RolesAuthorizationRequirement>().FirstOrDefault();
+
+                if (authorizationRequirement != null && authorizationRequirement.AllowedRoles.Any())
+                {
+                    var inRole = authorizationRequirement.AllowedRoles.Any(r => authorizationContext.IsInRole(r));
+
+                    if (!inRole)
+                    {
+                        authorizationContext.ErrorCode = (int)ErrorCode.UserNotAuthorized;
+                        authorizationContext.Status = SubsonicConstants.UserIsNotAuthorizedForTheGivenOperation;
+
+                        context.Result = await context.GetActionResultAsync(authorizationContext.CreateAuthorizationFailureResponse()).ConfigureAwait(false);
+                    }
+                }
+
                 context.HttpContext.Items.Add(SubsonicConstants.SubsonicQueryParameters, queryParameters);
                 context.HttpContext.Items.Add(SubsonicConstants.AuthenticationContext, authorizationContext);
-                context.HttpContext.User = authorizationContext.ToClaimsPrincipal();
+                context.HttpContext.User = authorizationContext;
             }
         }
     }

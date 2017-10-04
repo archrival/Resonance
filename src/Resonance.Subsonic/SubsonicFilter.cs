@@ -11,7 +11,7 @@ namespace Resonance.SubsonicCompat
 {
     public class SubsonicFilter
     {
-        public async Task<IActionResult> ConvertToResultFormatAsync(Response response, SubsonicQueryParameters queryParameters)
+        public static async Task<IActionResult> ConvertToResultFormatAsync(Response response, SubsonicQueryParameters queryParameters)
         {
             var xmlString = await response.SerializeToXmlAsync();
 
@@ -39,7 +39,7 @@ namespace Resonance.SubsonicCompat
             }
         }
 
-        public ContentResult CreateContentResult(string content, string contentType, Encoding contentEncoding)
+        public static ContentResult CreateContentResult(string content, string contentType, Encoding contentEncoding)
         {
             var contentResult = new ContentResult { Content = content };
             var mediaTypeHeader = MediaTypeHeaderValue.Parse(contentType);

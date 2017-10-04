@@ -1,11 +1,13 @@
 ﻿using Resonance.Data.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Security.Principal;
 
 namespace Resonance.Common.Web
 {
-	public class AuthorizationContext
+	public class AuthorizationContext : ClaimsPrincipal
 	{
 		public int? ErrorCode { get; set; }
 		public bool IsAuthenticated { get; set; }
@@ -18,12 +20,11 @@ namespace Resonance.Common.Web
 			return Roles.Any(r => r.Equals(Role.Administrator) || r.Equals(role));
 		}
 
-		public GenericPrincipal ToClaimsPrincipal()
-		{
-			var identity = new GenericIdentity(User.Name);
-			var principal = new GenericPrincipal(identity, Roles.Select(r => r.ToString()).ToArray());
+		public override IIdentity Identity => new GenericIdentity(User.Name);
 
-			return principal;
+		public override bool IsInRole(string role)
+		{
+			return Enum.TryParse(role, out Role roleValue) && IsInRole(roleValue);
 		}
 	}
 }

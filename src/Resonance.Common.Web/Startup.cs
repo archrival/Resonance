@@ -9,6 +9,7 @@ using Resonance.Data.Media.Common;
 using Resonance.Data.Media.Image;
 using Resonance.Data.Media.LastFm;
 using Resonance.Data.Media.Tag;
+using Resonance.Data.Models;
 using Resonance.Data.Storage;
 using Resonance.Data.Storage.Common;
 using System;
@@ -63,7 +64,15 @@ namespace Resonance.Common.Web
                     opt.SerializerSettings.StringEscapeHandling = StringEscapeHandling.Default;
                 });
 
-            IConfigurationSection config = Configuration.GetSection("MetadataRepository");
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy(PolicyConstants.Administration, policy => policy.RequireRole(Enum.GetName(typeof(Role), Role.Administrator)));
+                options.AddPolicy(PolicyConstants.ModifyUserSettings, policy => policy.RequireRole(Enum.GetName(typeof(Role), Role.Administrator), Enum.GetName(typeof(Role), Role.Settings)));
+                options.AddPolicy(PolicyConstants.Scrobble, policy => policy.RequireRole(Enum.GetName(typeof(Role), Role.Administrator), Enum.GetName(typeof(Role), Role.Playback)));
+                options.AddPolicy(PolicyConstants.Stream, policy => policy.RequireRole(Enum.GetName(typeof(Role), Role.Administrator), Enum.GetName(typeof(Role), Role.Playback)));
+            });
+
+            var config = Configuration.GetSection("MetadataRepository");
             services.Configure<MetadataRepositorySettings>(config);
             services.AddCors(options =>
             {
@@ -79,7 +88,7 @@ namespace Resonance.Common.Web
 
             services.AddSingleton<IMetadataRepositorySettings>(metadataRepositorySettings);
             services.AddSingleton<IMetadataRepositoryFactory, MetadataRepositoryFactory>();
-            services.AddSingleton((s) => s.GetService<IMetadataRepositoryFactory>().CreateMetadataRepository());
+            services.AddSingleton(s => s.GetService<IMetadataRepositoryFactory>().CreateMetadataRepository());
             services.AddSingleton<ITagReaderFactory, TagReaderFactory<TagLibTagReader>>();
             services.AddSingleton<ITagReader, TagLibTagReader>();
             services.AddSingleton<IMemoryCache>(new MemoryCache(memoryCacheOptions));
@@ -98,8 +107,8 @@ namespace Resonance.Common.Web
 
             foreach (var resonanceAssembly in resonanceAssemblies.GetChildren())
             {
-                string assemblyNameValue = resonanceAssembly.GetValue<string>("AssemblyName");
-                string typeNameValue = resonanceAssembly.GetValue<string>("TypeName");
+                var assemblyNameValue = resonanceAssembly.GetValue<string>("AssemblyName");
+                var typeNameValue = resonanceAssembly.GetValue<string>("TypeName");
 
                 var assemblyName = new AssemblyName(assemblyNameValue);
                 var assembly = Assembly.Load(assemblyName);

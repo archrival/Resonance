@@ -43,6 +43,8 @@ namespace Resonance.SubsonicCompat
                 return authenticationContext;
             }
 
+            cancellationToken.ThrowIfCancellationRequested();
+
             var authorizationSuccess = false;
 
             if (parameters.Password != null)
