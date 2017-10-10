@@ -1612,6 +1612,8 @@ namespace Resonance.Data.Storage.SQLite
 
             if (!string.IsNullOrWhiteSpace(genre))
             {
+                builder.Join("[GenreToTrack] gtt ON gtt.TrackId = tta.TrackId");
+                builder.Join("[Genre] g ON g.Id = gtt.GenreId");
                 builder.Where("g.Name IN(@Genre)", new { Genre = genre });
             }
 

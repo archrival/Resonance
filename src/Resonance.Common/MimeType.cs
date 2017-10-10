@@ -25,9 +25,18 @@ namespace Resonance.Common
         private static readonly byte[] WMV_WMA = { 48, 38, 178, 117, 142, 102, 207, 17, 166, 217, 0, 170, 0, 98, 206, 108 };
         private static readonly byte[] ZIP_DOCX = { 80, 75, 3, 4 };
 
+        public static string GetMimeType(Stream stream, string extension)
+        {
+            var bytes = new byte[maxByteCount];
+
+            stream.Read(bytes, 0, maxByteCount);
+
+            return GetMimeType(bytes, $"test.{extension}");
+        }
+
         public static string GetMimeType(string fileName)
         {
-            byte[] bytes = new byte[maxByteCount];
+            var bytes = new byte[maxByteCount];
 
             using (var stream = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.Read))
             {
@@ -39,9 +48,9 @@ namespace Resonance.Common
 
         public static string GetMimeType(byte[] file, string fileName)
         {
-            string mime = "application/octet-stream";
+            var mime = "application/octet-stream";
 
-            string extension = string.Empty;
+            var extension = string.Empty;
 
             if (!string.IsNullOrWhiteSpace(fileName))
             {

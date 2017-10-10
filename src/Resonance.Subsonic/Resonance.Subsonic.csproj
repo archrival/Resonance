@@ -14,6 +14,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\SubsonicSharp\Subsonic.Common\Subsonic.Common.csproj" />
     <ProjectReference Include="..\Resonance.Common.Web\Resonance.Common.Web.csproj" />
+    <ProjectReference Include="..\Resonance.Data.Media.Audio\Resonance.Data.Media.Audio.csproj" />
   </ItemGroup>
 
 </Project>

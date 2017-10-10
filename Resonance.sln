@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26730.12
+VisualStudioVersion = 15.0.26730.16
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{1E586776-0868-46AA-B702-A11D15F90BA1}"
 EndProject
@@ -47,6 +47,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Resonance.Web", "src\Resonance.Web\Resonance.Web.csproj", "{268081CD-2061-4734-A915-481FAB011850}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Resonance.Data.Storage.DocumentDB", "src\Resonance.Data.Storage.DocumentDB\Resonance.Data.Storage.DocumentDB.csproj", "{B7E224C8-FC62-40F3-A1D1-753180030366}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Resonance.Data.Media.Audio", "src\Resonance.Data.Media.Audio\Resonance.Data.Media.Audio.csproj", "{487E2926-50BF-4295-9730-1D9F4F89AADC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -126,6 +128,10 @@ Global
 		{B7E224C8-FC62-40F3-A1D1-753180030366}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B7E224C8-FC62-40F3-A1D1-753180030366}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B7E224C8-FC62-40F3-A1D1-753180030366}.Release|Any CPU.Build.0 = Release|Any CPU
+		{487E2926-50BF-4295-9730-1D9F4F89AADC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{487E2926-50BF-4295-9730-1D9F4F89AADC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{487E2926-50BF-4295-9730-1D9F4F89AADC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{487E2926-50BF-4295-9730-1D9F4F89AADC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -150,6 +156,7 @@ Global
 		{9D130E1A-3D1E-4726-85DA-205537AD3ACF} = {1E586776-0868-46AA-B702-A11D15F90BA1}
 		{268081CD-2061-4734-A915-481FAB011850} = {1E586776-0868-46AA-B702-A11D15F90BA1}
 		{B7E224C8-FC62-40F3-A1D1-753180030366} = {1E586776-0868-46AA-B702-A11D15F90BA1}
+		{487E2926-50BF-4295-9730-1D9F4F89AADC} = {1E586776-0868-46AA-B702-A11D15F90BA1}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {F91C867B-7B95-44DE-BA36-2A2194506F05}

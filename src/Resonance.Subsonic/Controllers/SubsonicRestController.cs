@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Resonance.Common;
 using Resonance.Common.Web;
+using Resonance.Data.Media.Audio;
 using Resonance.Data.Models;
 using Resonance.Data.Storage;
 using Resonance.Data.Storage.Common;
@@ -25,10 +26,12 @@ namespace Resonance.SubsonicCompat.Controllers
         private static readonly HttpClient HttpClient = new HttpClient();
         private static readonly Regex IndexRegex = new Regex("[a-zA-Z]");
         private readonly SubsonicAuthorization _subsonicAuthorization;
+        private readonly Transcode _transcode;
 
         public SubsonicRestController(IMediaLibrary mediaLibrary, IMetadataRepository metadataRepository, ISettingsRepository settingsRepository) : base(mediaLibrary, metadataRepository, settingsRepository)
         {
             _subsonicAuthorization = new SubsonicAuthorization(metadataRepository);
+            _transcode = new Transcode();
         }
 
         [HttpGet("addChatMessage.view"), HttpPost("addChatMessage.view")]
@@ -1920,7 +1923,7 @@ namespace Resonance.SubsonicCompat.Controllers
         [HttpGet("stream.view"), HttpPost("stream.view")]
         [ServiceFilter(typeof(SubsonicAsyncAuthorizationFilter))]
         [Authorize(Policy = PolicyConstants.Stream)]
-        public async Task<IActionResult> StreamAsync([ResonanceParameter] Guid id, [ResonanceParameter] int? maxBitRate, [ResonanceParameter(Name = "format")] StreamFormat? streamFormat, [ResonanceParameter] int? timeOffset, [ResonanceParameter] string size, [ResonanceParameter] bool estimateContentLength, [ResonanceParameter] bool converted, CancellationToken cancellationToken)
+        public async Task<IActionResult> StreamAsync([ResonanceParameter] Guid id, [ResonanceParameter] int? maxBitRate, [ResonanceParameter(Name = "format")] string streamFormat, [ResonanceParameter] int? timeOffset, [ResonanceParameter] string size, [ResonanceParameter] bool estimateContentLength, [ResonanceParameter] bool converted, CancellationToken cancellationToken)
         {
             var queryParameters = Request.GetSubsonicQueryParameters();
 
@@ -1946,6 +1949,18 @@ namespace Resonance.SubsonicCompat.Controllers
             };
 
             await MetadataRepository.AddPlaybackAsync(playback, cancellationToken).ConfigureAwait(false);
+
+            if (!string.Equals(streamFormat, "raw", StringComparison.InvariantCultureIgnoreCase) && maxBitRate.HasValue && maxBitRate.Value > 0)
+            {
+                if (string.IsNullOrWhiteSpace(streamFormat))
+                {
+                    streamFormat = "mp3";
+                }
+
+                var convertedStream = _transcode.Convert(track.Path, streamFormat, maxBitRate.Value, cancellationToken);
+
+                return File(convertedStream, "audio/mpeg", Path.ChangeExtension(Path.GetFileName(track.Path), streamFormat));
+            }
 
             return File(System.IO.File.Open(track.Path, FileMode.Open, FileAccess.Read, FileShare.Read), MimeType.GetMimeType(track.Path), Path.GetFileName(track.Path));
         }
