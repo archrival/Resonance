@@ -1957,6 +1957,12 @@ namespace Resonance.SubsonicCompat.Controllers
                     streamFormat = "mp3";
                 }
 
+                if (estimateContentLength)
+                {
+                    var estimatedLength = ((track.Duration.TotalSeconds * maxBitRate.Value) / 8);
+                    HttpContext.Response.Headers.Add("Content-Length", estimatedLength.ToString());
+                }
+
                 return File(_transcoder.TranscodeAudio(track.Path, streamFormat, maxBitRate.Value, cancellationToken), MimeType.GetDefaultMimeTypeForExtension(streamFormat), Path.ChangeExtension(Path.GetFileName(track.Path), streamFormat));
             }
 
