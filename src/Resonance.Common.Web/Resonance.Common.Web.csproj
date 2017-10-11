@@ -30,6 +30,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Resonance.Data.Media.Audio\Resonance.Data.Media.Audio.csproj" />
     <ProjectReference Include="..\Resonance.Data.Media.Image\Resonance.Data.Media.Image.csproj" />
     <ProjectReference Include="..\Resonance.Data.Storage.Common\Resonance.Data.Storage.Common.csproj" />
     <ProjectReference Include="..\Resonance.Data.Storage\Resonance.Data.Storage.csproj" />

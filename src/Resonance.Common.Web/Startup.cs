@@ -5,6 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using Resonance.Data.Media.Audio;
 using Resonance.Data.Media.Common;
 using Resonance.Data.Media.Image;
 using Resonance.Data.Media.LastFm;
@@ -72,8 +73,6 @@ namespace Resonance.Common.Web
                 options.AddPolicy(PolicyConstants.Stream, policy => policy.RequireRole(Enum.GetName(typeof(Role), Role.Administrator), Enum.GetName(typeof(Role), Role.Playback)));
             });
 
-            var config = Configuration.GetSection("MetadataRepository");
-            services.Configure<MetadataRepositorySettings>(config);
             services.AddCors(options =>
             {
                 options.AddPolicy(CorsPolicyName, builder => builder.AllowAnyOrigin());
@@ -84,7 +83,13 @@ namespace Resonance.Common.Web
                 ExpirationScanFrequency = TimeSpan.FromMinutes(15)
             };
 
-            var metadataRepositorySettings = config.Get<MetadataRepositorySettings>();
+            var metadataRepositoryConfig = Configuration.GetSection("MetadataRepository");
+            var metadataRepositorySettings = metadataRepositoryConfig.Get<MetadataRepositorySettings>();
+            services.Configure<MetadataRepositorySettings>(metadataRepositoryConfig);
+
+            var transcodeConfig = Configuration.GetSection("TranscodeSettings");
+            var transcodeSettings = transcodeConfig.Get<TranscodeSettings>();
+            services.Configure<TranscodeSettings>(transcodeConfig);
 
             services.AddSingleton<IMetadataRepositorySettings>(metadataRepositorySettings);
             services.AddSingleton<IMetadataRepositoryFactory, MetadataRepositoryFactory>();
@@ -97,6 +102,8 @@ namespace Resonance.Common.Web
             services.AddSingleton<ISettingsRepository, SettingsRepository>();
             services.AddSingleton<ICoverArtRepository, CoverArtRepository>();
             services.AddSingleton<IMediaLibrary, MediaLibrary>();
+            services.AddSingleton<ITranscodeSettings>(transcodeSettings);
+            services.AddSingleton<ITranscoder, Transcoder>();
 
             ConfigureControllerAssemblies(services);
         }

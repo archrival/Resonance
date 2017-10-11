@@ -26,12 +26,12 @@ namespace Resonance.SubsonicCompat.Controllers
         private static readonly HttpClient HttpClient = new HttpClient();
         private static readonly Regex IndexRegex = new Regex("[a-zA-Z]");
         private readonly SubsonicAuthorization _subsonicAuthorization;
-        private readonly Transcode _transcode;
+        private readonly ITranscoder _transcoder;
 
-        public SubsonicRestController(IMediaLibrary mediaLibrary, IMetadataRepository metadataRepository, ISettingsRepository settingsRepository) : base(mediaLibrary, metadataRepository, settingsRepository)
+        public SubsonicRestController(IMediaLibrary mediaLibrary, IMetadataRepository metadataRepository, ISettingsRepository settingsRepository, ITranscoder transcoder) : base(mediaLibrary, metadataRepository, settingsRepository)
         {
             _subsonicAuthorization = new SubsonicAuthorization(metadataRepository);
-            _transcode = new Transcode();
+            _transcoder = transcoder;
         }
 
         [HttpGet("addChatMessage.view"), HttpPost("addChatMessage.view")]
@@ -1957,9 +1957,7 @@ namespace Resonance.SubsonicCompat.Controllers
                     streamFormat = "mp3";
                 }
 
-                var convertedStream = _transcode.Convert(track.Path, streamFormat, maxBitRate.Value, cancellationToken);
-
-                return File(convertedStream, "audio/mpeg", Path.ChangeExtension(Path.GetFileName(track.Path), streamFormat));
+                return File(_transcoder.TranscodeAudio(track.Path, streamFormat, maxBitRate.Value, cancellationToken), MimeType.GetDefaultMimeTypeForExtension(streamFormat), Path.ChangeExtension(Path.GetFileName(track.Path), streamFormat));
             }
 
             return File(System.IO.File.Open(track.Path, FileMode.Open, FileAccess.Read, FileShare.Read), MimeType.GetMimeType(track.Path), Path.GetFileName(track.Path));
