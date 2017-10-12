@@ -1735,29 +1735,9 @@ namespace Resonance.Data.Storage.SQLite
                 return;
             }
 
-            var transaction = _transaction ?? _dbConnection.BeginTransaction();
+            var commandDefinition = new CommandDefinition(GetScript("Chat_Insert"), new { UserId = chat.User.Id, chat.Timestamp, chat.Message }, _transaction, cancellationToken: cancellationToken);
 
-            try
-            {
-                var commandDefinition = new CommandDefinition(GetScript("Chat_Insert"), new { UserId = chat.User.Id, chat.Timestamp, chat.Message }, transaction, cancellationToken: cancellationToken);
-
-                await _dbConnection.ExecuteAsync(commandDefinition).ConfigureAwait(false);
-
-                if (_transaction == null)
-                {
-                    transaction.Commit();
-                }
-            }
-            catch
-            {
-                transaction.Rollback();
-                throw;
-            }
-
-            if (_transaction == null)
-            {
-                transaction.Dispose();
-            }
+            await _dbConnection.ExecuteAsync(commandDefinition).ConfigureAwait(false);
         }
 
         public async Task InsertOrUpdateAlbumAsync(Album album, CancellationToken cancellationToken)
@@ -1874,31 +1854,11 @@ namespace Resonance.Data.Storage.SQLite
                 return;
             }
 
-            var transaction = _transaction ?? _dbConnection.BeginTransaction();
-
-            try
+            if (disposition.MediaType != null)
             {
-                if (disposition.MediaType != null)
-                {
-                    var collectionCommand = new CommandDefinition(GetScript("Disposition_Upsert"), new { disposition.Id, disposition.CollectionId, MediaTypeId = (int)disposition.MediaType, disposition.Favorited, disposition.MediaId, disposition.UserId, Rating = disposition.UserRating == 0 ? null : disposition.UserRating }, transaction, cancellationToken: cancellationToken);
+                var collectionCommand = new CommandDefinition(GetScript("Disposition_Upsert"), new { disposition.Id, disposition.CollectionId, MediaTypeId = (int)disposition.MediaType, disposition.Favorited, disposition.MediaId, disposition.UserId, Rating = disposition.UserRating == 0 ? null : disposition.UserRating }, _transaction, cancellationToken: cancellationToken);
 
-                    await _dbConnection.ExecuteAsync(collectionCommand).ConfigureAwait(false);
-                }
-
-                if (_transaction == null)
-                {
-                    transaction.Commit();
-                }
-            }
-            catch
-            {
-                transaction.Rollback();
-                throw;
-            }
-
-            if (_transaction == null)
-            {
-                transaction.Dispose();
+                await _dbConnection.ExecuteAsync(collectionCommand).ConfigureAwait(false);
             }
         }
 
@@ -1980,35 +1940,15 @@ namespace Resonance.Data.Storage.SQLite
                 return;
             }
 
-            var transaction = _transaction ?? _dbConnection.BeginTransaction();
-
-            try
+            var fileInfoCommand = new CommandDefinition(GetScript("Marker_Upsert"), new
             {
-                var fileInfoCommand = new CommandDefinition(GetScript("Marker_Upsert"), new
-                {
-                    TrackId = marker.TrackId,
-                    UserId = marker.User.Id,
-                    Position = marker.Position,
-                    Comment = marker.Comment
-                }, transaction, cancellationToken: cancellationToken);
+                TrackId = marker.TrackId,
+                UserId = marker.User.Id,
+                Position = marker.Position,
+                Comment = marker.Comment
+            }, _transaction, cancellationToken: cancellationToken);
 
-                await _dbConnection.ExecuteAsync(fileInfoCommand).ConfigureAwait(false);
-
-                if (_transaction == null)
-                {
-                    transaction.Commit();
-                }
-            }
-            catch
-            {
-                transaction.Rollback();
-                throw;
-            }
-
-            if (_transaction == null)
-            {
-                transaction.Dispose();
-            }
+            await _dbConnection.ExecuteAsync(fileInfoCommand).ConfigureAwait(false);
         }
 
         public async Task InsertOrUpdateMediaInfoAsync(MediaInfo mediaInfo, CancellationToken cancellationToken)
@@ -2366,29 +2306,9 @@ namespace Resonance.Data.Storage.SQLite
                 return;
             }
 
-            var transaction = _transaction ?? _dbConnection.BeginTransaction();
+            var commandDefinition = new CommandDefinition(GetScript("Playback_Insert"), new { playback.Address, playback.ClientId, Timestamp = playback.PlaybackDateTime, playback.TrackId, playback.UserId }, _transaction, cancellationToken: cancellationToken);
 
-            try
-            {
-                var commandDefinition = new CommandDefinition(GetScript("Playback_Insert"), new { playback.Address, playback.ClientId, Timestamp = playback.PlaybackDateTime, playback.TrackId, playback.UserId }, transaction, cancellationToken: cancellationToken);
-
-                await _dbConnection.ExecuteAsync(commandDefinition).ConfigureAwait(false);
-
-                if (_transaction == null)
-                {
-                    transaction.Commit();
-                }
-            }
-            catch
-            {
-                transaction.Rollback();
-                throw;
-            }
-
-            if (_transaction == null)
-            {
-                transaction.Dispose();
-            }
+            await _dbConnection.ExecuteAsync(commandDefinition).ConfigureAwait(false);
         }
 
         public Task RemoveCollectionAsync(Collection collection, CancellationToken cancellationToken)
