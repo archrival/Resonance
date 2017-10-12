@@ -1612,7 +1612,7 @@ namespace Resonance.Data.Storage.SQLite
 
             if (!string.IsNullOrWhiteSpace(genre))
             {
-                builder.Join("[GenreToTrack] gtt ON gtt.TrackId = tta.TrackId");
+                builder.Join("[GenreToTrack] gtt ON gtt.TrackId = t.TrackId");
                 builder.Join("[Genre] g ON g.Id = gtt.GenreId");
                 builder.Where("g.Name IN(@Genre)", new { Genre = genre });
             }
@@ -1678,7 +1678,8 @@ namespace Resonance.Data.Storage.SQLite
             var builder = new SqlBuilder();
 
             var query = builder.AddTemplate(GetScript("Track_Select"), new { UserId = userId });
-            builder.Where("g.Id = @GenreId", new { GenreId = genreId });
+            builder.Join("[GenreToTrack] gtt ON gtt.TrackId = t.TrackId");
+            builder.Where("gtt.GenreId = @GenreId", new { GenreId = genreId });
 
             var commandDefinition = new CommandDefinition(query.RawSql, transaction: _transaction, parameters: query.Parameters, cancellationToken: cancellationToken);
 
