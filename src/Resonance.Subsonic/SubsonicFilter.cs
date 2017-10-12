@@ -13,6 +13,11 @@ namespace Resonance.SubsonicCompat
     {
         public static async Task<IActionResult> ConvertToResultFormatAsync(Response response, SubsonicQueryParameters queryParameters)
         {
+            if (response == null || queryParameters == null)
+            {
+                return null;
+            }
+
             var xmlString = await response.SerializeToXmlAsync();
 
             switch (queryParameters.Format)

@@ -26,7 +26,7 @@ namespace Resonance.SubsonicCompat
 
             if (!authorizationContext.IsAuthenticated)
             {
-                context.Result = await ConvertToResultFormatAsync(authorizationContext.CreateAuthorizationFailureResponse(), queryParameters).ConfigureAwait(false);
+                context.Result = await context.GetActionResultAsync(authorizationContext.CreateAuthorizationFailureResponse()).ConfigureAwait(false);
             }
             else
             {

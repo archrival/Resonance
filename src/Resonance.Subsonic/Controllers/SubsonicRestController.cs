@@ -1920,7 +1920,7 @@ namespace Resonance.SubsonicCompat.Controllers
             return SubsonicControllerExtensions.CreateResponse(ItemChoiceType.ScanStatus, scanStatus);
         }
 
-        [HttpGet("stream.view"), HttpPost("stream.view")]
+        [HttpGet("stream.view"), HttpPost("stream.view"), HttpHead("stream.view")]
         [ServiceFilter(typeof(SubsonicAsyncAuthorizationFilter))]
         [Authorize(Policy = PolicyConstants.Stream)]
         public async Task<IActionResult> StreamAsync([ResonanceParameter] Guid id, [ResonanceParameter] int? maxBitRate, [ResonanceParameter(Name = "format")] string streamFormat, [ResonanceParameter] int? timeOffset, [ResonanceParameter] string size, [ResonanceParameter] bool estimateContentLength, [ResonanceParameter] bool converted, CancellationToken cancellationToken)
@@ -1959,7 +1959,7 @@ namespace Resonance.SubsonicCompat.Controllers
 
                 if (estimateContentLength)
                 {
-                    var estimatedLength = ((track.Duration.TotalSeconds * maxBitRate.Value) / 8);
+                    var estimatedLength = Math.Round(((track.Duration.TotalSeconds * maxBitRate.Value) / 8) + 1, 0);
                     HttpContext.Response.Headers.Add("Content-Length", estimatedLength.ToString());
                 }
 
