@@ -1,6 +1,7 @@
-﻿using System.Net;
-using Microsoft.AspNetCore.Hosting;
+﻿using Microsoft.AspNetCore.Hosting;
 using Resonance.Common.Web;
+using System;
+using System.Net;
 
 namespace Resonance
 {
@@ -8,7 +9,7 @@ namespace Resonance
     {
         public static void Main(string[] args)
         {
-            ServicePointManager.DefaultConnectionLimit = 4000;
+            ServicePointManager.DefaultConnectionLimit = Environment.ProcessorCount * 12;
             ServicePointManager.UseNagleAlgorithm = true;
 
             var host = ResonanceWebHostBuilderExtensions.GetWebHostBuilder()
