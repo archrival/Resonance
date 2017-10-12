@@ -43,7 +43,7 @@ namespace Resonance.Common.Web
         {
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
-            loggerFactory.AddFile(string.Format("resonance-{0}-{Date}.log", Environment.MachineName.ToLowerInvariant()));
+            loggerFactory.AddFile("resonance-{Date}.log");
 
             app.UseCors(CorsPolicyName);
             app.UseMvc();
