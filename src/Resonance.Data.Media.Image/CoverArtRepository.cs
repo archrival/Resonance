@@ -1,9 +1,9 @@
-﻿using ImageSharp;
-using ImageSharp.Processing;
-using Resonance.Common;
+﻿using Resonance.Common;
 using Resonance.Data.Media.Common;
 using Resonance.Data.Models;
 using Resonance.Data.Storage;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Processing;
 using SixLabors.Primitives;
 using System.Collections.Concurrent;
 using System.IO;
@@ -71,12 +71,12 @@ namespace Resonance.Data.Media.Image
 
                 using (var memoryStream = new MemoryStream(bytes))
                 using (var imageMemoryStream = new MemoryStream())
-                using (var image = ImageSharp.Image.Load(memoryStream))
+                using (var image = SixLabors.ImageSharp.Image.Load(memoryStream))
                 {
                     var resizeOptions = new ResizeOptions { Size = new Size { Height = size.Value, Width = size.Value }, Mode = ResizeMode.Max };
 
-                    var resizedImageData = image.Resize(resizeOptions);
-
+                    var resizedImageData = image.Clone(ctx => ctx.Resize(resizeOptions));
+                        
                     // Save to PNG to retain quality at the expense of file size
                     resizedImageData.SaveAsPng(imageMemoryStream);
 
