@@ -11,16 +11,11 @@ namespace Resonance.SubsonicCompat
 {
     public static class SubsonicControllerExtensions
     {
-        public static async Task<IActionResult> GetActionResultAsync(this ActionContext context, Response response)
-        {
-            var queryParameters = context.GetSubsonicQueryParameters();
-
-            return await SubsonicFilter.ConvertToResultFormatAsync(response, queryParameters).ConfigureAwait(false);
-        }
+        public static Response DefaultResponse => new Response { Status = ResponseStatus.Ok, Version = SubsonicConstants.ServerVersion };
 
         public static Response CreateAuthorizationFailureResponse(this AuthorizationContext authenticationContext)
         {
-            var response = CreateResponse();
+            var response = DefaultResponse;
 
             response.Status = ResponseStatus.Failed;
             response.ItemElementName = ItemChoiceType.Error;
@@ -35,7 +30,7 @@ namespace Resonance.SubsonicCompat
 
         public static Response CreateFailureResponse(ErrorCode errorCode, string message)
         {
-            var response = CreateResponse();
+            var response = DefaultResponse;
 
             response.Status = ResponseStatus.Failed;
             response.ItemElementName = ItemChoiceType.Error;
@@ -50,7 +45,7 @@ namespace Resonance.SubsonicCompat
 
         public static Response CreateResponse(ItemChoiceType itemChoiceType, object item)
         {
-            var response = CreateResponse();
+            var response = DefaultResponse;
 
             response.ItemElementName = itemChoiceType;
             response.Item = item;
@@ -58,13 +53,11 @@ namespace Resonance.SubsonicCompat
             return response;
         }
 
-        public static Response CreateResponse()
+        public static async Task<IActionResult> GetActionResultAsync(this ActionContext context, Response response)
         {
-            return new Response
-            {
-                Status = ResponseStatus.Ok,
-                Version = SubsonicConstants.ServerVersion
-            };
+            var queryParameters = context.GetSubsonicQueryParameters();
+
+            return await SubsonicFilter.ConvertToResultFormatAsync(response, queryParameters).ConfigureAwait(false);
         }
 
         public static AuthorizationContext GetAuthorizationContext(this ActionContext context)

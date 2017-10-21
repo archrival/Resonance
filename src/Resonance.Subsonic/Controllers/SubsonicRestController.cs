@@ -50,7 +50,7 @@ namespace Resonance.SubsonicCompat.Controllers
 
             await MetadataRepository.AddChatAsync(chat, cancellationToken).ConfigureAwait(false);
 
-            return SubsonicControllerExtensions.CreateResponse();
+            return SubsonicControllerExtensions.DefaultResponse;
         }
 
         [HttpGet("changePassword.view"), HttpPost("changePassword.view")]
@@ -96,12 +96,12 @@ namespace Resonance.SubsonicCompat.Controllers
                 user = authorizationContext.User;
                 user.Roles = authorizationContext.Roles;
             }
-            
+
             user.Password = SubsonicControllerExtensions.ParsePassword(password).EncryptString(Constants.ResonanceKey);
 
             await MetadataRepository.InsertOrUpdateUserAsync(user, cancellationToken).ConfigureAwait(false);
 
-            return SubsonicControllerExtensions.CreateResponse();
+            return SubsonicControllerExtensions.DefaultResponse;
         }
 
         [HttpGet("createBookmark.view"), HttpPost("createBookmark.view")]
@@ -121,7 +121,7 @@ namespace Resonance.SubsonicCompat.Controllers
 
             await MetadataRepository.InsertOrUpdateMarkerAsync(marker, cancellationToken).ConfigureAwait(false);
 
-            return SubsonicControllerExtensions.CreateResponse();
+            return SubsonicControllerExtensions.DefaultResponse;
         }
 
         [HttpGet("createPlaylist.view"), HttpPost("createPlaylist.view")]
@@ -276,7 +276,7 @@ namespace Resonance.SubsonicCompat.Controllers
 
             await MetadataRepository.InsertOrUpdateUserAsync(user, cancellationToken).ConfigureAwait(false);
 
-            return SubsonicControllerExtensions.CreateResponse();
+            return SubsonicControllerExtensions.DefaultResponse;
         }
 
         [HttpGet("deleteBookmark.view"), HttpPost("deleteBookmark.view")]
@@ -288,7 +288,7 @@ namespace Resonance.SubsonicCompat.Controllers
 
             await MetadataRepository.DeleteMarkerAsync(userId, id, cancellationToken).ConfigureAwait(false);
 
-            return SubsonicControllerExtensions.CreateResponse();
+            return SubsonicControllerExtensions.DefaultResponse;
         }
 
         [HttpGet("deletePlaylist.view"), HttpPost("deletePlaylist.view")]
@@ -300,7 +300,7 @@ namespace Resonance.SubsonicCompat.Controllers
 
             await MetadataRepository.DeletePlaylistAsync(userId, id, cancellationToken).ConfigureAwait(false);
 
-            return SubsonicControllerExtensions.CreateResponse();
+            return SubsonicControllerExtensions.DefaultResponse;
         }
 
         [HttpGet("deleteUser.view"), HttpPost("deleteUser.view")]
@@ -322,13 +322,12 @@ namespace Resonance.SubsonicCompat.Controllers
 
             await MetadataRepository.DeleteUserAsync(user.Id, cancellationToken).ConfigureAwait(false);
 
-            return SubsonicControllerExtensions.CreateResponse();
+            return SubsonicControllerExtensions.DefaultResponse;
         }
 
-        [HttpGet("download.view"), HttpPost("download.view")]
+        [HttpGet("download.view"), HttpPost("download.view"), HttpHead("download.view")]
         [ServiceFilter(typeof(SubsonicAsyncAuthorizationFilter))]
         [Authorize(Policy = PolicyConstants.Stream)]
-
         public async Task<IActionResult> DownloadAsync([ResonanceParameter] Guid id, CancellationToken cancellationToken)
         {
             var userId = ControllerContext.GetAuthorizationContext().User.Id;
@@ -988,7 +987,8 @@ namespace Resonance.SubsonicCompat.Controllers
 
             var license = new License
             {
-                Valid = true
+                Valid = true,
+                LicenseExpires = DateTime.MaxValue
             };
 
             return SubsonicControllerExtensions.CreateResponse(ItemChoiceType.License, license);
@@ -1580,7 +1580,7 @@ namespace Resonance.SubsonicCompat.Controllers
         {
             await Task.CompletedTask;
 
-            return SubsonicControllerExtensions.CreateResponse();
+            return SubsonicControllerExtensions.DefaultResponse;
         }
 
         [HttpGet("savePlayQueue.view"), HttpPost("savePlayQueue.view")]
@@ -1620,7 +1620,7 @@ namespace Resonance.SubsonicCompat.Controllers
                 await MetadataRepository.UpdatePlayQueueAsync(playQueue, cancellationToken).ConfigureAwait(false);
             }
 
-            return SubsonicControllerExtensions.CreateResponse();
+            return SubsonicControllerExtensions.DefaultResponse;
         }
 
         [HttpGet("scrobble.view"), HttpPost("scrobble.view")]
@@ -1647,7 +1647,7 @@ namespace Resonance.SubsonicCompat.Controllers
 
             await MetadataRepository.AddPlaybackAsync(playback, cancellationToken).ConfigureAwait(false);
 
-            return SubsonicControllerExtensions.CreateResponse();
+            return SubsonicControllerExtensions.DefaultResponse;
         }
 
         [HttpGet("search.view"), HttpPost("search.view")]
@@ -1838,7 +1838,7 @@ namespace Resonance.SubsonicCompat.Controllers
 
             await MetadataRepository.SetDispositionAsync(disposition, cancellationToken).ConfigureAwait(false);
 
-            return SubsonicControllerExtensions.CreateResponse();
+            return SubsonicControllerExtensions.DefaultResponse;
         }
 
         [HttpGet("star.view"), HttpPost("star.view")]
@@ -1881,7 +1881,7 @@ namespace Resonance.SubsonicCompat.Controllers
 
             await MetadataRepository.SetDispositionAsync(disposition, cancellationToken).ConfigureAwait(false);
 
-            return SubsonicControllerExtensions.CreateResponse();
+            return SubsonicControllerExtensions.DefaultResponse;
         }
 
         [HttpGet("startScan.view"), HttpPost("startScan.view")]
@@ -2009,7 +2009,7 @@ namespace Resonance.SubsonicCompat.Controllers
 
             await MetadataRepository.SetDispositionAsync(disposition, cancellationToken).ConfigureAwait(false);
 
-            return SubsonicControllerExtensions.CreateResponse();
+            return SubsonicControllerExtensions.DefaultResponse;
         }
 
         [HttpGet("updatePlaylist.view"), HttpPost("updatePlaylist.view")]
@@ -2057,7 +2057,7 @@ namespace Resonance.SubsonicCompat.Controllers
 
             MediaLibrary.RemovePlaylistFromCache(userId, playlist.Id, true);
 
-            return SubsonicControllerExtensions.CreateResponse();
+            return SubsonicControllerExtensions.DefaultResponse;
         }
 
         [HttpGet("updateUser.view"), HttpPost("updateUser.view")]
@@ -2158,7 +2158,7 @@ namespace Resonance.SubsonicCompat.Controllers
 
             await MetadataRepository.InsertOrUpdateUserAsync(user, cancellationToken).ConfigureAwait(false);
 
-            return SubsonicControllerExtensions.CreateResponse();
+            return SubsonicControllerExtensions.DefaultResponse;
         }
 
         private static int? SetBounds(int? size, int min, int max)
