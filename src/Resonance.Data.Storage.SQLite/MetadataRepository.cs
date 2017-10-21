@@ -38,34 +38,34 @@ namespace Resonance.Data.Storage.SQLite
             CreateSchemaAsync().ConfigureAwait(false).GetAwaiter().GetResult();
         }
 
-        public async Task AddChatAsync(Chat chat, CancellationToken cancellationToken)
+        public Task AddChatAsync(Chat chat, CancellationToken cancellationToken)
         {
-            await InsertChatAsync(chat, cancellationToken).ConfigureAwait(false);
+            return InsertChatAsync(chat, cancellationToken);
         }
 
-        public async Task AddCollectionAsync(Collection collection, CancellationToken cancellationToken)
+        public Task AddCollectionAsync(Collection collection, CancellationToken cancellationToken)
         {
-            await InsertOrUpdateCollectionAsync(collection, cancellationToken).ConfigureAwait(false);
+            return InsertOrUpdateCollectionAsync(collection, cancellationToken);
         }
 
-        public async Task AddPlaybackAsync(Playback playback, CancellationToken cancellationToken)
+        public Task AddPlaybackAsync(Playback playback, CancellationToken cancellationToken)
         {
-            await InsertPlaybackAsync(playback, cancellationToken).ConfigureAwait(false);
+            return InsertPlaybackAsync(playback, cancellationToken);
         }
 
-        public async Task AddPlaylistAsync(Playlist playlist, CancellationToken cancellationToken)
+        public Task AddPlaylistAsync(Playlist playlist, CancellationToken cancellationToken)
         {
-            await InsertOrUpdatePlaylistAsync(playlist, cancellationToken).ConfigureAwait(false);
+            return InsertOrUpdatePlaylistAsync(playlist, cancellationToken);
         }
 
-        public async Task AddPlayQueueAsync(PlayQueue playQueue, CancellationToken cancellationToken)
+        public Task AddPlayQueueAsync(PlayQueue playQueue, CancellationToken cancellationToken)
         {
-            await InsertOrUpdatePlayQueueAsync(playQueue, cancellationToken).ConfigureAwait(false);
+            return InsertOrUpdatePlayQueueAsync(playQueue, cancellationToken);
         }
 
-        public async Task AddUserAsync(User user, CancellationToken cancellationToken)
+        public Task AddUserAsync(User user, CancellationToken cancellationToken)
         {
-            await InsertOrUpdateUserAsync(user, cancellationToken).ConfigureAwait(false);
+            return InsertOrUpdateUserAsync(user, cancellationToken);
         }
 
         public void BeginTransaction(CancellationToken cancellationToken)
@@ -1309,7 +1309,7 @@ namespace Resonance.Data.Storage.SQLite
 
                 var trackMediaBundles = new ConcurrentDictionary<int, MediaBundle<Track>>();
 
-                Parallel.ForEach(trackToPlaylistResults, new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount }, trackToPlaylistResult =>
+                Parallel.ForEach(trackToPlaylistResults, trackToPlaylistResult =>
                 {
                     Guid trackId = DynamicExtensions.GetGuidFromDynamic(trackToPlaylistResult.TrackId);
 
@@ -1729,16 +1729,16 @@ namespace Resonance.Data.Storage.SQLite
             return results.Select(result => (User)User.FromDynamic(result)).ToList();
         }
 
-        public async Task InsertChatAsync(Chat chat, CancellationToken cancellationToken)
+        public Task InsertChatAsync(Chat chat, CancellationToken cancellationToken)
         {
             if (chat == null)
             {
-                return;
+                return Task.CompletedTask;
             }
 
             var commandDefinition = new CommandDefinition(GetScript("Chat_Insert"), new { UserId = chat.User.Id, chat.Timestamp, chat.Message }, _transaction, cancellationToken: cancellationToken);
 
-            await _dbConnection.ExecuteAsync(commandDefinition).ConfigureAwait(false);
+            return _dbConnection.ExecuteAsync(commandDefinition);
         }
 
         public async Task InsertOrUpdateAlbumAsync(Album album, CancellationToken cancellationToken)
@@ -1848,19 +1848,16 @@ namespace Resonance.Data.Storage.SQLite
             }
         }
 
-        public async Task InsertOrUpdateDispositionAsync(Disposition disposition, CancellationToken cancellationToken)
+        public Task InsertOrUpdateDispositionAsync(Disposition disposition, CancellationToken cancellationToken)
         {
-            if (disposition == null)
+            if (disposition?.MediaType == null)
             {
-                return;
+                return Task.CompletedTask;
             }
 
-            if (disposition.MediaType != null)
-            {
-                var collectionCommand = new CommandDefinition(GetScript("Disposition_Upsert"), new { disposition.Id, disposition.CollectionId, MediaTypeId = (int)disposition.MediaType, disposition.Favorited, disposition.MediaId, disposition.UserId, Rating = disposition.UserRating == 0 ? null : disposition.UserRating }, _transaction, cancellationToken: cancellationToken);
+            var collectionCommand = new CommandDefinition(GetScript("Disposition_Upsert"), new { disposition.Id, disposition.CollectionId, MediaTypeId = (int)disposition.MediaType, disposition.Favorited, disposition.MediaId, disposition.UserId, Rating = disposition.UserRating == 0 ? null : disposition.UserRating }, _transaction, cancellationToken: cancellationToken);
 
-                await _dbConnection.ExecuteAsync(collectionCommand).ConfigureAwait(false);
-            }
+            return _dbConnection.ExecuteAsync(collectionCommand);
         }
 
         public async Task InsertOrUpdateFileInfoAsync(Track track, CancellationToken cancellationToken)
@@ -1934,11 +1931,11 @@ namespace Resonance.Data.Storage.SQLite
             }
         }
 
-        public async Task InsertOrUpdateMarkerAsync(Marker marker, CancellationToken cancellationToken)
+        public Task InsertOrUpdateMarkerAsync(Marker marker, CancellationToken cancellationToken)
         {
             if (marker == null)
             {
-                return;
+                return Task.CompletedTask;
             }
 
             var fileInfoCommand = new CommandDefinition(GetScript("Marker_Upsert"), new
@@ -1949,7 +1946,7 @@ namespace Resonance.Data.Storage.SQLite
                 Comment = marker.Comment
             }, _transaction, cancellationToken: cancellationToken);
 
-            await _dbConnection.ExecuteAsync(fileInfoCommand).ConfigureAwait(false);
+            return _dbConnection.ExecuteAsync(fileInfoCommand);
         }
 
         public async Task InsertOrUpdateMediaInfoAsync(MediaInfo mediaInfo, CancellationToken cancellationToken)
@@ -2300,16 +2297,16 @@ namespace Resonance.Data.Storage.SQLite
             }
         }
 
-        public async Task InsertPlaybackAsync(Playback playback, CancellationToken cancellationToken)
+        public Task InsertPlaybackAsync(Playback playback, CancellationToken cancellationToken)
         {
             if (playback == null)
             {
-                return;
+                return Task.CompletedTask;
             }
 
             var commandDefinition = new CommandDefinition(GetScript("Playback_Insert"), new { playback.Address, playback.ClientId, Timestamp = playback.PlaybackDateTime, playback.TrackId, playback.UserId }, _transaction, cancellationToken: cancellationToken);
 
-            await _dbConnection.ExecuteAsync(commandDefinition).ConfigureAwait(false);
+            return _dbConnection.ExecuteAsync(commandDefinition);
         }
 
         public Task RemoveCollectionAsync(Collection collection, CancellationToken cancellationToken)
@@ -2415,9 +2412,9 @@ namespace Resonance.Data.Storage.SQLite
             return await GetMediaBundleAsync<T>(result, userId, populate, cancellationToken).ConfigureAwait(false);
         }
 
-        public async Task SetDispositionAsync(Disposition disposition, CancellationToken cancellationToken)
+        public Task SetDispositionAsync(Disposition disposition, CancellationToken cancellationToken)
         {
-            await InsertOrUpdateDispositionAsync(disposition, cancellationToken).ConfigureAwait(false);
+            return InsertOrUpdateDispositionAsync(disposition, cancellationToken);
         }
 
         public async Task UpdatePlaylistAsync(Playlist playlist, CancellationToken cancellationToken)
