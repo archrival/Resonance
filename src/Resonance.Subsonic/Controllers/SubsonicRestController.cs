@@ -1014,7 +1014,10 @@ namespace Resonance.SubsonicCompat.Controllers
         {
             var radioStations = await MetadataRepository.GetRadioStationsAsync(cancellationToken).ConfigureAwait(false);
 
-            var internetRadioStations = radioStations.Select(r => r.ToSubsonicInternetRadioStation());
+            var internetRadioStations = new InternetRadioStations
+            {
+                Items = new List<InternetRadioStation>(radioStations.Select(r => r.ToSubsonicInternetRadioStation()))
+            };
 
             return SubsonicControllerExtensions.CreateResponse(ItemChoiceType.InternetRadioStations, internetRadioStations);
         }
