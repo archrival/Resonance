@@ -63,6 +63,11 @@ namespace Resonance.Data.Storage.SQLite
             return InsertOrUpdatePlayQueueAsync(playQueue, cancellationToken);
         }
 
+        public Task AddRadioStationAsync(RadioStation radioStation, CancellationToken cancellationToken)
+        {
+            return InsertOrUpdateRadioStationAsync(radioStation, cancellationToken);
+        }
+
         public Task AddUserAsync(User user, CancellationToken cancellationToken)
         {
             return InsertOrUpdateUserAsync(user, cancellationToken);
@@ -252,6 +257,33 @@ namespace Resonance.Data.Storage.SQLite
             try
             {
                 var commandDefinition = new CommandDefinition(GetScript("PlayQueue_Track_Delete"), new { UserId = (Guid?)null, PlayQueueId = playQueueId }, transaction, cancellationToken: cancellationToken);
+
+                await _dbConnection.ExecuteAsync(commandDefinition).ConfigureAwait(false);
+
+                if (_transaction == null)
+                {
+                    transaction.Commit();
+                }
+            }
+            catch
+            {
+                transaction.Rollback();
+                throw;
+            }
+
+            if (_transaction == null)
+            {
+                transaction.Dispose();
+            }
+        }
+
+        public async Task DeleteRadioStationAsync(Guid id, CancellationToken cancellationToken)
+        {
+            var transaction = _transaction ?? _dbConnection.BeginTransaction();
+
+            try
+            {
+                var commandDefinition = new CommandDefinition(GetScript("RadioStation_Delete"), new { Id = id }, transaction, cancellationToken: cancellationToken);
 
                 await _dbConnection.ExecuteAsync(commandDefinition).ConfigureAwait(false);
 
@@ -1416,6 +1448,43 @@ namespace Resonance.Data.Storage.SQLite
             return playQueue;
         }
 
+        public async Task<RadioStation> GetRadioStationAsync(Guid id, CancellationToken cancellationToken)
+        {
+            var builder = new SqlBuilder();
+
+            var query = builder.AddTemplate(GetScript("RadioStation_Select"));
+            builder.Where("r.Id IN(@Id)", new { Id = id });
+
+            var commandDefinition = new CommandDefinition(query.RawSql, transaction: _transaction, parameters: query.Parameters, cancellationToken: cancellationToken);
+
+            var result = await _dbConnection.QueryFirstOrDefaultAsync(commandDefinition).ConfigureAwait(false);
+
+            if (result == null)
+            {
+                return null;
+            }
+
+            return RadioStation.FromDynamic(result);
+        }
+
+        public async Task<IEnumerable<RadioStation>> GetRadioStationsAsync(CancellationToken cancellationToken)
+        {
+            var builder = new SqlBuilder();
+
+            var query = builder.AddTemplate(GetScript("RadioStation_Select"));
+
+            var commandDefinition = new CommandDefinition(query.RawSql, transaction: _transaction, parameters: query.Parameters, cancellationToken: cancellationToken);
+
+            var results = await _dbConnection.QueryAsync(commandDefinition).ConfigureAwait(false);
+
+            if (results == null)
+            {
+                return null;
+            }
+
+            return results.Select(r => (RadioStation)RadioStation.FromDynamic(r));
+        }
+
         public async Task<IEnumerable<MediaBundle<Album>>> GetRandomAlbumsAsync(Guid userId, int size, int offset, string genre, int? fromYear, int? toYear, Guid? collectionId, bool populate, CancellationToken cancellationToken)
         {
             var builder = new SqlBuilder();
@@ -2120,6 +2189,38 @@ namespace Resonance.Data.Storage.SQLite
             }
         }
 
+        public async Task InsertOrUpdateRadioStationAsync(RadioStation radioStation, CancellationToken cancellationToken)
+        {
+            if (radioStation == null)
+            {
+                return;
+            }
+
+            var transaction = _transaction ?? _dbConnection.BeginTransaction();
+
+            try
+            {
+                var commandDefinition = new CommandDefinition(GetScript("RadioStation_Upsert"), new { radioStation.Id, UserId = radioStation.Name, radioStation.StreamUrl, radioStation.HomepageUrl }, transaction, cancellationToken: cancellationToken);
+
+                await _dbConnection.ExecuteAsync(commandDefinition).ConfigureAwait(false);
+
+                if (_transaction == null)
+                {
+                    transaction.Commit();
+                }
+            }
+            catch (Exception)
+            {
+                transaction.Rollback();
+                throw;
+            }
+
+            if (_transaction == null)
+            {
+                transaction.Dispose();
+            }
+        }
+
         public async Task InsertOrUpdateTrackAsync(Track track, CancellationToken cancellationToken)
         {
             if (track == null)
@@ -2473,6 +2574,11 @@ namespace Resonance.Data.Storage.SQLite
             }
         }
 
+        public Task UpdateRadioStationAsync(RadioStation radioStation, CancellationToken cancellationToken)
+        {
+            return InsertOrUpdateRadioStationAsync(radioStation, cancellationToken);
+        }
+
         private static string GetIds<T>(IEnumerable<T> list) where T : ModelBase
         {
             return string.Join(":", list.Select(l => l.Id).OrderBy(l => l));
@@ -2484,22 +2590,11 @@ namespace Resonance.Data.Storage.SQLite
 
             try
             {
-                var commandDefinition = new CommandDefinition("SELECT name FROM sqlite_master WHERE type='table' AND name='Schema';", null, transaction);
+                var schemaCommandDefinition = new CommandDefinition(GetScript("Schema"), null, transaction);
 
-                var result = await _dbConnection.ExecuteScalarAsync<string>(commandDefinition).ConfigureAwait(false);
+                await _dbConnection.ExecuteAsync(schemaCommandDefinition).ConfigureAwait(false);
 
-                if (result != "Schema")
-                {
-                    var schemaCommandDefinition = new CommandDefinition(GetScript("Schema"), null, transaction);
-
-                    await _dbConnection.ExecuteAsync(schemaCommandDefinition).ConfigureAwait(false);
-
-                    transaction.Commit();
-                }
-                else
-                {
-                    transaction.Rollback();
-                }
+                transaction.Commit();
             }
             catch
             {

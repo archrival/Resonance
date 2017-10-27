@@ -124,6 +124,24 @@ namespace Resonance.SubsonicCompat.Controllers
             return SubsonicControllerExtensions.DefaultResponse;
         }
 
+        [HttpGet("createInternetRadioStation.view"), HttpPost("createInternetRadioStation.view")]
+        [ServiceFilter(typeof(SubsonicAsyncAuthorizationFilter))]
+        [ServiceFilter(typeof(SubsonicAsyncResultFilter))]
+        [Authorize(Policy = PolicyConstants.Administration)]
+        public async Task<Response> CreateInternetRadioStationAsync([ResonanceParameter] string streamUrl, [ResonanceParameter] string name, [ResonanceParameter] string homepageUrl, CancellationToken cancellationToken)
+        {
+            var radioStation = new RadioStation
+            {
+                HomepageUrl = homepageUrl,
+                Name = name,
+                StreamUrl = streamUrl
+            };
+
+            await MetadataRepository.AddRadioStationAsync(radioStation, cancellationToken).ConfigureAwait(false);
+
+            return SubsonicControllerExtensions.DefaultResponse;
+        }
+
         [HttpGet("createPlaylist.view"), HttpPost("createPlaylist.view")]
         [ServiceFilter(typeof(SubsonicAsyncAuthorizationFilter))]
         [ServiceFilter(typeof(SubsonicAsyncResultFilter))]
@@ -287,6 +305,17 @@ namespace Resonance.SubsonicCompat.Controllers
             var userId = ControllerContext.GetAuthorizationContext().User.Id;
 
             await MetadataRepository.DeleteMarkerAsync(userId, id, cancellationToken).ConfigureAwait(false);
+
+            return SubsonicControllerExtensions.DefaultResponse;
+        }
+
+        [HttpGet("deleteInternetRadioStation.view"), HttpPost("deleteInternetRadioStation.view")]
+        [ServiceFilter(typeof(SubsonicAsyncAuthorizationFilter))]
+        [ServiceFilter(typeof(SubsonicAsyncResultFilter))]
+        [Authorize(Policy = PolicyConstants.Administration)]
+        public async Task<Response> DeleteInternetRadioStationAsync([ResonanceParameter] Guid id, CancellationToken cancellationToken)
+        {
+            await MetadataRepository.DeleteRadioStationAsync(id, cancellationToken).ConfigureAwait(false);
 
             return SubsonicControllerExtensions.DefaultResponse;
         }
@@ -976,6 +1005,18 @@ namespace Resonance.SubsonicCompat.Controllers
             }
 
             return SubsonicControllerExtensions.CreateResponse(ItemChoiceType.Indexes, indexes);
+        }
+
+        [HttpGet("getInternetRadioStations.view"), HttpPost("getInternetRadioStations.view")]
+        [ServiceFilter(typeof(SubsonicAsyncAuthorizationFilter))]
+        [ServiceFilter(typeof(SubsonicAsyncResultFilter))]
+        public async Task<Response> GetInternetRadioStationsAsync(CancellationToken cancellationToken)
+        {
+            var radioStations = await MetadataRepository.GetRadioStationsAsync(cancellationToken).ConfigureAwait(false);
+
+            var internetRadioStations = radioStations.Select(r => r.ToSubsonicInternetRadioStation());
+
+            return SubsonicControllerExtensions.CreateResponse(ItemChoiceType.InternetRadioStations, internetRadioStations);
         }
 
         [HttpGet("getLicense.view"), HttpPost("getLicense.view")]
@@ -2008,6 +2049,26 @@ namespace Resonance.SubsonicCompat.Controllers
             disposition.Favorited = null;
 
             await MetadataRepository.SetDispositionAsync(disposition, cancellationToken).ConfigureAwait(false);
+
+            return SubsonicControllerExtensions.DefaultResponse;
+        }
+
+        [HttpGet("updateInternetRadioStation.view"), HttpPost("updateInternetRadioStation.view")]
+        [ServiceFilter(typeof(SubsonicAsyncAuthorizationFilter))]
+        [ServiceFilter(typeof(SubsonicAsyncResultFilter))]
+        [Authorize(Policy = PolicyConstants.Administration)]
+        public async Task<Response> UpdateInternetRadioStationAsync([ResonanceParameter] Guid id, [ResonanceParameter] string streamUrl, [ResonanceParameter] string name, [ResonanceParameter] string homepageUrl, CancellationToken cancellationToken)
+        {
+            var radioStation = await MetadataRepository.GetRadioStationAsync(id, cancellationToken).ConfigureAwait(false);
+
+            if (radioStation != null)
+            {
+                radioStation.HomepageUrl = homepageUrl;
+                radioStation.Name = name;
+                radioStation.StreamUrl = streamUrl;
+
+                await MetadataRepository.UpdateRadioStationAsync(radioStation, cancellationToken).ConfigureAwait(false);
+            }
 
             return SubsonicControllerExtensions.DefaultResponse;
         }

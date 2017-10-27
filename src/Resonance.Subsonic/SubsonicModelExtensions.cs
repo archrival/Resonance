@@ -312,6 +312,17 @@ namespace Resonance.SubsonicCompat
             return subsonicGenre;
         }
 
+        public static InternetRadioStation ToSubsonicInternetRadioStation(this RadioStation radioStation)
+        {
+            return new InternetRadioStation
+            {
+                HomePageUrl = radioStation.HomepageUrl,
+                Id = radioStation.Id.ToString("n"),
+                Name = radioStation.Name,
+                StreamUrl = radioStation.StreamUrl
+            };
+        }
+
         public static NowPlayingEntry ToSubsonicNowPlayingEntry(this MediaBundle<Track> trackMediaBundle, MediaBundle<Album> albumMediaBundle, Disposition disposition, Playback playback, User user)
         {
             var nowPlayingEntry = new NowPlayingEntry();

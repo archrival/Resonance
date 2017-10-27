@@ -54,6 +54,9 @@
     <EmbeddedResource Include="Scripts\PlayQueue_Track_Insert.sql" />
     <EmbeddedResource Include="Scripts\PlayQueue_Track_Select.sql" />
     <EmbeddedResource Include="Scripts\PlayQueue_Upsert.sql" />
+    <EmbeddedResource Include="Scripts\RadioStation_Delete.sql" />
+    <EmbeddedResource Include="Scripts\RadioStation_Select.sql" />
+    <EmbeddedResource Include="Scripts\RadioStation_Upsert.sql" />
     <EmbeddedResource Include="Scripts\ReplayGain_Delete.sql" />
     <EmbeddedResource Include="Scripts\ReplayGain_Upsert.sql" />
     <EmbeddedResource Include="Scripts\Role_Select.sql" />

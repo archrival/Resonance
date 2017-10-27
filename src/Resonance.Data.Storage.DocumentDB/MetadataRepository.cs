@@ -14,11 +14,10 @@ namespace Resonance.Data.Storage.DocumentDB
     public class MetadataRepository : IMetadataRepository
     {
         private readonly DocumentClient _client;
+        private readonly FeedOptions _defaultFeedOptions = new FeedOptions { MaxItemCount = -1, EnableCrossPartitionQuery = true };
+        private readonly string _path;
         private readonly string _port;
         private readonly string _server;
-        private readonly string _path;
-
-        private readonly FeedOptions _defaultFeedOptions = new FeedOptions { MaxItemCount = -1, EnableCrossPartitionQuery = true };
 
         public MetadataRepository(string path, string server, string port, string key)
         {
@@ -53,6 +52,11 @@ namespace Resonance.Data.Storage.DocumentDB
             await _client.UpsertDocumentAsync(UriFactory.CreateDocumentCollectionUri(DatabaseConstants.DatabaseId, DatabaseConstants.Playlist), playlist);
         }
 
+        public Task AddRadioStationAsync(RadioStation radioStation, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
         public async Task AddUserAsync(Models.User user, CancellationToken cancellationToken)
         {
             await _client.UpsertDocumentAsync(UriFactory.CreateDocumentCollectionUri(DatabaseConstants.DatabaseId, DatabaseConstants.User), user);
@@ -60,7 +64,6 @@ namespace Resonance.Data.Storage.DocumentDB
 
         public void BeginTransaction(CancellationToken cancellationToken)
         {
-            
         }
 
         public Task ClearCollectionAsync<T>(Guid? collectionId, CancellationToken cancellationToken) where T : ModelBase, ICollectionIdentifier
@@ -78,7 +81,7 @@ namespace Resonance.Data.Storage.DocumentDB
             var query = _client.CreateDocumentQuery<Marker>(UriFactory.CreateDocumentCollectionUri(DatabaseConstants.DatabaseId, DatabaseConstants.Marker), _defaultFeedOptions)
             .Where(s => s.User.Id == userId && s.TrackId == trackId)
             .AsDocumentQuery();
-            
+
             while (query.HasMoreResults)
             {
                 foreach (var marker in await query.ExecuteNextAsync<Marker>(cancellationToken))
@@ -108,6 +111,11 @@ namespace Resonance.Data.Storage.DocumentDB
             throw new NotImplementedException();
         }
 
+        public Task DeleteRadioStationAsync(Guid id, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
         public Task DeleteTrackReferencesAsync(Track track, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
@@ -120,7 +128,6 @@ namespace Resonance.Data.Storage.DocumentDB
 
         public void EndTransaction(bool commit, CancellationToken cancellationToken)
         {
-            
         }
 
         public async Task<MediaBundle<Album>> GetAlbumAsync(Guid userId, Guid id, bool populate, CancellationToken cancellationToken)
@@ -162,7 +169,6 @@ namespace Resonance.Data.Storage.DocumentDB
 
             while (documentQuery.HasMoreResults)
             {
-
                 foreach (var album in await documentQuery.ExecuteNextAsync<Album>(cancellationToken).ConfigureAwait(false))
                 {
                     var mediaBundle = new MediaBundle<Album>()
@@ -187,7 +193,7 @@ namespace Resonance.Data.Storage.DocumentDB
         {
             var query = _client.CreateDocumentQuery<Album>(UriFactory.CreateDocumentCollectionUri(DatabaseConstants.DatabaseId, DatabaseConstants.Album), _defaultFeedOptions)
                 .Where(al => al.Artists.Select(ar => ar.Media.Id).Contains(artistId) || al.Tracks.Select(t => t.Media).SelectMany(tr => tr.Artists).Select(tar => tar.Media.Id).Contains(artistId));
-            
+
             var documentQuery = query.AsDocumentQuery();
 
             var mediaBundles = new List<MediaBundle<Album>>();
@@ -248,7 +254,7 @@ namespace Resonance.Data.Storage.DocumentDB
             var query = _client.CreateDocumentQuery<Artist>(UriFactory.CreateDocumentCollectionUri(DatabaseConstants.DatabaseId, DatabaseConstants.Artist), _defaultFeedOptions)
                 .AsQueryable()
                 .Where(ar => ar.Name == artist);
-                            
+
             if (collectionId.HasValue)
             {
                 query = query.Where(s => s.CollectionId == collectionId.Value);
@@ -260,7 +266,7 @@ namespace Resonance.Data.Storage.DocumentDB
             {
                 return null;
             }
-            
+
             var mediaBundle = new MediaBundle<Artist>()
             {
                 Media = artistModel,
@@ -395,6 +401,16 @@ namespace Resonance.Data.Storage.DocumentDB
         }
 
         public Task<PlayQueue> GetPlayQueueAsync(Guid userId, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<RadioStation> GetRadioStationAsync(Guid id, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<IEnumerable<RadioStation>> GetRadioStationsAsync(CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }
@@ -609,6 +625,11 @@ namespace Resonance.Data.Storage.DocumentDB
         }
 
         public Task UpdatePlayQueueAsync(PlayQueue playQueue, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task UpdateRadioStationAsync(RadioStation radioStation, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }

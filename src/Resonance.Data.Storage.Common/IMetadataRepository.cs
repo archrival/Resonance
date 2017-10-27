@@ -16,6 +16,8 @@ namespace Resonance.Data.Storage
 
         Task AddPlaylistAsync(Playlist playlist, CancellationToken cancellationToken);
 
+        Task AddRadioStationAsync(RadioStation radioStation, CancellationToken cancellationToken);
+
         Task AddUserAsync(User user, CancellationToken cancellationToken);
 
         void BeginTransaction(CancellationToken cancellationToken);
@@ -33,6 +35,8 @@ namespace Resonance.Data.Storage
         Task DeletePlayQueueAsync(Guid userId, CancellationToken cancellationToken);
 
         Task DeletePlayQueueTracksAsync(Guid playQueueId, CancellationToken cancellationToken);
+
+        Task DeleteRadioStationAsync(Guid id, CancellationToken cancellationToken);
 
         Task DeleteTrackReferencesAsync(Track track, CancellationToken cancellationToken);
 
@@ -106,6 +110,10 @@ namespace Resonance.Data.Storage
 
         Task<PlayQueue> GetPlayQueueAsync(Guid userId, CancellationToken cancellationToken);
 
+        Task<RadioStation> GetRadioStationAsync(Guid id, CancellationToken cancellationToken);
+
+        Task<IEnumerable<RadioStation>> GetRadioStationsAsync(CancellationToken cancellationToken);
+
         Task<IEnumerable<MediaBundle<Album>>> GetRandomAlbumsAsync(Guid userId, int size, int offset, string genre, int? fromYear, int? toYear, Guid? collectionId, bool populate, CancellationToken cancellationToken);
 
         Task<IEnumerable<MediaBundle<Track>>> GetRecentPlaybackAsync(Guid userId, bool populate, CancellationToken cancellationToken);
@@ -173,5 +181,7 @@ namespace Resonance.Data.Storage
         Task UpdatePlaylistAsync(Playlist playlist, CancellationToken cancellationToken);
 
         Task UpdatePlayQueueAsync(PlayQueue playQueue, CancellationToken cancellationToken);
+
+        Task UpdateRadioStationAsync(RadioStation radioStation, CancellationToken cancellationToken);
     }
 }
