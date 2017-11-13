@@ -89,9 +89,9 @@ namespace Resonance.Data.Storage.SQLite
 
             try
             {
-                var builder = new SqlBuilder();
+                var builder = SqlBuilder.Create();
 
-                var query = builder.AddTemplate(GetScript("Album_Delete"));
+                var template = builder.AddTemplate(GetScript("Album_Delete"));
                 builder.Where(
                     @"Id IN
                     (
@@ -103,7 +103,7 @@ namespace Resonance.Data.Storage.SQLite
                     )"
                 );
 
-                var commandDefinition = new CommandDefinition(query.RawSql, query.Parameters, transaction, cancellationToken: cancellationToken);
+                var commandDefinition = new CommandDefinition(template.RawSql, template.Parameters, transaction, cancellationToken: cancellationToken);
 
                 await _dbConnection.ExecuteAsync(commandDefinition).ConfigureAwait(false);
 
@@ -161,12 +161,12 @@ namespace Resonance.Data.Storage.SQLite
 
                 await _dbConnection.ExecuteAsync(commandDefinition).ConfigureAwait(false);
 
-                var builder = new SqlBuilder();
+                var builder = SqlBuilder.Create();
 
-                var query = builder.AddTemplate(GetScript("Playlist_Track_Delete"));
+                var template = builder.AddTemplate(GetScript("Playlist_Track_Delete"));
                 builder.Where("PlaylistId = @PlaylistId", new { PlaylistId = playlistId });
 
-                commandDefinition = new CommandDefinition(query.RawSql, query.Parameters, transaction, cancellationToken: cancellationToken);
+                commandDefinition = new CommandDefinition(template.RawSql, template.Parameters, transaction, cancellationToken: cancellationToken);
 
                 await _dbConnection.ExecuteAsync(commandDefinition).ConfigureAwait(false);
 
@@ -193,12 +193,12 @@ namespace Resonance.Data.Storage.SQLite
 
             try
             {
-                var builder = new SqlBuilder();
+                var builder = SqlBuilder.Create();
 
-                var query = builder.AddTemplate(GetScript("Playlist_Track_Delete"));
+                var template = builder.AddTemplate(GetScript("Playlist_Track_Delete"));
                 builder.Where("PlaylistId = @PlaylistId", new { PlaylistId = playlistId });
 
-                var commandDefinition = new CommandDefinition(query.RawSql, query.Parameters, transaction, cancellationToken: cancellationToken);
+                var commandDefinition = new CommandDefinition(template.RawSql, template.Parameters, transaction, cancellationToken: cancellationToken);
 
                 await _dbConnection.ExecuteAsync(commandDefinition).ConfigureAwait(false);
 
@@ -322,12 +322,12 @@ namespace Resonance.Data.Storage.SQLite
 
                 await _dbConnection.ExecuteAsync(trackToAlbumDeleteCommand).ConfigureAwait(false);
 
-                var builder = new SqlBuilder();
+                var builder = SqlBuilder.Create();
 
-                var query = builder.AddTemplate(GetScript("Playlist_Track_Delete"));
+                var template = builder.AddTemplate(GetScript("Playlist_Track_Delete"));
                 builder.Where("TrackId = @TrackId", new { TrackId = track.Id });
 
-                var playlistTrackDeleteCommand = new CommandDefinition(query.RawSql, query.Parameters, transaction, cancellationToken: cancellationToken);
+                var playlistTrackDeleteCommand = new CommandDefinition(template.RawSql, template.Parameters, transaction, cancellationToken: cancellationToken);
 
                 await _dbConnection.ExecuteAsync(playlistTrackDeleteCommand).ConfigureAwait(false);
 
@@ -404,12 +404,12 @@ namespace Resonance.Data.Storage.SQLite
 
         public async Task<MediaBundle<Album>> GetAlbumAsync(Guid userId, Guid id, bool populate, CancellationToken cancellationToken)
         {
-            var builder = new SqlBuilder();
+            var builder = SqlBuilder.Create();
 
-            var query = builder.AddTemplate(GetScript("Album_Select"), new { UserId = userId });
+            var template = builder.AddTemplate(GetScript("Album_Select"), new { UserId = userId });
             builder.Where("a.Id = @AlbumId", new { AlbumId = id });
 
-            var commandDefinition = new CommandDefinition(query.RawSql, transaction: _transaction, parameters: query.Parameters, cancellationToken: cancellationToken);
+            var commandDefinition = new CommandDefinition(template.RawSql, transaction: _transaction, parameters: template.Parameters, cancellationToken: cancellationToken);
 
             var result = await _dbConnection.QueryFirstOrDefaultAsync(commandDefinition).ConfigureAwait(false);
 
@@ -430,9 +430,9 @@ namespace Resonance.Data.Storage.SQLite
 
         public async Task<MediaBundle<Album>> GetAlbumAsync(Guid userId, HashSet<Artist> artists, string name, Guid? collectionId, bool populate, CancellationToken cancellationToken)
         {
-            var builder = new SqlBuilder();
+            var builder = SqlBuilder.Create();
 
-            var query = builder.AddTemplate(GetScript("Album_Select"), new { UserId = userId });
+            var template = builder.AddTemplate(GetScript("Album_Select"), new { UserId = userId });
 
             builder.Where("a.Name = @AlbumName", new { AlbumName = name });
             builder.Where("a.ArtistIds = @ArtistIds", new { ArtistIds = GetIds(artists) });
@@ -442,7 +442,7 @@ namespace Resonance.Data.Storage.SQLite
                 builder.Where("a.CollectionId = @CollectionId", new { CollectionId = collectionId });
             }
 
-            var commandDefinition = new CommandDefinition(query.RawSql, transaction: _transaction, parameters: query.Parameters, cancellationToken: cancellationToken);
+            var commandDefinition = new CommandDefinition(template.RawSql, transaction: _transaction, parameters: template.Parameters, cancellationToken: cancellationToken);
 
             var result = await _dbConnection.QueryFirstOrDefaultAsync(commandDefinition).ConfigureAwait(false);
 
@@ -463,11 +463,11 @@ namespace Resonance.Data.Storage.SQLite
 
         public async Task<IEnumerable<MediaBundle<Album>>> GetAlbumsAsync(Guid userId, Guid? collectionId, bool populate, CancellationToken cancellationToken)
         {
-            var builder = new SqlBuilder();
+            var builder = SqlBuilder.Create();
 
-            var query = builder.AddTemplate(GetScript("Album_Select"), new { UserId = userId });
+            var template = builder.AddTemplate(GetScript("Album_Select"), new { UserId = userId });
 
-            builder.AddClause("firstjoin", "LEFT JOIN [TrackToAlbum] tta ON tta.AlbumId = a.Id");
+            builder.PrimaryJoin("LEFT JOIN [TrackToAlbum] tta ON tta.AlbumId = a.Id");
             builder.Where("tta.AlbumId IS NOT NULL");
 
             if (collectionId.HasValue)
@@ -475,7 +475,7 @@ namespace Resonance.Data.Storage.SQLite
                 builder.Where("a.CollectionId = @CollectionId", new { CollectionId = collectionId });
             }
 
-            var commandDefinition = new CommandDefinition(query.RawSql, transaction: _transaction, parameters: query.Parameters, cancellationToken: cancellationToken);
+            var commandDefinition = new CommandDefinition(template.RawSql, transaction: _transaction, parameters: template.Parameters, cancellationToken: cancellationToken);
 
             var results = await _dbConnection.QueryAsync(commandDefinition).ConfigureAwait(false);
 
@@ -484,20 +484,20 @@ namespace Resonance.Data.Storage.SQLite
 
         public async Task<IEnumerable<MediaBundle<Album>>> GetAlbumsByArtistAsync(Guid userId, Guid artistId, bool populate, CancellationToken cancellationToken)
         {
-            var builder = new SqlBuilder();
+            var builder = SqlBuilder.Create();
 
-            var query = builder.AddTemplate(GetScript("Album_Select"), new { UserId = userId });
+            var template = builder.AddTemplate(GetScript("Album_Select"), new { UserId = userId });
 
             builder.Join("[ArtistToAlbum] ata ON ata.AlbumId = a.Id");
             builder.Where("ata.ArtistId = @ArtistId", new { ArtistId = artistId });
 
-            var commandDefinition = new CommandDefinition(query.RawSql, transaction: _transaction, parameters: query.Parameters, cancellationToken: cancellationToken);
+            var commandDefinition = new CommandDefinition(template.RawSql, transaction: _transaction, parameters: template.Parameters, cancellationToken: cancellationToken);
 
-            var trackArtistBuilder = new SqlBuilder();
+            var trackArtistBuilder = SqlBuilder.Create();
 
             var trackArtistQuery = trackArtistBuilder.AddTemplate(GetScript("Album_Select"), new { UserId = userId });
 
-            trackArtistBuilder.AddClause("firstjoin", "LEFT JOIN [TrackToAlbum] tta ON tta.AlbumId = a.Id");
+            trackArtistBuilder.PrimaryJoin("LEFT JOIN [TrackToAlbum] tta ON tta.AlbumId = a.Id");
             trackArtistBuilder.LeftJoin("[ArtistToTrack] att ON att.TrackId = tta.TrackId");
             trackArtistBuilder.Where("att.ArtistId = @ArtistId AND tta.AlbumId IS NOT NULL", new { ArtistId = artistId });
 
@@ -531,16 +531,16 @@ namespace Resonance.Data.Storage.SQLite
 
         public async Task<IEnumerable<MediaBundle<Album>>> GetAlbumsByGenreAsync(Guid userId, Guid genreId, bool populate, CancellationToken cancellationToken)
         {
-            var builder = new SqlBuilder();
+            var builder = SqlBuilder.Create();
 
-            var query = builder.AddTemplate(GetScript("Album_Select"), new { UserId = userId });
+            var template = builder.AddTemplate(GetScript("Album_Select"), new { UserId = userId });
 
-            builder.AddClause("firstjoin", "LEFT JOIN [TrackToAlbum] tta ON tta.AlbumId = a.Id");
+            builder.PrimaryJoin("LEFT JOIN [TrackToAlbum] tta ON tta.AlbumId = a.Id");
             builder.Where("tta.AlbumId IS NOT NULL");
             builder.Join("[GenreToTrack] gtt ON gtt.TrackId = tta.TrackId");
             builder.Where("gtt.GenreId = @GenreId", new { GenreId = genreId });
 
-            var commandDefinition = new CommandDefinition(query.RawSql, transaction: _transaction, parameters: query.Parameters, cancellationToken: cancellationToken);
+            var commandDefinition = new CommandDefinition(template.RawSql, transaction: _transaction, parameters: template.Parameters, cancellationToken: cancellationToken);
 
             var results = await _dbConnection.QueryAsync(commandDefinition).ConfigureAwait(false);
 
@@ -549,11 +549,11 @@ namespace Resonance.Data.Storage.SQLite
 
         public async Task<IEnumerable<MediaBundle<Album>>> GetAlphabeticalAlbumsAsync(Guid userId, int size, int offset, string genre, int? fromYear, int? toYear, Guid? collectionId, bool populate, CancellationToken cancellationToken)
         {
-            var builder = new SqlBuilder();
+            var builder = SqlBuilder.Create();
 
-            var query = builder.AddTemplate(GetScript("Album_Select"), new { UserId = userId });
+            var template = builder.AddTemplate(GetScript("Album_Select"), new { UserId = userId });
 
-            builder.AddClause("firstjoin", "LEFT JOIN [TrackToAlbum] tta ON tta.AlbumId = a.Id");
+            builder.PrimaryJoin("LEFT JOIN [TrackToAlbum] tta ON tta.AlbumId = a.Id");
             builder.Where("tta.AlbumId IS NOT NULL");
 
             var yearProvided = fromYear.HasValue || toYear.HasValue;
@@ -591,10 +591,10 @@ namespace Resonance.Data.Storage.SQLite
             }
 
             builder.OrderBy(yearProvided ? $"t.ReleaseDate {(reverseYearSort ? "DESC" : "ASC")}, a.Name ASC" : "a.Name ASC");
+            builder.Limit("@Size", new { Size = size });
+            builder.Offset("@Offset", new { Offset = offset });
 
-            builder.AddClause("limit", "LIMIT @Size OFFSET @Offset", new { Size = size, Offset = offset });
-
-            var commandDefinition = new CommandDefinition(query.RawSql, transaction: _transaction, parameters: query.Parameters, cancellationToken: cancellationToken);
+            var commandDefinition = new CommandDefinition(template.RawSql, transaction: _transaction, parameters: template.Parameters, cancellationToken: cancellationToken);
 
             var results = await _dbConnection.QueryAsync(commandDefinition).ConfigureAwait(false);
 
@@ -603,13 +603,13 @@ namespace Resonance.Data.Storage.SQLite
 
         public async Task<IEnumerable<MediaBundle<Album>>> GetAlphabeticalByArtistAlbumsAsync(Guid userId, int size, int offset, string genre, int? fromYear, int? toYear, Guid? collectionId, bool populate, CancellationToken cancellationToken)
         {
-            var builder = new SqlBuilder();
+            var builder = SqlBuilder.Create();
 
-            var query = builder.AddTemplate(GetScript("Album_Select"), new { UserId = userId });
+            var template = builder.AddTemplate(GetScript("Album_Select"), new { UserId = userId });
 
             var yearProvided = fromYear.HasValue || toYear.HasValue;
 
-            builder.AddClause("firstjoin", "LEFT JOIN [TrackToAlbum] tta ON tta.AlbumId = a.Id");
+            builder.PrimaryJoin("LEFT JOIN [TrackToAlbum] tta ON tta.AlbumId = a.Id");
             builder.Where("tta.AlbumId IS NOT NULL");
             builder.Join("[ArtistToTrack] att ON att.TrackId = tta.TrackId");
             builder.Join("[Artist] ar ON ar.Id = att.ArtistId");
@@ -644,10 +644,10 @@ namespace Resonance.Data.Storage.SQLite
             }
 
             builder.OrderBy("ar.Name ASC");
+            builder.Limit("@Size", new { Size = size });
+            builder.Offset("@Offset", new { Offset = offset });
 
-            builder.AddClause("limit", "LIMIT @Size OFFSET @Offset", new { Size = size, Offset = offset });
-
-            var commandDefinition = new CommandDefinition(query.RawSql, transaction: _transaction, parameters: query.Parameters, cancellationToken: cancellationToken);
+            var commandDefinition = new CommandDefinition(template.RawSql, transaction: _transaction, parameters: template.Parameters, cancellationToken: cancellationToken);
 
             var results = await _dbConnection.QueryAsync(commandDefinition).ConfigureAwait(false);
 
@@ -656,12 +656,12 @@ namespace Resonance.Data.Storage.SQLite
 
         public async Task<MediaBundle<Artist>> GetArtistAsync(Guid userId, Guid id, CancellationToken cancellationToken)
         {
-            var builder = new SqlBuilder();
+            var builder = SqlBuilder.Create();
 
-            var query = builder.AddTemplate(GetScript("Artist_Select"), new { UserId = userId });
+            var template = builder.AddTemplate(GetScript("Artist_Select"), new { UserId = userId });
             builder.Where("a.Id = @ArtistId", new { ArtistId = id });
 
-            var commandDefinition = new CommandDefinition(query.RawSql, transaction: _transaction, parameters: query.Parameters, cancellationToken: cancellationToken);
+            var commandDefinition = new CommandDefinition(template.RawSql, transaction: _transaction, parameters: template.Parameters, cancellationToken: cancellationToken);
 
             var result = await _dbConnection.QueryFirstOrDefaultAsync(commandDefinition).ConfigureAwait(false);
 
@@ -670,9 +670,9 @@ namespace Resonance.Data.Storage.SQLite
 
         public async Task<MediaBundle<Artist>> GetArtistAsync(Guid userId, string artist, Guid? collectionId, CancellationToken cancellationToken)
         {
-            var builder = new SqlBuilder();
+            var builder = SqlBuilder.Create();
 
-            var query = builder.AddTemplate(GetScript("Artist_Select"), new { UserId = userId });
+            var template = builder.AddTemplate(GetScript("Artist_Select"), new { UserId = userId });
             builder.Where("a.Name = @ArtistName", new { ArtistName = artist });
 
             if (collectionId.HasValue)
@@ -680,7 +680,7 @@ namespace Resonance.Data.Storage.SQLite
                 builder.Where("a.CollectionId = @CollectionId", new { CollectionId = collectionId });
             }
 
-            var commandDefinition = new CommandDefinition(query.RawSql, transaction: _transaction, parameters: query.Parameters, cancellationToken: cancellationToken);
+            var commandDefinition = new CommandDefinition(template.RawSql, transaction: _transaction, parameters: template.Parameters, cancellationToken: cancellationToken);
 
             var result = await _dbConnection.QueryFirstOrDefaultAsync(commandDefinition).ConfigureAwait(false);
 
@@ -689,9 +689,9 @@ namespace Resonance.Data.Storage.SQLite
 
         public async Task<IEnumerable<MediaBundle<Artist>>> GetArtistsAsync(Guid userId, Guid? collectionId, CancellationToken cancellationToken)
         {
-            var builder = new SqlBuilder();
+            var builder = SqlBuilder.Create();
 
-            var query = builder.AddTemplate(GetScript("Artist_Select"), new { UserId = userId });
+            var template = builder.AddTemplate(GetScript("Artist_Select"), new { UserId = userId });
             builder.Where(@"a.Id NOT IN (
                   SELECT ar.Id FROM [Artist] ar
                   WHERE
@@ -712,7 +712,7 @@ namespace Resonance.Data.Storage.SQLite
                 builder.Where("a.CollectionId = @CollectionId", new { CollectionId = collectionId });
             }
 
-            var commandDefinition = new CommandDefinition(query.RawSql, transaction: _transaction, parameters: query.Parameters, cancellationToken: cancellationToken);
+            var commandDefinition = new CommandDefinition(template.RawSql, transaction: _transaction, parameters: template.Parameters, cancellationToken: cancellationToken);
 
             var results = await _dbConnection.QueryAsync(commandDefinition).ConfigureAwait(false);
 
@@ -721,14 +721,14 @@ namespace Resonance.Data.Storage.SQLite
 
         public async Task<IEnumerable<MediaBundle<Artist>>> GetArtistsByAlbumAsync(Guid userId, Guid albumId, CancellationToken cancellationToken)
         {
-            var builder = new SqlBuilder();
+            var builder = SqlBuilder.Create();
 
-            var query = builder.AddTemplate(GetScript("Artist_Select"), new { UserId = userId });
+            var template = builder.AddTemplate(GetScript("Artist_Select"), new { UserId = userId });
             builder.Join("[ArtistToAlbum] ata ON ata.ArtistId = a.Id");
             builder.Where("ata.AlbumId = @AlbumId", new { AlbumId = albumId });
             builder.OrderBy("ata.[rowid]");
 
-            var commandDefinition = new CommandDefinition(query.RawSql, transaction: _transaction, parameters: query.Parameters, cancellationToken: cancellationToken);
+            var commandDefinition = new CommandDefinition(template.RawSql, transaction: _transaction, parameters: template.Parameters, cancellationToken: cancellationToken);
 
             var results = await _dbConnection.QueryAsync(commandDefinition).ConfigureAwait(false);
 
@@ -737,14 +737,14 @@ namespace Resonance.Data.Storage.SQLite
 
         public async Task<IEnumerable<MediaBundle<Artist>>> GetArtistsByTrackAsync(Guid userId, Guid trackId, CancellationToken cancellationToken)
         {
-            var builder = new SqlBuilder();
+            var builder = SqlBuilder.Create();
 
-            var query = builder.AddTemplate(GetScript("Artist_Select"), new { UserId = userId });
+            var template = builder.AddTemplate(GetScript("Artist_Select"), new { UserId = userId });
             builder.Join("[ArtistToTrack] att ON att.ArtistId = a.Id");
             builder.Where("att.TrackId = @TrackId", new { TrackId = trackId });
             builder.OrderBy("att.[rowid]");
 
-            var commandDefinition = new CommandDefinition(query.RawSql, transaction: _transaction, parameters: query.Parameters, cancellationToken: cancellationToken);
+            var commandDefinition = new CommandDefinition(template.RawSql, transaction: _transaction, parameters: template.Parameters, cancellationToken: cancellationToken);
 
             var results = await _dbConnection.QueryAsync(commandDefinition).ConfigureAwait(false);
 
@@ -760,9 +760,9 @@ namespace Resonance.Data.Storage.SQLite
 
         public async Task<IEnumerable<Chat>> GetChatAsync(DateTime? since, CancellationToken cancellationToken)
         {
-            var builder = new SqlBuilder();
+            var builder = SqlBuilder.Create();
 
-            var query = builder.AddTemplate(GetScript("Chat_Select"));
+            var template = builder.AddTemplate(GetScript("Chat_Select"));
 
             if (since.HasValue)
             {
@@ -771,7 +771,7 @@ namespace Resonance.Data.Storage.SQLite
 
             builder.OrderBy("c.Timestamp DESC");
 
-            var commandDefinition = new CommandDefinition(query.RawSql, transaction: _transaction, parameters: query.Parameters, cancellationToken: cancellationToken);
+            var commandDefinition = new CommandDefinition(template.RawSql, transaction: _transaction, parameters: template.Parameters, cancellationToken: cancellationToken);
 
             var chatMessages = new List<Chat>();
 
@@ -791,11 +791,11 @@ namespace Resonance.Data.Storage.SQLite
 
         public async Task<IEnumerable<Collection>> GetCollectionsAsync(CancellationToken cancellationToken)
         {
-            var builder = new SqlBuilder();
+            var builder = SqlBuilder.Create();
 
-            var query = builder.AddTemplate(GetScript("Collection_Select"));
+            var template = builder.AddTemplate(GetScript("Collection_Select"));
 
-            var commandDefinition = new CommandDefinition(query.RawSql, transaction: _transaction, cancellationToken: cancellationToken);
+            var commandDefinition = new CommandDefinition(template.RawSql, transaction: _transaction, cancellationToken: cancellationToken);
 
             var results = await _dbConnection.QueryAsync(commandDefinition).ConfigureAwait(false);
 
@@ -804,13 +804,13 @@ namespace Resonance.Data.Storage.SQLite
 
         public async Task<Disposition> GetDispositionAsync(Guid userId, Guid mediaId, CancellationToken cancellationToken)
         {
-            var builder = new SqlBuilder();
+            var builder = SqlBuilder.Create();
 
-            var query = builder.AddTemplate(GetScript("Disposition_Select"));
+            var template = builder.AddTemplate(GetScript("Disposition_Select"));
             builder.Where("d.MediaId = @MediaId", new { MediaId = mediaId });
             builder.Where("d.UserId = @UserId", new { UserId = userId });
 
-            var commandDefinition = new CommandDefinition(query.RawSql, transaction: _transaction, parameters: query.Parameters, cancellationToken: cancellationToken);
+            var commandDefinition = new CommandDefinition(template.RawSql, transaction: _transaction, parameters: template.Parameters, cancellationToken: cancellationToken);
 
             var result = await _dbConnection.QueryFirstOrDefaultAsync(commandDefinition).ConfigureAwait(false);
 
@@ -824,11 +824,11 @@ namespace Resonance.Data.Storage.SQLite
 
         public async Task<IEnumerable<MediaBundle<Album>>> GetFavoritedAlbumsAsync(Guid userId, int size, int offset, string genre, int? fromYear, int? toYear, Guid? collectionId, bool populate, CancellationToken cancellationToken)
         {
-            var builder = new SqlBuilder();
+            var builder = SqlBuilder.Create();
 
-            var query = builder.AddTemplate(GetScript("Album_Select"), new { UserId = userId });
+            var template = builder.AddTemplate(GetScript("Album_Select"), new { UserId = userId });
 
-            builder.AddClause("firstjoin", "LEFT JOIN [TrackToAlbum] tta ON tta.AlbumId = a.Id");
+            builder.PrimaryJoin("LEFT JOIN [TrackToAlbum] tta ON tta.AlbumId = a.Id");
             builder.Where("tta.AlbumId IS NOT NULL");
 
             var yearProvided = fromYear.HasValue || toYear.HasValue;
@@ -866,12 +866,11 @@ namespace Resonance.Data.Storage.SQLite
             }
 
             builder.Where("d.Favorited IS NOT NULL");
-
             builder.OrderBy("d.Favorited DESC, a.Name ASC");
+            builder.Limit("@Size", new { Size = size });
+            builder.Offset("@Offset", new { Offset = offset });
 
-            builder.AddClause("limit", "LIMIT @Size OFFSET @Offset", new { Size = size, Offset = offset });
-
-            var commandDefinition = new CommandDefinition(query.RawSql, transaction: _transaction, parameters: query.Parameters, cancellationToken: cancellationToken);
+            var commandDefinition = new CommandDefinition(template.RawSql, transaction: _transaction, parameters: template.Parameters, cancellationToken: cancellationToken);
 
             var results = await _dbConnection.QueryAsync(commandDefinition).ConfigureAwait(false);
 
@@ -881,12 +880,12 @@ namespace Resonance.Data.Storage.SQLite
         public async Task<IEnumerable<MediaBundle<T>>> GetFavoritedAsync<T>(Guid userId, Guid? collectionId, bool populate, CancellationToken cancellationToken) where T : MediaBase, ISearchable, ICollectionIdentifier
         {
             var genericType = typeof(T);
-            var builder = new SqlBuilder();
-            Dapper.SqlBuilder.Template query;
+            var builder = SqlBuilder.Create();
+            Dapper.SqlBuilder.Template template;
 
             if (genericType == typeof(Artist))
             {
-                query = builder.AddTemplate(GetScript("Artist_Select"), new { UserId = userId });
+                template = builder.AddTemplate(GetScript("Artist_Select"), new { UserId = userId });
                 builder.Where(@"a.Id NOT IN (
                   SELECT ar.Id FROM [Artist] ar
                   WHERE
@@ -911,9 +910,9 @@ namespace Resonance.Data.Storage.SQLite
             }
             else if (genericType == typeof(Album))
             {
-                query = builder.AddTemplate(GetScript("Album_Select"), new { UserId = userId });
+                template = builder.AddTemplate(GetScript("Album_Select"), new { UserId = userId });
 
-                builder.AddClause("firstjoin", "LEFT JOIN [TrackToAlbum] tta ON tta.AlbumId = a.Id");
+                builder.PrimaryJoin("LEFT JOIN [TrackToAlbum] tta ON tta.AlbumId = a.Id");
                 builder.Where("tta.AlbumId IS NOT NULL");
 
                 if (collectionId.HasValue)
@@ -925,7 +924,7 @@ namespace Resonance.Data.Storage.SQLite
             }
             else if (genericType == typeof(Track))
             {
-                query = builder.AddTemplate(GetScript("Track_Select"), new { UserId = userId });
+                template = builder.AddTemplate(GetScript("Track_Select"), new { UserId = userId });
 
                 if (collectionId.HasValue)
                 {
@@ -941,7 +940,7 @@ namespace Resonance.Data.Storage.SQLite
 
             builder.Where("d.Favorited IS NOT NULL");
 
-            var commandDefinition = new CommandDefinition(query.RawSql, transaction: _transaction, parameters: query.Parameters, cancellationToken: cancellationToken);
+            var commandDefinition = new CommandDefinition(template.RawSql, transaction: _transaction, parameters: template.Parameters, cancellationToken: cancellationToken);
 
             var results = await _dbConnection.QueryAsync(commandDefinition).ConfigureAwait(false);
 
@@ -955,9 +954,9 @@ namespace Resonance.Data.Storage.SQLite
 
         public async Task<Genre> GetGenreAsync(string genre, Guid? collectionId, CancellationToken cancellationToken)
         {
-            var builder = new SqlBuilder();
+            var builder = SqlBuilder.Create();
 
-            var query = builder.AddTemplate(GetScript("Genre_Select"));
+            var template = builder.AddTemplate(GetScript("Genre_Select"));
 
             if (collectionId.HasValue)
             {
@@ -966,7 +965,7 @@ namespace Resonance.Data.Storage.SQLite
 
             builder.Where("g.Name = @GenreName", new { GenreName = genre });
 
-            var commandDefinition = new CommandDefinition(query.RawSql, transaction: _transaction, parameters: query.Parameters, cancellationToken: cancellationToken);
+            var commandDefinition = new CommandDefinition(template.RawSql, transaction: _transaction, parameters: template.Parameters, cancellationToken: cancellationToken);
 
             var result = await _dbConnection.QueryFirstOrDefaultAsync(commandDefinition).ConfigureAwait(false);
 
@@ -975,11 +974,11 @@ namespace Resonance.Data.Storage.SQLite
 
         public async Task<Dictionary<string, Tuple<int, int>>> GetGenreCountsAsync(Guid? collectionId, CancellationToken cancellationToken)
         {
-            var builder = new SqlBuilder();
+            var builder = SqlBuilder.Create();
 
-            var query = builder.AddTemplate(GetScript("GenreCounts_Select"));
+            var template = builder.AddTemplate(GetScript("GenreCounts_Select"));
 
-            var commandDefinition = new CommandDefinition(query.RawSql, transaction: _transaction, parameters: query.Parameters, cancellationToken: cancellationToken);
+            var commandDefinition = new CommandDefinition(template.RawSql, transaction: _transaction, parameters: template.Parameters, cancellationToken: cancellationToken);
 
             var results = await _dbConnection.QueryAsync(commandDefinition).ConfigureAwait(false);
 
@@ -1004,9 +1003,9 @@ namespace Resonance.Data.Storage.SQLite
 
         public async Task<IEnumerable<Genre>> GetGenresAsync(Guid? collectionId, CancellationToken cancellationToken)
         {
-            var builder = new SqlBuilder();
+            var builder = SqlBuilder.Create();
 
-            var query = builder.AddTemplate(GetScript("Genre_Select"));
+            var template = builder.AddTemplate(GetScript("Genre_Select"));
             builder.LeftJoin("[GenreToTrack] gtt ON gtt.GenreId = g.Id");
             builder.Where("gtt.GenreId IS NOT NULL");
 
@@ -1015,7 +1014,7 @@ namespace Resonance.Data.Storage.SQLite
                 builder.Where("g.CollectionId = @CollectionId", new { CollectionId = collectionId });
             }
 
-            var commandDefinition = new CommandDefinition(query.RawSql, transaction: _transaction, parameters: query.Parameters, cancellationToken: cancellationToken);
+            var commandDefinition = new CommandDefinition(template.RawSql, transaction: _transaction, parameters: template.Parameters, cancellationToken: cancellationToken);
 
             var results = await _dbConnection.QueryAsync(commandDefinition).ConfigureAwait(false);
 
@@ -1024,14 +1023,14 @@ namespace Resonance.Data.Storage.SQLite
 
         public async Task<IEnumerable<Genre>> GetGenresByTrackAsync(Guid trackId, CancellationToken cancellationToken)
         {
-            var builder = new SqlBuilder();
+            var builder = SqlBuilder.Create();
 
-            var query = builder.AddTemplate(GetScript("Genre_Select"));
+            var template = builder.AddTemplate(GetScript("Genre_Select"));
             builder.Join("[GenreToTrack] gtt ON gtt.GenreId = g.Id");
             builder.Where("gtt.TrackId = @TrackId", new { TrackId = trackId });
             builder.OrderBy("gtt.[rowid]");
 
-            var commandDefinition = new CommandDefinition(query.RawSql, transaction: _transaction, parameters: query.Parameters, cancellationToken: cancellationToken);
+            var commandDefinition = new CommandDefinition(template.RawSql, transaction: _transaction, parameters: template.Parameters, cancellationToken: cancellationToken);
 
             var results = await _dbConnection.QueryAsync(commandDefinition).ConfigureAwait(false);
 
@@ -1040,11 +1039,11 @@ namespace Resonance.Data.Storage.SQLite
 
         public async Task<IEnumerable<MediaBundle<Album>>> GetHighestRatedAlbumsAsync(Guid userId, int size, int offset, string genre, int? fromYear, int? toYear, Guid? collectionId, bool populate, CancellationToken cancellationToken)
         {
-            var builder = new SqlBuilder();
+            var builder = SqlBuilder.Create();
 
-            var query = builder.AddTemplate(GetScript("Album_Select"), new { UserId = userId });
+            var template = builder.AddTemplate(GetScript("Album_Select"), new { UserId = userId });
 
-            builder.AddClause("firstjoin", "LEFT JOIN [TrackToAlbum] tta ON tta.AlbumId = a.Id");
+            builder.PrimaryJoin("LEFT JOIN [TrackToAlbum] tta ON tta.AlbumId = a.Id");
             builder.Where("tta.AlbumId IS NOT NULL");
 
             var yearProvided = fromYear.HasValue || toYear.HasValue;
@@ -1082,12 +1081,11 @@ namespace Resonance.Data.Storage.SQLite
             }
 
             builder.Where("d.Rating IS NOT NULL");
-
             builder.OrderBy("d.Rating DESC, a.Name ASC");
+            builder.Limit("@Size", new { Size = size });
+            builder.Offset("@Offset", new { Offset = offset });
 
-            builder.AddClause("limit", "LIMIT @Size OFFSET @Offset", new { Size = size, Offset = offset });
-
-            var commandDefinition = new CommandDefinition(query.RawSql, transaction: _transaction, parameters: query.Parameters, cancellationToken: cancellationToken);
+            var commandDefinition = new CommandDefinition(template.RawSql, transaction: _transaction, parameters: template.Parameters, cancellationToken: cancellationToken);
 
             var results = await _dbConnection.QueryAsync(commandDefinition).ConfigureAwait(false);
 
@@ -1096,12 +1094,12 @@ namespace Resonance.Data.Storage.SQLite
 
         public async Task<IEnumerable<Marker>> GetMarkersAsync(Guid userId, CancellationToken cancellationToken)
         {
-            var builder = new SqlBuilder();
+            var builder = SqlBuilder.Create();
 
-            var query = builder.AddTemplate(GetScript("Marker_Select"));
+            var template = builder.AddTemplate(GetScript("Marker_Select"));
             builder.Where("m.UserId = @UserId", new { UserId = userId });
 
-            var commandDefinition = new CommandDefinition(query.RawSql, transaction: _transaction, parameters: query.Parameters, cancellationToken: cancellationToken);
+            var commandDefinition = new CommandDefinition(template.RawSql, transaction: _transaction, parameters: template.Parameters, cancellationToken: cancellationToken);
 
             var results = await _dbConnection.QueryAsync(commandDefinition).ConfigureAwait(false);
 
@@ -1110,12 +1108,12 @@ namespace Resonance.Data.Storage.SQLite
 
         public async Task<MediaInfo> GetMediaInfoAsync(Guid mediaId, CancellationToken cancellationToken)
         {
-            var builder = new SqlBuilder();
+            var builder = SqlBuilder.Create();
 
-            var query = builder.AddTemplate(GetScript("MediaInfo_Select"));
+            var template = builder.AddTemplate(GetScript("MediaInfo_Select"));
             builder.Where("mi.MediaId = @MediaId", new { MediaId = mediaId });
 
-            var commandDefinition = new CommandDefinition(query.RawSql, transaction: _transaction, parameters: query.Parameters, cancellationToken: cancellationToken);
+            var commandDefinition = new CommandDefinition(template.RawSql, transaction: _transaction, parameters: template.Parameters, cancellationToken: cancellationToken);
 
             var result = await _dbConnection.QueryFirstOrDefaultAsync(commandDefinition).ConfigureAwait(false);
 
@@ -1124,11 +1122,11 @@ namespace Resonance.Data.Storage.SQLite
 
         public async Task<MediaType?> GetMediaTypeAsync(Guid mediaId, CancellationToken cancellationToken)
         {
-            var builder = new SqlBuilder();
+            var builder = SqlBuilder.Create();
 
-            var query = builder.AddTemplate(GetScript("MediaTypeId_Select"), new { Id = mediaId });
+            var template = builder.AddTemplate(GetScript("MediaTypeId_Select"), new { Id = mediaId });
 
-            var commandDefinition = new CommandDefinition(query.RawSql, transaction: _transaction, parameters: query.Parameters, cancellationToken: cancellationToken);
+            var commandDefinition = new CommandDefinition(template.RawSql, transaction: _transaction, parameters: template.Parameters, cancellationToken: cancellationToken);
 
             var result = await _dbConnection.ExecuteScalarAsync<int?>(commandDefinition).ConfigureAwait(false);
 
@@ -1139,13 +1137,13 @@ namespace Resonance.Data.Storage.SQLite
 
         public async Task<IEnumerable<MediaBundle<Album>>> GetMostPlayedAlbumsAsync(Guid userId, int size, int offset, string genre, int? fromYear, int? toYear, Guid? collectionId, bool populate, CancellationToken cancellationToken)
         {
-            var builder = new SqlBuilder();
+            var builder = SqlBuilder.Create();
 
-            var query = builder.AddTemplate(GetScript("Album_Select"), new { UserId = userId });
+            var template = builder.AddTemplate(GetScript("Album_Select"), new { UserId = userId });
 
             var yearProvided = fromYear.HasValue || toYear.HasValue;
 
-            builder.AddClause("firstjoin", "LEFT JOIN [TrackToAlbum] tta ON tta.AlbumId = a.Id");
+            builder.PrimaryJoin("LEFT JOIN [TrackToAlbum] tta ON tta.AlbumId = a.Id");
             builder.Where("tta.AlbumId IS NOT NULL");
             builder.Join(@"
                          (
@@ -1185,11 +1183,11 @@ namespace Resonance.Data.Storage.SQLite
                 builder.Where($"t.ReleaseDate {(reverseYearSort ? ">=" : "<=")} @ToYear", new { ToYear = toYear });
             }
 
-            builder.AddClause("limit", "LIMIT @Size OFFSET @Offset", new { Size = size, Offset = offset });
-
             builder.OrderBy("c.[PlaybackCount] DESC, a.Name ASC");
+            builder.Limit("@Size", new { Size = size });
+            builder.Offset("@Offset", new { Offset = offset });
 
-            var commandDefinition = new CommandDefinition(query.RawSql, transaction: _transaction, parameters: query.Parameters, cancellationToken: cancellationToken);
+            var commandDefinition = new CommandDefinition(template.RawSql, transaction: _transaction, parameters: template.Parameters, cancellationToken: cancellationToken);
 
             var results = await _dbConnection.QueryAsync(commandDefinition).ConfigureAwait(false);
 
@@ -1198,13 +1196,13 @@ namespace Resonance.Data.Storage.SQLite
 
         public async Task<IEnumerable<MediaBundle<Album>>> GetMostRecentlyPlayedAlbumsAsync(Guid userId, int size, int offset, string genre, int? fromYear, int? toYear, Guid? collectionId, bool populate, CancellationToken cancellationToken)
         {
-            var builder = new SqlBuilder();
+            var builder = SqlBuilder.Create();
 
-            var query = builder.AddTemplate(GetScript("Album_Select"), new { UserId = userId });
+            var template = builder.AddTemplate(GetScript("Album_Select"), new { UserId = userId });
 
             var yearProvided = fromYear.HasValue || toYear.HasValue;
 
-            builder.AddClause("firstjoin", "LEFT JOIN [TrackToAlbum] tta ON tta.AlbumId = a.Id");
+            builder.PrimaryJoin("LEFT JOIN [TrackToAlbum] tta ON tta.AlbumId = a.Id");
             builder.Where("tta.AlbumId IS NOT NULL");
             builder.Join(@"
                          (
@@ -1243,11 +1241,11 @@ namespace Resonance.Data.Storage.SQLite
                 builder.Where($"t.ReleaseDate {(reverseYearSort ? ">=" : "<=")} @ToYear", new { ToYear = toYear });
             }
 
-            builder.AddClause("limit", "LIMIT @Size OFFSET @Offset", new { Size = size, Offset = offset });
-
             builder.OrderBy("c.Timestamp DESC, a.Name ASC");
+            builder.Limit("@Size", new { Size = size });
+            builder.Offset("@Offset", new { Offset = offset });
 
-            var commandDefinition = new CommandDefinition(query.RawSql, transaction: _transaction, parameters: query.Parameters, cancellationToken: cancellationToken);
+            var commandDefinition = new CommandDefinition(template.RawSql, transaction: _transaction, parameters: template.Parameters, cancellationToken: cancellationToken);
 
             var results = await _dbConnection.QueryAsync(commandDefinition).ConfigureAwait(false);
 
@@ -1256,11 +1254,11 @@ namespace Resonance.Data.Storage.SQLite
 
         public async Task<IEnumerable<MediaBundle<Album>>> GetNewestAlbumsAsync(Guid userId, int size, int offset, string genre, int? fromYear, int? toYear, Guid? collectionId, bool populate, CancellationToken cancellationToken)
         {
-            var builder = new SqlBuilder();
+            var builder = SqlBuilder.Create();
 
-            var query = builder.AddTemplate(GetScript("Album_Select"), new { UserId = userId });
+            var template = builder.AddTemplate(GetScript("Album_Select"), new { UserId = userId });
 
-            builder.AddClause("firstjoin", "LEFT JOIN [TrackToAlbum] tta ON tta.AlbumId = a.Id");
+            builder.PrimaryJoin("LEFT JOIN [TrackToAlbum] tta ON tta.AlbumId = a.Id");
             builder.Where("tta.AlbumId IS NOT NULL");
 
             var yearProvided = fromYear.HasValue || toYear.HasValue;
@@ -1297,11 +1295,11 @@ namespace Resonance.Data.Storage.SQLite
                 builder.Where($"t.ReleaseDate {(reverseYearSort ? ">=" : "<=")} @ToYear", new { ToYear = toYear });
             }
 
-            builder.AddClause("limit", "LIMIT @Size OFFSET @Offset", new { Size = size, Offset = offset });
-
             builder.OrderBy("ch.[Timestamp] DESC, a.Name ASC");
+            builder.Limit("@Size", new { Size = size });
+            builder.Offset("@Offset", new { Offset = offset });
 
-            var commandDefinition = new CommandDefinition(query.RawSql, transaction: _transaction, parameters: query.Parameters, cancellationToken: cancellationToken);
+            var commandDefinition = new CommandDefinition(template.RawSql, transaction: _transaction, parameters: template.Parameters, cancellationToken: cancellationToken);
 
             var results = await _dbConnection.QueryAsync(commandDefinition).ConfigureAwait(false);
 
@@ -1310,12 +1308,12 @@ namespace Resonance.Data.Storage.SQLite
 
         public async Task<Playlist> GetPlaylistAsync(Guid userId, Guid id, bool getTracks, CancellationToken cancellationToken)
         {
-            var builder = new SqlBuilder();
+            var builder = SqlBuilder.Create();
 
-            var query = builder.AddTemplate(GetScript("Playlist_Select"));
+            var template = builder.AddTemplate(GetScript("Playlist_Select"));
             builder.Where("p.Id = @Id", new { Id = id });
 
-            var commandDefinition = new CommandDefinition(query.RawSql, transaction: _transaction, parameters: query.Parameters, cancellationToken: cancellationToken);
+            var commandDefinition = new CommandDefinition(template.RawSql, transaction: _transaction, parameters: template.Parameters, cancellationToken: cancellationToken);
 
             var result = await _dbConnection.QueryFirstOrDefaultAsync(commandDefinition).ConfigureAwait(false);
 
@@ -1329,7 +1327,7 @@ namespace Resonance.Data.Storage.SQLite
 
             if (getTracks)
             {
-                var trackToPlaylistBuilder = new SqlBuilder();
+                var trackToPlaylistBuilder = SqlBuilder.Create();
 
                 var trackToPlaylistQuery = trackToPlaylistBuilder.AddTemplate(GetScript("Playlist_Track_Select"));
                 trackToPlaylistBuilder.Where("ttp.PlaylistId = @PlaylistId", new { PlaylistId = id });
@@ -1361,9 +1359,9 @@ namespace Resonance.Data.Storage.SQLite
 
         public async Task<List<Playlist>> GetPlaylistsAsync(Guid userId, string username, bool getTracks, CancellationToken cancellationToken)
         {
-            var builder = new SqlBuilder();
+            var builder = SqlBuilder.Create();
 
-            var query = builder.AddTemplate(GetScript("Playlist_Select"));
+            var template = builder.AddTemplate(GetScript("Playlist_Select"));
 
             if (!string.IsNullOrWhiteSpace(username))
             {
@@ -1379,7 +1377,7 @@ namespace Resonance.Data.Storage.SQLite
                 builder.Where("p.UserId = @UserId OR p.Accessibility = @Accessibility", new { UserId = userId, Accessibility = (int)Accessibility.Public });
             }
 
-            var commandDefinition = new CommandDefinition(query.RawSql, transaction: _transaction, parameters: query.Parameters, cancellationToken: cancellationToken);
+            var commandDefinition = new CommandDefinition(template.RawSql, transaction: _transaction, parameters: template.Parameters, cancellationToken: cancellationToken);
 
             var results = await _dbConnection.QueryAsync(commandDefinition).ConfigureAwait(false);
 
@@ -1402,12 +1400,12 @@ namespace Resonance.Data.Storage.SQLite
 
         public async Task<PlayQueue> GetPlayQueueAsync(Guid userId, CancellationToken cancellationToken)
         {
-            var builder = new SqlBuilder();
+            var builder = SqlBuilder.Create();
 
-            var query = builder.AddTemplate(GetScript("PlayQueue_Select"));
+            var template = builder.AddTemplate(GetScript("PlayQueue_Select"));
             builder.Where("p.UserId = @UserId", new { UserId = userId });
 
-            var commandDefinition = new CommandDefinition(query.RawSql, transaction: _transaction, parameters: query.Parameters, cancellationToken: cancellationToken);
+            var commandDefinition = new CommandDefinition(template.RawSql, transaction: _transaction, parameters: template.Parameters, cancellationToken: cancellationToken);
 
             var result = await _dbConnection.QueryFirstOrDefaultAsync(commandDefinition).ConfigureAwait(false);
 
@@ -1419,7 +1417,7 @@ namespace Resonance.Data.Storage.SQLite
             var playQueue = PlayQueue.FromDynamic(result);
             playQueue.User = await GetUserAsync(userId, cancellationToken).ConfigureAwait(false);
 
-            var trackToPlayQueueBuilder = new SqlBuilder();
+            var trackToPlayQueueBuilder = SqlBuilder.Create();
 
             var trackToPlayQueueQuery = trackToPlayQueueBuilder.AddTemplate(GetScript("PlayQueue_Track_Select"));
             trackToPlayQueueBuilder.Where("ttp.PlayQueueId = @PlayQueueId", new { PlayQueueId = playQueue.Id });
@@ -1450,12 +1448,12 @@ namespace Resonance.Data.Storage.SQLite
 
         public async Task<RadioStation> GetRadioStationAsync(Guid id, CancellationToken cancellationToken)
         {
-            var builder = new SqlBuilder();
+            var builder = SqlBuilder.Create();
 
-            var query = builder.AddTemplate(GetScript("RadioStation_Select"));
+            var template = builder.AddTemplate(GetScript("RadioStation_Select"));
             builder.Where("r.Id IN(@Id)", new { Id = id });
 
-            var commandDefinition = new CommandDefinition(query.RawSql, transaction: _transaction, parameters: query.Parameters, cancellationToken: cancellationToken);
+            var commandDefinition = new CommandDefinition(template.RawSql, transaction: _transaction, parameters: template.Parameters, cancellationToken: cancellationToken);
 
             var result = await _dbConnection.QueryFirstOrDefaultAsync(commandDefinition).ConfigureAwait(false);
 
@@ -1469,11 +1467,11 @@ namespace Resonance.Data.Storage.SQLite
 
         public async Task<IEnumerable<RadioStation>> GetRadioStationsAsync(CancellationToken cancellationToken)
         {
-            var builder = new SqlBuilder();
+            var builder = SqlBuilder.Create();
 
-            var query = builder.AddTemplate(GetScript("RadioStation_Select"));
+            var template = builder.AddTemplate(GetScript("RadioStation_Select"));
 
-            var commandDefinition = new CommandDefinition(query.RawSql, transaction: _transaction, parameters: query.Parameters, cancellationToken: cancellationToken);
+            var commandDefinition = new CommandDefinition(template.RawSql, transaction: _transaction, parameters: template.Parameters, cancellationToken: cancellationToken);
 
             var results = await _dbConnection.QueryAsync(commandDefinition).ConfigureAwait(false);
 
@@ -1487,11 +1485,11 @@ namespace Resonance.Data.Storage.SQLite
 
         public async Task<IEnumerable<MediaBundle<Album>>> GetRandomAlbumsAsync(Guid userId, int size, int offset, string genre, int? fromYear, int? toYear, Guid? collectionId, bool populate, CancellationToken cancellationToken)
         {
-            var builder = new SqlBuilder();
+            var builder = SqlBuilder.Create();
 
-            var query = builder.AddTemplate(GetScript("Album_Select"), new { UserId = userId });
+            var template = builder.AddTemplate(GetScript("Album_Select"), new { UserId = userId });
 
-            builder.AddClause("firstjoin", "LEFT JOIN [TrackToAlbum] tta ON tta.AlbumId = a.Id");
+            builder.PrimaryJoin("LEFT JOIN [TrackToAlbum] tta ON tta.AlbumId = a.Id");
             builder.Where("tta.AlbumId IS NOT NULL");
 
             var yearProvided = fromYear.HasValue || toYear.HasValue;
@@ -1529,15 +1527,15 @@ namespace Resonance.Data.Storage.SQLite
             }
 
             builder.Where("a.Id IN (SELECT Id FROM Album ORDER BY RANDOM() LIMIT @Size + @Offset)", new { Size = size });
-
-            builder.AddClause("limit", "LIMIT @Size OFFSET @Offset", new { Size = size, Offset = offset });
+            builder.Limit("@Size", new { Size = size });
+            builder.Offset("@Offset", new { Offset = offset });
 
             if (yearProvided)
             {
                 builder.OrderBy($"t.ReleaseDate {(reverseYearSort ? "DESC" : "ASC")}");
             }
 
-            var commandDefinition = new CommandDefinition(query.RawSql, transaction: _transaction, parameters: query.Parameters, cancellationToken: cancellationToken);
+            var commandDefinition = new CommandDefinition(template.RawSql, transaction: _transaction, parameters: template.Parameters, cancellationToken: cancellationToken);
 
             var results = await _dbConnection.QueryAsync(commandDefinition).ConfigureAwait(false);
 
@@ -1546,15 +1544,15 @@ namespace Resonance.Data.Storage.SQLite
 
         public async Task<IEnumerable<MediaBundle<Track>>> GetRecentPlaybackAsync(Guid userId, bool populate, CancellationToken cancellationToken)
         {
-            var builder = new SqlBuilder();
+            var builder = SqlBuilder.Create();
 
-            var query = builder.AddTemplate(GetScript("Track_Select"), new { UserId = userId });
+            var template = builder.AddTemplate(GetScript("Track_Select"), new { UserId = userId });
             builder.Join("[Playback] p ON p.TrackId = t.Id");
             builder.OrderBy("p.Timestamp DESC");
-            builder.AddClause("addselect", ", p.Address, p.ClientId, p.Timestamp, p.UserId");
-            builder.AddClause("limit", "LIMIT @Size", new { Size = 25 });
+            builder.AddSelect(", p.Address, p.ClientId, p.Timestamp, p.UserId");
+            builder.Limit("@Size", new { Size = 25 });
 
-            var commandDefinition = new CommandDefinition(query.RawSql, transaction: _transaction, parameters: query.Parameters, cancellationToken: cancellationToken);
+            var commandDefinition = new CommandDefinition(template.RawSql, transaction: _transaction, parameters: template.Parameters, cancellationToken: cancellationToken);
 
             var results = await _dbConnection.QueryAsync(commandDefinition).ConfigureAwait(false);
 
@@ -1563,13 +1561,13 @@ namespace Resonance.Data.Storage.SQLite
 
         public async Task<IEnumerable<Role>> GetRolesForUserAsync(Guid userId, CancellationToken cancellationToken)
         {
-            var builder = new SqlBuilder();
+            var builder = SqlBuilder.Create();
 
-            var query = builder.AddTemplate(GetScript("Role_Select"));
+            var template = builder.AddTemplate(GetScript("Role_Select"));
             builder.Join("[UserToRole] utr ON utr.RoleId = r.Id");
             builder.Where("utr.UserId = @UserId", new { UserId = userId });
 
-            var commandDefinition = new CommandDefinition(query.RawSql, transaction: _transaction, parameters: query.Parameters, cancellationToken: cancellationToken);
+            var commandDefinition = new CommandDefinition(template.RawSql, transaction: _transaction, parameters: template.Parameters, cancellationToken: cancellationToken);
 
             var results = await _dbConnection.QueryAsync(commandDefinition).ConfigureAwait(false);
 
@@ -1578,12 +1576,12 @@ namespace Resonance.Data.Storage.SQLite
 
         public async Task<MediaBundle<Track>> GetTrackAsync(Guid userId, Guid id, bool populate, CancellationToken cancellationToken)
         {
-            var builder = new SqlBuilder();
+            var builder = SqlBuilder.Create();
 
-            var query = builder.AddTemplate(GetScript("Track_Select"), new { UserId = userId });
+            var template = builder.AddTemplate(GetScript("Track_Select"), new { UserId = userId });
             builder.Where("t.Id = @TrackId", new { TrackId = id });
 
-            var commandDefinition = new CommandDefinition(query.RawSql, transaction: _transaction, parameters: query.Parameters, cancellationToken: cancellationToken);
+            var commandDefinition = new CommandDefinition(template.RawSql, transaction: _transaction, parameters: template.Parameters, cancellationToken: cancellationToken);
 
             var result = await _dbConnection.QueryFirstOrDefaultAsync(commandDefinition).ConfigureAwait(false);
 
@@ -1604,21 +1602,21 @@ namespace Resonance.Data.Storage.SQLite
 
         public async Task<MediaBundle<Track>> GetTrackAsync(Guid userId, string artist, string track, Guid? collectionId, bool populate, CancellationToken cancellationToken)
         {
-            var builder = new SqlBuilder();
+            var builder = SqlBuilder.Create();
 
-            var query = builder.AddTemplate(GetScript("Track_Select"), new { UserId = userId });
+            var template = builder.AddTemplate(GetScript("Track_Select"), new { UserId = userId });
             builder.Join("[ArtistToTrack] att ON att.TrackId = t.Id");
             builder.Join("[Artist] a ON a.Id = att.ArtistId");
             builder.Where("a.Name = @Artist", new { Artist = artist });
             builder.Where("t.Name = @Track", new { Track = track });
-            builder.AddClause("limit", "LIMIT @Size", new { Size = 1 });
+            builder.Limit("@Size", new { Size = 1 });
 
             if (collectionId.HasValue)
             {
                 builder.Where("t.CollectionId = @CollectionId", new { CollectionId = collectionId });
             }
 
-            var commandDefinition = new CommandDefinition(query.RawSql, transaction: _transaction, parameters: query.Parameters, cancellationToken: cancellationToken);
+            var commandDefinition = new CommandDefinition(template.RawSql, transaction: _transaction, parameters: template.Parameters, cancellationToken: cancellationToken);
 
             var result = await _dbConnection.QueryFirstOrDefaultAsync(commandDefinition).ConfigureAwait(false);
 
@@ -1639,9 +1637,9 @@ namespace Resonance.Data.Storage.SQLite
 
         public async Task<MediaBundle<Track>> GetTrackAsync(Guid userId, string path, Guid? collectionId, bool populate, CancellationToken cancellationToken)
         {
-            var builder = new SqlBuilder();
+            var builder = SqlBuilder.Create();
 
-            var query = builder.AddTemplate(GetScript("Track_Select"), new { UserId = userId });
+            var template = builder.AddTemplate(GetScript("Track_Select"), new { UserId = userId });
             builder.Where("t.Path = @Path", new { Path = path });
 
             if (collectionId.HasValue)
@@ -1649,7 +1647,7 @@ namespace Resonance.Data.Storage.SQLite
                 builder.Where("t.CollectionId = @CollectionId", new { CollectionId = collectionId });
             }
 
-            var commandDefinition = new CommandDefinition(query.RawSql, transaction: _transaction, parameters: query.Parameters, cancellationToken: cancellationToken);
+            var commandDefinition = new CommandDefinition(template.RawSql, transaction: _transaction, parameters: template.Parameters, cancellationToken: cancellationToken);
 
             var result = await _dbConnection.QueryFirstOrDefaultAsync(commandDefinition).ConfigureAwait(false);
 
@@ -1670,9 +1668,9 @@ namespace Resonance.Data.Storage.SQLite
 
         public async Task<IEnumerable<MediaBundle<Track>>> GetTracksAsync(Guid userId, int size, int offset, string genre, int? fromYear, int? toYear, Guid? collectionId, bool populate, bool randomize, CancellationToken cancellationToken)
         {
-            var builder = new SqlBuilder();
+            var builder = SqlBuilder.Create();
 
-            var query = builder.AddTemplate(GetScript("Track_Select"), new { UserId = userId });
+            var template = builder.AddTemplate(GetScript("Track_Select"), new { UserId = userId });
 
             if (collectionId.HasValue)
             {
@@ -1701,9 +1699,10 @@ namespace Resonance.Data.Storage.SQLite
                 builder.Where("t.Id IN (SELECT Id FROM Track ORDER BY RANDOM() LIMIT @Size + @Offset)", new { Size = size });
             }
 
-            builder.AddClause("limit", "LIMIT @Size OFFSET @Offset", new { Size = size, Offset = offset });
+            builder.Limit("@Size", new { Size = size });
+            builder.Offset("@Offset", new { Offset = offset });
 
-            var commandDefinition = new CommandDefinition(query.RawSql, transaction: _transaction, parameters: query.Parameters, cancellationToken: cancellationToken);
+            var commandDefinition = new CommandDefinition(template.RawSql, transaction: _transaction, parameters: template.Parameters, cancellationToken: cancellationToken);
 
             var results = await _dbConnection.QueryAsync(commandDefinition).ConfigureAwait(false);
 
@@ -1712,16 +1711,16 @@ namespace Resonance.Data.Storage.SQLite
 
         public async Task<IEnumerable<MediaBundle<Track>>> GetTracksAsync(Guid userId, Guid? collectionId, CancellationToken cancellationToken)
         {
-            var builder = new SqlBuilder();
+            var builder = SqlBuilder.Create();
 
-            var query = builder.AddTemplate(GetScript("Track_Select"), new { UserId = userId });
+            var template = builder.AddTemplate(GetScript("Track_Select"), new { UserId = userId });
 
             if (collectionId.HasValue)
             {
                 builder.Where("t.CollectionId = @CollectionId", new { CollectionId = collectionId });
             }
 
-            var commandDefinition = new CommandDefinition(query.RawSql, transaction: _transaction, parameters: query.Parameters, cancellationToken: cancellationToken);
+            var commandDefinition = new CommandDefinition(template.RawSql, transaction: _transaction, parameters: template.Parameters, cancellationToken: cancellationToken);
 
             var results = await _dbConnection.QueryAsync(commandDefinition).ConfigureAwait(false);
 
@@ -1730,12 +1729,12 @@ namespace Resonance.Data.Storage.SQLite
 
         public async Task<IEnumerable<MediaBundle<Track>>> GetTracksByAlbumAsync(Guid userId, Guid albumId, bool populate, CancellationToken cancellationToken)
         {
-            var builder = new SqlBuilder();
+            var builder = SqlBuilder.Create();
 
-            var query = builder.AddTemplate(GetScript("Track_Select"), new { UserId = userId });
+            var template = builder.AddTemplate(GetScript("Track_Select"), new { UserId = userId });
             builder.Where("tta.AlbumId = @AlbumId", new { AlbumId = albumId });
 
-            var commandDefinition = new CommandDefinition(query.RawSql, transaction: _transaction, parameters: query.Parameters, cancellationToken: cancellationToken);
+            var commandDefinition = new CommandDefinition(template.RawSql, transaction: _transaction, parameters: template.Parameters, cancellationToken: cancellationToken);
 
             var results = await _dbConnection.QueryAsync(commandDefinition).ConfigureAwait(false);
 
@@ -1744,13 +1743,13 @@ namespace Resonance.Data.Storage.SQLite
 
         public async Task<IEnumerable<MediaBundle<Track>>> GetTracksByGenreAsync(Guid userId, Guid genreId, bool populate, CancellationToken cancellationToken)
         {
-            var builder = new SqlBuilder();
+            var builder = SqlBuilder.Create();
 
-            var query = builder.AddTemplate(GetScript("Track_Select"), new { UserId = userId });
+            var template = builder.AddTemplate(GetScript("Track_Select"), new { UserId = userId });
             builder.Join("[GenreToTrack] gtt ON gtt.TrackId = t.Id");
             builder.Where("gtt.GenreId = @GenreId", new { GenreId = genreId });
 
-            var commandDefinition = new CommandDefinition(query.RawSql, transaction: _transaction, parameters: query.Parameters, cancellationToken: cancellationToken);
+            var commandDefinition = new CommandDefinition(template.RawSql, transaction: _transaction, parameters: template.Parameters, cancellationToken: cancellationToken);
 
             var results = await _dbConnection.QueryAsync(commandDefinition).ConfigureAwait(false);
 
@@ -1759,12 +1758,12 @@ namespace Resonance.Data.Storage.SQLite
 
         public async Task<User> GetUserAsync(Guid userId, CancellationToken cancellationToken)
         {
-            var builder = new SqlBuilder();
+            var builder = SqlBuilder.Create();
 
-            var query = builder.AddTemplate(GetScript("User_Select"));
+            var template = builder.AddTemplate(GetScript("User_Select"));
             builder.Where("u.Id = @UserId", new { UserId = userId });
 
-            var commandDefinition = new CommandDefinition(query.RawSql, transaction: _transaction, parameters: query.Parameters, cancellationToken: cancellationToken);
+            var commandDefinition = new CommandDefinition(template.RawSql, transaction: _transaction, parameters: template.Parameters, cancellationToken: cancellationToken);
 
             var result = await _dbConnection.QueryFirstOrDefaultAsync(commandDefinition).ConfigureAwait(false);
 
@@ -1773,12 +1772,12 @@ namespace Resonance.Data.Storage.SQLite
 
         public async Task<User> GetUserAsync(string username, CancellationToken cancellationToken)
         {
-            var builder = new SqlBuilder();
+            var builder = SqlBuilder.Create();
 
-            var query = builder.AddTemplate(GetScript("User_Select"));
+            var template = builder.AddTemplate(GetScript("User_Select"));
             builder.Where("u.Name = @Username", new { Username = username });
 
-            var commandDefinition = new CommandDefinition(query.RawSql, transaction: _transaction, parameters: query.Parameters, cancellationToken: cancellationToken);
+            var commandDefinition = new CommandDefinition(template.RawSql, transaction: _transaction, parameters: template.Parameters, cancellationToken: cancellationToken);
 
             var result = await _dbConnection.QueryFirstOrDefaultAsync(commandDefinition).ConfigureAwait(false);
 
@@ -1787,11 +1786,11 @@ namespace Resonance.Data.Storage.SQLite
 
         public async Task<IEnumerable<User>> GetUsersAsync(CancellationToken cancellationToken)
         {
-            var builder = new SqlBuilder();
+            var builder = SqlBuilder.Create();
 
-            var query = builder.AddTemplate(GetScript("User_Select"));
+            var template = builder.AddTemplate(GetScript("User_Select"));
 
-            var commandDefinition = new CommandDefinition(query.RawSql, transaction: _transaction, cancellationToken: cancellationToken);
+            var commandDefinition = new CommandDefinition(template.RawSql, transaction: _transaction, cancellationToken: cancellationToken);
 
             var results = await _dbConnection.QueryAsync(commandDefinition).ConfigureAwait(false);
 
@@ -2423,15 +2422,15 @@ namespace Resonance.Data.Storage.SQLite
         public async Task<IEnumerable<MediaBundle<T>>> SearchAsync<T>(Guid userId, string queryString, int size, int offset, Guid? collectionId, bool populate, CancellationToken cancellationToken) where T : MediaBase, ISearchable, ICollectionIdentifier
         {
             var genericType = typeof(T);
-            var builder = new SqlBuilder();
-            Dapper.SqlBuilder.Template query;
+            var builder = SqlBuilder.Create();
+            Dapper.SqlBuilder.Template template;
 
             queryString = queryString.Replace('*', '%');
             queryString = $"%{queryString}%";
 
             if (genericType == typeof(Artist))
             {
-                query = builder.AddTemplate(GetScript("Artist_Select"), new { UserId = userId });
+                template = builder.AddTemplate(GetScript("Artist_Select"), new { UserId = userId });
                 builder.Where(@"a.Id NOT IN (
                   SELECT ar.Id FROM [Artist] ar
                   WHERE
@@ -2461,9 +2460,9 @@ namespace Resonance.Data.Storage.SQLite
             }
             else if (genericType == typeof(Album))
             {
-                query = builder.AddTemplate(GetScript("Album_Select"), new { UserId = userId });
+                template = builder.AddTemplate(GetScript("Album_Select"), new { UserId = userId });
 
-                builder.AddClause("firstjoin", "LEFT JOIN [TrackToAlbum] tta ON tta.AlbumId = a.Id");
+                builder.PrimaryJoin("LEFT JOIN [TrackToAlbum] tta ON tta.AlbumId = a.Id");
                 builder.Where("tta.AlbumId IS NOT NULL");
 
                 if (collectionId.HasValue)
@@ -2480,7 +2479,7 @@ namespace Resonance.Data.Storage.SQLite
             }
             else if (genericType == typeof(Track))
             {
-                query = builder.AddTemplate(GetScript("Track_Select"), new { UserId = userId });
+                template = builder.AddTemplate(GetScript("Track_Select"), new { UserId = userId });
 
                 if (collectionId.HasValue)
                 {
@@ -2499,9 +2498,10 @@ namespace Resonance.Data.Storage.SQLite
                 return null;
             }
 
-            builder.AddClause("limit", "LIMIT @Size OFFSET @Offset", new { Size = size, Offset = offset });
+            builder.Limit("@Size", new { Size = size });
+            builder.Offset("@Offset", new { Offset = offset });
 
-            var commandDefinition = new CommandDefinition(query.RawSql, transaction: _transaction, parameters: query.Parameters, cancellationToken: cancellationToken);
+            var commandDefinition = new CommandDefinition(template.RawSql, transaction: _transaction, parameters: template.Parameters, cancellationToken: cancellationToken);
 
             var result = await _dbConnection.QueryAsync(commandDefinition).ConfigureAwait(false);
 

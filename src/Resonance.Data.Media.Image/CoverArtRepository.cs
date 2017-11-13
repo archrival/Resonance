@@ -49,7 +49,7 @@ namespace Resonance.Data.Media.Image
 
             if (coverArt == null)
             {
-                var tagReader = _tagReaderFactory.CreateTagReader(track.Path);
+                var tagReader = _tagReaderFactory.CreateTagReader(track.Path, false, true);
 
                 coverArt = tagReader.CoverArt.FirstOrDefault(ca => ca.CoverArtType == CoverArtType.Front || ca.CoverArtType == CoverArtType.Other);
 
@@ -76,7 +76,7 @@ namespace Resonance.Data.Media.Image
                     var resizeOptions = new ResizeOptions { Size = new Size { Height = size.Value, Width = size.Value }, Mode = ResizeMode.Max };
 
                     var resizedImageData = image.Clone(ctx => ctx.Resize(resizeOptions));
-                        
+
                     // Save to PNG to retain quality at the expense of file size
                     resizedImageData.SaveAsPng(imageMemoryStream);
 

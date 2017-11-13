@@ -95,6 +95,11 @@ namespace Resonance.Common
             return saltBytes;
         }
 
+        public static string GetFileHash(string path, HashType hashType)
+        {
+            return GetHash(File.ReadAllBytes(path), hashType);
+        }
+
         public static string GetHash(this byte[] bytes, HashType hashType)
         {
             var sb = new StringBuilder();

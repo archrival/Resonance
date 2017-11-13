@@ -65,6 +65,6 @@ namespace Resonance.Data.Media.Common
 
         uint TrackNumber { get; }
 
-        void ReadTag(string path, HashType hashType = HashType.None);
+        void ReadTag(string path, bool readMediaProperties = true, bool readCoverArt = true, HashType hashType = HashType.None);
     }
 }

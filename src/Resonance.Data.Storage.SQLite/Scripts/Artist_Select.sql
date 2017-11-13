@@ -19,3 +19,4 @@ GROUP BY a.Id, ad.MediaId
 HAVING (MAX(mh.[Timestamp]) OR mh.[Timestamp] IS NULL) OR (MIN(ch.[Timestamp]) OR ch.[Timestamp] IS NULL)
 /**orderby**/
 /**limit**/
+/**offset**/

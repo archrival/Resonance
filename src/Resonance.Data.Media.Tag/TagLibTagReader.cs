@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using TagLib;
 
 namespace Resonance.Data.Media.Tag
@@ -12,7 +13,6 @@ namespace Resonance.Data.Media.Tag
     public class TagLibTagReader : ITagReader
     {
         private readonly bool _useUtc;
-        private FileInfo _fileInfo;
         private TagLib.File _fileTag;
         private string _hash;
         private HashType _hashType;
@@ -46,9 +46,9 @@ namespace Resonance.Data.Media.Tag
 
         public IEnumerable<CoverArt> CoverArt { get; set; }
 
-        public DateTime DateCreated => _useUtc ? _fileInfo.CreationTimeUtc : _fileInfo.CreationTime;
+        public DateTime DateCreated { get; set; }
 
-        public DateTime DateModified => _useUtc ? _fileInfo.LastWriteTimeUtc : _fileInfo.LastWriteTime;
+        public DateTime DateModified { get; set; }
 
         public uint DiscNumber => _fileTag.Tag.Disc;
 
@@ -80,25 +80,39 @@ namespace Resonance.Data.Media.Tag
 
         public int SampleRate => _fileTag.Properties.AudioSampleRate;
 
-        public long Size => _fileInfo.Length;
+        public long Size { get; set; }
 
         public string TrackName => _fileTag.Tag.Title;
 
         public uint TrackNumber => _fileTag.Tag.Track;
 
-        public void ReadTag(string path, HashType hashType = HashType.None)
+        public void ReadTag(string path, bool readMediaProperties = true, bool readCoverArt = true, HashType hashType = HashType.None)
         {
             _path = path;
             _hashType = hashType;
             _fileTag = TagLib.File.Create(_path);
-            _fileInfo = new FileInfo(_path);
 
-            ReadMediaProperties();
-            ReadCoverArt();
+            if (readMediaProperties)
+            {
+                using (var file = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                {
+                    Size = file.Length;
+                }
+
+                DateCreated = _useUtc ? System.IO.File.GetCreationTimeUtc(path) : System.IO.File.GetCreationTime(path);
+                DateModified = _useUtc ? System.IO.File.GetLastWriteTimeUtc(path) : System.IO.File.GetLastWriteTime(path);
+
+                ReadMediaProperties();
+            }
+
+            if (readCoverArt)
+            {
+                ReadCoverArt();
+            }
 
             if (hashType != HashType.None)
             {
-                _hash = _fileInfo.GetHash(_hashType);
+                _hash = HashExtensions.GetFileHash(path, _hashType);
             }
         }
 
@@ -165,8 +179,10 @@ namespace Resonance.Data.Media.Tag
 
             var duration = _fileTag.Properties.Duration;
 
-            if (!(codec is TagLib.Mpeg.AudioHeader))
+            if (codec == null || !(codec is TagLib.Mpeg.AudioHeader))
+            {
                 return;
+            }
 
             var mpegAudioHeader = (TagLib.Mpeg.AudioHeader)codec;
 

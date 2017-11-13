@@ -2,6 +2,6 @@
 {
     public interface ITagReaderFactory
     {
-        ITagReader CreateTagReader(string path);
+        ITagReader CreateTagReader(string path, bool readMediaPropertes = true, bool readCoverArt = true);
     }
 }
