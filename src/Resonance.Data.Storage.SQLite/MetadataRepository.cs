@@ -10,6 +10,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -17,6 +18,7 @@ namespace Resonance.Data.Storage.SQLite
 {
     public class MetadataRepository : IMetadataRepository
     {
+        private static Regex SearchRegex = new Regex(@"\*$");
         private readonly Assembly _assembly;
         private readonly string _assemblyName;
         private readonly string _database;
@@ -89,7 +91,7 @@ namespace Resonance.Data.Storage.SQLite
 
             try
             {
-                var builder = SqlBuilder.Create();
+                var builder = new SqlBuilder();
 
                 var template = builder.AddTemplate(GetScript("Album_Delete"));
                 builder.Where(
@@ -161,7 +163,7 @@ namespace Resonance.Data.Storage.SQLite
 
                 await _dbConnection.ExecuteAsync(commandDefinition).ConfigureAwait(false);
 
-                var builder = SqlBuilder.Create();
+                var builder = new SqlBuilder();
 
                 var template = builder.AddTemplate(GetScript("Playlist_Track_Delete"));
                 builder.Where("PlaylistId = @PlaylistId", new { PlaylistId = playlistId });
@@ -193,7 +195,7 @@ namespace Resonance.Data.Storage.SQLite
 
             try
             {
-                var builder = SqlBuilder.Create();
+                var builder = new SqlBuilder();
 
                 var template = builder.AddTemplate(GetScript("Playlist_Track_Delete"));
                 builder.Where("PlaylistId = @PlaylistId", new { PlaylistId = playlistId });
@@ -322,7 +324,7 @@ namespace Resonance.Data.Storage.SQLite
 
                 await _dbConnection.ExecuteAsync(trackToAlbumDeleteCommand).ConfigureAwait(false);
 
-                var builder = SqlBuilder.Create();
+                var builder = new SqlBuilder();
 
                 var template = builder.AddTemplate(GetScript("Playlist_Track_Delete"));
                 builder.Where("TrackId = @TrackId", new { TrackId = track.Id });
@@ -404,7 +406,7 @@ namespace Resonance.Data.Storage.SQLite
 
         public async Task<MediaBundle<Album>> GetAlbumAsync(Guid userId, Guid id, bool populate, CancellationToken cancellationToken)
         {
-            var builder = SqlBuilder.Create();
+            var builder = new SqlBuilder();
 
             var template = builder.AddTemplate(GetScript("Album_Select"), new { UserId = userId });
             builder.Where("a.Id = @AlbumId", new { AlbumId = id });
@@ -430,7 +432,7 @@ namespace Resonance.Data.Storage.SQLite
 
         public async Task<MediaBundle<Album>> GetAlbumAsync(Guid userId, HashSet<Artist> artists, string name, Guid? collectionId, bool populate, CancellationToken cancellationToken)
         {
-            var builder = SqlBuilder.Create();
+            var builder = new SqlBuilder();
 
             var template = builder.AddTemplate(GetScript("Album_Select"), new { UserId = userId });
 
@@ -463,7 +465,7 @@ namespace Resonance.Data.Storage.SQLite
 
         public async Task<IEnumerable<MediaBundle<Album>>> GetAlbumsAsync(Guid userId, Guid? collectionId, bool populate, CancellationToken cancellationToken)
         {
-            var builder = SqlBuilder.Create();
+            var builder = new SqlBuilder();
 
             var template = builder.AddTemplate(GetScript("Album_Select"), new { UserId = userId });
 
@@ -484,7 +486,7 @@ namespace Resonance.Data.Storage.SQLite
 
         public async Task<IEnumerable<MediaBundle<Album>>> GetAlbumsByArtistAsync(Guid userId, Guid artistId, bool populate, CancellationToken cancellationToken)
         {
-            var builder = SqlBuilder.Create();
+            var builder = new SqlBuilder();
 
             var template = builder.AddTemplate(GetScript("Album_Select"), new { UserId = userId });
 
@@ -493,7 +495,7 @@ namespace Resonance.Data.Storage.SQLite
 
             var commandDefinition = new CommandDefinition(template.RawSql, transaction: _transaction, parameters: template.Parameters, cancellationToken: cancellationToken);
 
-            var trackArtistBuilder = SqlBuilder.Create();
+            var trackArtistBuilder = new SqlBuilder();
 
             var trackArtistQuery = trackArtistBuilder.AddTemplate(GetScript("Album_Select"), new { UserId = userId });
 
@@ -531,7 +533,7 @@ namespace Resonance.Data.Storage.SQLite
 
         public async Task<IEnumerable<MediaBundle<Album>>> GetAlbumsByGenreAsync(Guid userId, Guid genreId, bool populate, CancellationToken cancellationToken)
         {
-            var builder = SqlBuilder.Create();
+            var builder = new SqlBuilder();
 
             var template = builder.AddTemplate(GetScript("Album_Select"), new { UserId = userId });
 
@@ -549,7 +551,7 @@ namespace Resonance.Data.Storage.SQLite
 
         public async Task<IEnumerable<MediaBundle<Album>>> GetAlphabeticalAlbumsAsync(Guid userId, int size, int offset, string genre, int? fromYear, int? toYear, Guid? collectionId, bool populate, CancellationToken cancellationToken)
         {
-            var builder = SqlBuilder.Create();
+            var builder = new SqlBuilder();
 
             var template = builder.AddTemplate(GetScript("Album_Select"), new { UserId = userId });
 
@@ -603,7 +605,7 @@ namespace Resonance.Data.Storage.SQLite
 
         public async Task<IEnumerable<MediaBundle<Album>>> GetAlphabeticalByArtistAlbumsAsync(Guid userId, int size, int offset, string genre, int? fromYear, int? toYear, Guid? collectionId, bool populate, CancellationToken cancellationToken)
         {
-            var builder = SqlBuilder.Create();
+            var builder = new SqlBuilder();
 
             var template = builder.AddTemplate(GetScript("Album_Select"), new { UserId = userId });
 
@@ -656,7 +658,7 @@ namespace Resonance.Data.Storage.SQLite
 
         public async Task<MediaBundle<Artist>> GetArtistAsync(Guid userId, Guid id, CancellationToken cancellationToken)
         {
-            var builder = SqlBuilder.Create();
+            var builder = new SqlBuilder();
 
             var template = builder.AddTemplate(GetScript("Artist_Select"), new { UserId = userId });
             builder.Where("a.Id = @ArtistId", new { ArtistId = id });
@@ -670,7 +672,7 @@ namespace Resonance.Data.Storage.SQLite
 
         public async Task<MediaBundle<Artist>> GetArtistAsync(Guid userId, string artist, Guid? collectionId, CancellationToken cancellationToken)
         {
-            var builder = SqlBuilder.Create();
+            var builder = new SqlBuilder();
 
             var template = builder.AddTemplate(GetScript("Artist_Select"), new { UserId = userId });
             builder.Where("a.Name = @ArtistName", new { ArtistName = artist });
@@ -689,7 +691,7 @@ namespace Resonance.Data.Storage.SQLite
 
         public async Task<IEnumerable<MediaBundle<Artist>>> GetArtistsAsync(Guid userId, Guid? collectionId, CancellationToken cancellationToken)
         {
-            var builder = SqlBuilder.Create();
+            var builder = new SqlBuilder();
 
             var template = builder.AddTemplate(GetScript("Artist_Select"), new { UserId = userId });
             builder.Where(@"a.Id NOT IN (
@@ -721,7 +723,7 @@ namespace Resonance.Data.Storage.SQLite
 
         public async Task<IEnumerable<MediaBundle<Artist>>> GetArtistsByAlbumAsync(Guid userId, Guid albumId, CancellationToken cancellationToken)
         {
-            var builder = SqlBuilder.Create();
+            var builder = new SqlBuilder();
 
             var template = builder.AddTemplate(GetScript("Artist_Select"), new { UserId = userId });
             builder.Join("[ArtistToAlbum] ata ON ata.ArtistId = a.Id");
@@ -737,7 +739,7 @@ namespace Resonance.Data.Storage.SQLite
 
         public async Task<IEnumerable<MediaBundle<Artist>>> GetArtistsByTrackAsync(Guid userId, Guid trackId, CancellationToken cancellationToken)
         {
-            var builder = SqlBuilder.Create();
+            var builder = new SqlBuilder();
 
             var template = builder.AddTemplate(GetScript("Artist_Select"), new { UserId = userId });
             builder.Join("[ArtistToTrack] att ON att.ArtistId = a.Id");
@@ -760,7 +762,7 @@ namespace Resonance.Data.Storage.SQLite
 
         public async Task<IEnumerable<Chat>> GetChatAsync(DateTime? since, CancellationToken cancellationToken)
         {
-            var builder = SqlBuilder.Create();
+            var builder = new SqlBuilder();
 
             var template = builder.AddTemplate(GetScript("Chat_Select"));
 
@@ -791,7 +793,7 @@ namespace Resonance.Data.Storage.SQLite
 
         public async Task<IEnumerable<Collection>> GetCollectionsAsync(CancellationToken cancellationToken)
         {
-            var builder = SqlBuilder.Create();
+            var builder = new SqlBuilder();
 
             var template = builder.AddTemplate(GetScript("Collection_Select"));
 
@@ -804,7 +806,7 @@ namespace Resonance.Data.Storage.SQLite
 
         public async Task<Disposition> GetDispositionAsync(Guid userId, Guid mediaId, CancellationToken cancellationToken)
         {
-            var builder = SqlBuilder.Create();
+            var builder = new SqlBuilder();
 
             var template = builder.AddTemplate(GetScript("Disposition_Select"));
             builder.Where("d.MediaId = @MediaId", new { MediaId = mediaId });
@@ -824,7 +826,7 @@ namespace Resonance.Data.Storage.SQLite
 
         public async Task<IEnumerable<MediaBundle<Album>>> GetFavoritedAlbumsAsync(Guid userId, int size, int offset, string genre, int? fromYear, int? toYear, Guid? collectionId, bool populate, CancellationToken cancellationToken)
         {
-            var builder = SqlBuilder.Create();
+            var builder = new SqlBuilder();
 
             var template = builder.AddTemplate(GetScript("Album_Select"), new { UserId = userId });
 
@@ -880,7 +882,7 @@ namespace Resonance.Data.Storage.SQLite
         public async Task<IEnumerable<MediaBundle<T>>> GetFavoritedAsync<T>(Guid userId, Guid? collectionId, bool populate, CancellationToken cancellationToken) where T : MediaBase, ISearchable, ICollectionIdentifier
         {
             var genericType = typeof(T);
-            var builder = SqlBuilder.Create();
+            var builder = new SqlBuilder();
             Dapper.SqlBuilder.Template template;
 
             if (genericType == typeof(Artist))
@@ -954,7 +956,7 @@ namespace Resonance.Data.Storage.SQLite
 
         public async Task<Genre> GetGenreAsync(string genre, Guid? collectionId, CancellationToken cancellationToken)
         {
-            var builder = SqlBuilder.Create();
+            var builder = new SqlBuilder();
 
             var template = builder.AddTemplate(GetScript("Genre_Select"));
 
@@ -974,7 +976,7 @@ namespace Resonance.Data.Storage.SQLite
 
         public async Task<Dictionary<string, Tuple<int, int>>> GetGenreCountsAsync(Guid? collectionId, CancellationToken cancellationToken)
         {
-            var builder = SqlBuilder.Create();
+            var builder = new SqlBuilder();
 
             var template = builder.AddTemplate(GetScript("GenreCounts_Select"));
 
@@ -1003,7 +1005,7 @@ namespace Resonance.Data.Storage.SQLite
 
         public async Task<IEnumerable<Genre>> GetGenresAsync(Guid? collectionId, CancellationToken cancellationToken)
         {
-            var builder = SqlBuilder.Create();
+            var builder = new SqlBuilder();
 
             var template = builder.AddTemplate(GetScript("Genre_Select"));
             builder.LeftJoin("[GenreToTrack] gtt ON gtt.GenreId = g.Id");
@@ -1023,7 +1025,7 @@ namespace Resonance.Data.Storage.SQLite
 
         public async Task<IEnumerable<Genre>> GetGenresByTrackAsync(Guid trackId, CancellationToken cancellationToken)
         {
-            var builder = SqlBuilder.Create();
+            var builder = new SqlBuilder();
 
             var template = builder.AddTemplate(GetScript("Genre_Select"));
             builder.Join("[GenreToTrack] gtt ON gtt.GenreId = g.Id");
@@ -1039,7 +1041,7 @@ namespace Resonance.Data.Storage.SQLite
 
         public async Task<IEnumerable<MediaBundle<Album>>> GetHighestRatedAlbumsAsync(Guid userId, int size, int offset, string genre, int? fromYear, int? toYear, Guid? collectionId, bool populate, CancellationToken cancellationToken)
         {
-            var builder = SqlBuilder.Create();
+            var builder = new SqlBuilder();
 
             var template = builder.AddTemplate(GetScript("Album_Select"), new { UserId = userId });
 
@@ -1094,7 +1096,7 @@ namespace Resonance.Data.Storage.SQLite
 
         public async Task<IEnumerable<Marker>> GetMarkersAsync(Guid userId, CancellationToken cancellationToken)
         {
-            var builder = SqlBuilder.Create();
+            var builder = new SqlBuilder();
 
             var template = builder.AddTemplate(GetScript("Marker_Select"));
             builder.Where("m.UserId = @UserId", new { UserId = userId });
@@ -1108,7 +1110,7 @@ namespace Resonance.Data.Storage.SQLite
 
         public async Task<MediaInfo> GetMediaInfoAsync(Guid mediaId, CancellationToken cancellationToken)
         {
-            var builder = SqlBuilder.Create();
+            var builder = new SqlBuilder();
 
             var template = builder.AddTemplate(GetScript("MediaInfo_Select"));
             builder.Where("mi.MediaId = @MediaId", new { MediaId = mediaId });
@@ -1122,7 +1124,7 @@ namespace Resonance.Data.Storage.SQLite
 
         public async Task<MediaType?> GetMediaTypeAsync(Guid mediaId, CancellationToken cancellationToken)
         {
-            var builder = SqlBuilder.Create();
+            var builder = new SqlBuilder();
 
             var template = builder.AddTemplate(GetScript("MediaTypeId_Select"), new { Id = mediaId });
 
@@ -1137,7 +1139,7 @@ namespace Resonance.Data.Storage.SQLite
 
         public async Task<IEnumerable<MediaBundle<Album>>> GetMostPlayedAlbumsAsync(Guid userId, int size, int offset, string genre, int? fromYear, int? toYear, Guid? collectionId, bool populate, CancellationToken cancellationToken)
         {
-            var builder = SqlBuilder.Create();
+            var builder = new SqlBuilder();
 
             var template = builder.AddTemplate(GetScript("Album_Select"), new { UserId = userId });
 
@@ -1196,7 +1198,7 @@ namespace Resonance.Data.Storage.SQLite
 
         public async Task<IEnumerable<MediaBundle<Album>>> GetMostRecentlyPlayedAlbumsAsync(Guid userId, int size, int offset, string genre, int? fromYear, int? toYear, Guid? collectionId, bool populate, CancellationToken cancellationToken)
         {
-            var builder = SqlBuilder.Create();
+            var builder = new SqlBuilder();
 
             var template = builder.AddTemplate(GetScript("Album_Select"), new { UserId = userId });
 
@@ -1254,7 +1256,7 @@ namespace Resonance.Data.Storage.SQLite
 
         public async Task<IEnumerable<MediaBundle<Album>>> GetNewestAlbumsAsync(Guid userId, int size, int offset, string genre, int? fromYear, int? toYear, Guid? collectionId, bool populate, CancellationToken cancellationToken)
         {
-            var builder = SqlBuilder.Create();
+            var builder = new SqlBuilder();
 
             var template = builder.AddTemplate(GetScript("Album_Select"), new { UserId = userId });
 
@@ -1308,7 +1310,7 @@ namespace Resonance.Data.Storage.SQLite
 
         public async Task<Playlist> GetPlaylistAsync(Guid userId, Guid id, bool getTracks, CancellationToken cancellationToken)
         {
-            var builder = SqlBuilder.Create();
+            var builder = new SqlBuilder();
 
             var template = builder.AddTemplate(GetScript("Playlist_Select"));
             builder.Where("p.Id = @Id", new { Id = id });
@@ -1327,7 +1329,7 @@ namespace Resonance.Data.Storage.SQLite
 
             if (getTracks)
             {
-                var trackToPlaylistBuilder = SqlBuilder.Create();
+                var trackToPlaylistBuilder = new SqlBuilder();
 
                 var trackToPlaylistQuery = trackToPlaylistBuilder.AddTemplate(GetScript("Playlist_Track_Select"));
                 trackToPlaylistBuilder.Where("ttp.PlaylistId = @PlaylistId", new { PlaylistId = id });
@@ -1359,7 +1361,7 @@ namespace Resonance.Data.Storage.SQLite
 
         public async Task<List<Playlist>> GetPlaylistsAsync(Guid userId, string username, bool getTracks, CancellationToken cancellationToken)
         {
-            var builder = SqlBuilder.Create();
+            var builder = new SqlBuilder();
 
             var template = builder.AddTemplate(GetScript("Playlist_Select"));
 
@@ -1400,7 +1402,7 @@ namespace Resonance.Data.Storage.SQLite
 
         public async Task<PlayQueue> GetPlayQueueAsync(Guid userId, CancellationToken cancellationToken)
         {
-            var builder = SqlBuilder.Create();
+            var builder = new SqlBuilder();
 
             var template = builder.AddTemplate(GetScript("PlayQueue_Select"));
             builder.Where("p.UserId = @UserId", new { UserId = userId });
@@ -1417,7 +1419,7 @@ namespace Resonance.Data.Storage.SQLite
             var playQueue = PlayQueue.FromDynamic(result);
             playQueue.User = await GetUserAsync(userId, cancellationToken).ConfigureAwait(false);
 
-            var trackToPlayQueueBuilder = SqlBuilder.Create();
+            var trackToPlayQueueBuilder = new SqlBuilder();
 
             var trackToPlayQueueQuery = trackToPlayQueueBuilder.AddTemplate(GetScript("PlayQueue_Track_Select"));
             trackToPlayQueueBuilder.Where("ttp.PlayQueueId = @PlayQueueId", new { PlayQueueId = playQueue.Id });
@@ -1448,7 +1450,7 @@ namespace Resonance.Data.Storage.SQLite
 
         public async Task<RadioStation> GetRadioStationAsync(Guid id, CancellationToken cancellationToken)
         {
-            var builder = SqlBuilder.Create();
+            var builder = new SqlBuilder();
 
             var template = builder.AddTemplate(GetScript("RadioStation_Select"));
             builder.Where("r.Id IN(@Id)", new { Id = id });
@@ -1467,7 +1469,7 @@ namespace Resonance.Data.Storage.SQLite
 
         public async Task<IEnumerable<RadioStation>> GetRadioStationsAsync(CancellationToken cancellationToken)
         {
-            var builder = SqlBuilder.Create();
+            var builder = new SqlBuilder();
 
             var template = builder.AddTemplate(GetScript("RadioStation_Select"));
 
@@ -1485,7 +1487,7 @@ namespace Resonance.Data.Storage.SQLite
 
         public async Task<IEnumerable<MediaBundle<Album>>> GetRandomAlbumsAsync(Guid userId, int size, int offset, string genre, int? fromYear, int? toYear, Guid? collectionId, bool populate, CancellationToken cancellationToken)
         {
-            var builder = SqlBuilder.Create();
+            var builder = new SqlBuilder();
 
             var template = builder.AddTemplate(GetScript("Album_Select"), new { UserId = userId });
 
@@ -1526,7 +1528,7 @@ namespace Resonance.Data.Storage.SQLite
                 builder.Where($"t.ReleaseDate {(reverseYearSort ? ">=" : "<=")} @ToYear", new { ToYear = toYear });
             }
 
-            builder.Where("a.Id IN (SELECT Id FROM Album ORDER BY RANDOM() LIMIT @Size + @Offset)", new { Size = size });
+            builder.Where("a.Id IN (SELECT Id FROM Album ORDER BY RANDOM() LIMIT @RandomCount)", new { RandomCount = size + offset });
             builder.Limit("@Size", new { Size = size });
             builder.Offset("@Offset", new { Offset = offset });
 
@@ -1544,7 +1546,7 @@ namespace Resonance.Data.Storage.SQLite
 
         public async Task<IEnumerable<MediaBundle<Track>>> GetRecentPlaybackAsync(Guid userId, bool populate, CancellationToken cancellationToken)
         {
-            var builder = SqlBuilder.Create();
+            var builder = new SqlBuilder();
 
             var template = builder.AddTemplate(GetScript("Track_Select"), new { UserId = userId });
             builder.Join("[Playback] p ON p.TrackId = t.Id");
@@ -1561,7 +1563,7 @@ namespace Resonance.Data.Storage.SQLite
 
         public async Task<IEnumerable<Role>> GetRolesForUserAsync(Guid userId, CancellationToken cancellationToken)
         {
-            var builder = SqlBuilder.Create();
+            var builder = new SqlBuilder();
 
             var template = builder.AddTemplate(GetScript("Role_Select"));
             builder.Join("[UserToRole] utr ON utr.RoleId = r.Id");
@@ -1576,7 +1578,7 @@ namespace Resonance.Data.Storage.SQLite
 
         public async Task<MediaBundle<Track>> GetTrackAsync(Guid userId, Guid id, bool populate, CancellationToken cancellationToken)
         {
-            var builder = SqlBuilder.Create();
+            var builder = new SqlBuilder();
 
             var template = builder.AddTemplate(GetScript("Track_Select"), new { UserId = userId });
             builder.Where("t.Id = @TrackId", new { TrackId = id });
@@ -1602,7 +1604,7 @@ namespace Resonance.Data.Storage.SQLite
 
         public async Task<MediaBundle<Track>> GetTrackAsync(Guid userId, string artist, string track, Guid? collectionId, bool populate, CancellationToken cancellationToken)
         {
-            var builder = SqlBuilder.Create();
+            var builder = new SqlBuilder();
 
             var template = builder.AddTemplate(GetScript("Track_Select"), new { UserId = userId });
             builder.Join("[ArtistToTrack] att ON att.TrackId = t.Id");
@@ -1637,7 +1639,7 @@ namespace Resonance.Data.Storage.SQLite
 
         public async Task<MediaBundle<Track>> GetTrackAsync(Guid userId, string path, Guid? collectionId, bool populate, CancellationToken cancellationToken)
         {
-            var builder = SqlBuilder.Create();
+            var builder = new SqlBuilder();
 
             var template = builder.AddTemplate(GetScript("Track_Select"), new { UserId = userId });
             builder.Where("t.Path = @Path", new { Path = path });
@@ -1668,7 +1670,7 @@ namespace Resonance.Data.Storage.SQLite
 
         public async Task<IEnumerable<MediaBundle<Track>>> GetTracksAsync(Guid userId, int size, int offset, string genre, int? fromYear, int? toYear, Guid? collectionId, bool populate, bool randomize, CancellationToken cancellationToken)
         {
-            var builder = SqlBuilder.Create();
+            var builder = new SqlBuilder();
 
             var template = builder.AddTemplate(GetScript("Track_Select"), new { UserId = userId });
 
@@ -1681,7 +1683,7 @@ namespace Resonance.Data.Storage.SQLite
             {
                 builder.Join("[GenreToTrack] gtt ON gtt.TrackId = t.Id");
                 builder.Join("[Genre] g ON g.Id = gtt.GenreId");
-                builder.Where("g.Name IN(@Genre)", new { Genre = genre });
+                builder.Where("g.Name = @Genre", new { Genre = genre });
             }
 
             if (fromYear.HasValue)
@@ -1696,7 +1698,7 @@ namespace Resonance.Data.Storage.SQLite
 
             if (randomize)
             {
-                builder.Where("t.Id IN (SELECT Id FROM Track ORDER BY RANDOM() LIMIT @Size + @Offset)", new { Size = size });
+                builder.Where("t.Id IN (SELECT Id FROM Track ORDER BY RANDOM() LIMIT @RandomCount)", new { RandomCount = size + offset });
             }
 
             builder.Limit("@Size", new { Size = size });
@@ -1711,7 +1713,7 @@ namespace Resonance.Data.Storage.SQLite
 
         public async Task<IEnumerable<MediaBundle<Track>>> GetTracksAsync(Guid userId, Guid? collectionId, CancellationToken cancellationToken)
         {
-            var builder = SqlBuilder.Create();
+            var builder = new SqlBuilder();
 
             var template = builder.AddTemplate(GetScript("Track_Select"), new { UserId = userId });
 
@@ -1729,7 +1731,7 @@ namespace Resonance.Data.Storage.SQLite
 
         public async Task<IEnumerable<MediaBundle<Track>>> GetTracksByAlbumAsync(Guid userId, Guid albumId, bool populate, CancellationToken cancellationToken)
         {
-            var builder = SqlBuilder.Create();
+            var builder = new SqlBuilder();
 
             var template = builder.AddTemplate(GetScript("Track_Select"), new { UserId = userId });
             builder.Where("tta.AlbumId = @AlbumId", new { AlbumId = albumId });
@@ -1743,7 +1745,7 @@ namespace Resonance.Data.Storage.SQLite
 
         public async Task<IEnumerable<MediaBundle<Track>>> GetTracksByGenreAsync(Guid userId, Guid genreId, bool populate, CancellationToken cancellationToken)
         {
-            var builder = SqlBuilder.Create();
+            var builder = new SqlBuilder();
 
             var template = builder.AddTemplate(GetScript("Track_Select"), new { UserId = userId });
             builder.Join("[GenreToTrack] gtt ON gtt.TrackId = t.Id");
@@ -1758,7 +1760,7 @@ namespace Resonance.Data.Storage.SQLite
 
         public async Task<User> GetUserAsync(Guid userId, CancellationToken cancellationToken)
         {
-            var builder = SqlBuilder.Create();
+            var builder = new SqlBuilder();
 
             var template = builder.AddTemplate(GetScript("User_Select"));
             builder.Where("u.Id = @UserId", new { UserId = userId });
@@ -1772,7 +1774,7 @@ namespace Resonance.Data.Storage.SQLite
 
         public async Task<User> GetUserAsync(string username, CancellationToken cancellationToken)
         {
-            var builder = SqlBuilder.Create();
+            var builder = new SqlBuilder();
 
             var template = builder.AddTemplate(GetScript("User_Select"));
             builder.Where("u.Name = @Username", new { Username = username });
@@ -1786,7 +1788,7 @@ namespace Resonance.Data.Storage.SQLite
 
         public async Task<IEnumerable<User>> GetUsersAsync(CancellationToken cancellationToken)
         {
-            var builder = SqlBuilder.Create();
+            var builder = new SqlBuilder();
 
             var template = builder.AddTemplate(GetScript("User_Select"));
 
@@ -2422,10 +2424,10 @@ namespace Resonance.Data.Storage.SQLite
         public async Task<IEnumerable<MediaBundle<T>>> SearchAsync<T>(Guid userId, string queryString, int size, int offset, Guid? collectionId, bool populate, CancellationToken cancellationToken) where T : MediaBase, ISearchable, ICollectionIdentifier
         {
             var genericType = typeof(T);
-            var builder = SqlBuilder.Create();
+            var builder = new SqlBuilder();
             Dapper.SqlBuilder.Template template;
 
-            queryString = queryString.Replace('*', '%');
+            queryString = SearchRegex.Replace(queryString, string.Empty);
             queryString = $"%{queryString}%";
 
             if (genericType == typeof(Artist))

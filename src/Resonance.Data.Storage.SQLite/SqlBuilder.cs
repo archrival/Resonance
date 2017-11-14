@@ -2,11 +2,6 @@
 {
     public class SqlBuilder : Dapper.SqlBuilder
     {
-        public static SqlBuilder Create()
-        {
-            return new SqlBuilder();
-        }
-
         public new void AddClause(string name, string sql, object parameters = null, string joiner = "", string prefix = "", string postfix = "", bool isInclusive = false)
         {
             base.AddClause(name, sql, parameters, joiner, prefix, postfix, isInclusive);

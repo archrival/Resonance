@@ -1737,23 +1737,48 @@ namespace Resonance.SubsonicCompat.Controllers
 
             var userId = ControllerContext.GetAuthorizationContext().User.Id;
 
+            var tasks = new List<Task>();
+            Task<IEnumerable<MediaBundle<Data.Models.Artist>>> artistsSearchTask = null;
+            Task<IEnumerable<MediaBundle<Album>>> albumSearchTask = null;
+            Task<IEnumerable<MediaBundle<Track>>> trackSearchTask = null;
+
             if (artistCount > 0)
             {
-                artists = await MediaLibrary.SearchArtistsAsync(userId, query, artistCount.GetValueOrDefault(), artistOffset.GetValueOrDefault(), musicFolderId, true, cancellationToken).ConfigureAwait(false);
+                artistsSearchTask = MediaLibrary.SearchArtistsAsync(userId, query, artistCount.GetValueOrDefault(), artistOffset.GetValueOrDefault(), musicFolderId, true, cancellationToken);
+                tasks.Add(artistsSearchTask);
             }
 
             cancellationToken.ThrowIfCancellationRequested();
 
             if (albumCount > 0)
             {
-                albums = await MediaLibrary.SearchAlbumsAsync(userId, query, albumCount.GetValueOrDefault(), albumOffset.GetValueOrDefault(), musicFolderId, true, cancellationToken).ConfigureAwait(false);
+                albumSearchTask = MediaLibrary.SearchAlbumsAsync(userId, query, albumCount.GetValueOrDefault(), albumOffset.GetValueOrDefault(), musicFolderId, true, cancellationToken);
+                tasks.Add(albumSearchTask);
             }
 
             cancellationToken.ThrowIfCancellationRequested();
 
             if (songCount > 0)
             {
-                tracks = await MediaLibrary.SearchTracksAsync(userId, query, songCount.GetValueOrDefault(), songOffset.GetValueOrDefault(), musicFolderId, true, cancellationToken).ConfigureAwait(false);
+                trackSearchTask = MediaLibrary.SearchTracksAsync(userId, query, songCount.GetValueOrDefault(), songOffset.GetValueOrDefault(), musicFolderId, true, cancellationToken);
+                tasks.Add(trackSearchTask);
+            }
+
+            await Task.WhenAll(tasks);
+
+            if (artistsSearchTask != null && artistsSearchTask.Status == TaskStatus.RanToCompletion)
+            {
+                artists = artistsSearchTask.Result;
+            }
+
+            if (albumSearchTask != null && albumSearchTask.Status == TaskStatus.RanToCompletion)
+            {
+                albums = albumSearchTask.Result;
+            }
+
+            if (trackSearchTask != null && trackSearchTask.Status == TaskStatus.RanToCompletion)
+            {
+                tracks = trackSearchTask.Result;
             }
 
             cancellationToken.ThrowIfCancellationRequested();
@@ -1813,23 +1838,48 @@ namespace Resonance.SubsonicCompat.Controllers
 
             var userId = ControllerContext.GetAuthorizationContext().User.Id;
 
+            var tasks = new List<Task>();
+            Task<IEnumerable<MediaBundle<Data.Models.Artist>>> artistsSearchTask = null;
+            Task<IEnumerable<MediaBundle<Album>>> albumSearchTask = null;
+            Task<IEnumerable<MediaBundle<Track>>> trackSearchTask = null;
+
             if (artistCount > 0)
             {
-                artists = await MediaLibrary.SearchArtistsAsync(userId, query, artistCount.GetValueOrDefault(), artistOffset.GetValueOrDefault(), musicFolderId, true, cancellationToken).ConfigureAwait(false);
+                artistsSearchTask = MediaLibrary.SearchArtistsAsync(userId, query, artistCount.GetValueOrDefault(), artistOffset.GetValueOrDefault(), musicFolderId, true, cancellationToken);
+                tasks.Add(artistsSearchTask);
             }
 
             cancellationToken.ThrowIfCancellationRequested();
 
             if (albumCount > 0)
             {
-                albums = await MediaLibrary.SearchAlbumsAsync(userId, query, albumCount.GetValueOrDefault(), albumOffset.GetValueOrDefault(), musicFolderId, true, cancellationToken).ConfigureAwait(false);
+                albumSearchTask = MediaLibrary.SearchAlbumsAsync(userId, query, albumCount.GetValueOrDefault(), albumOffset.GetValueOrDefault(), musicFolderId, true, cancellationToken);
+                tasks.Add(albumSearchTask);
             }
 
             cancellationToken.ThrowIfCancellationRequested();
 
             if (songCount > 0)
             {
-                tracks = await MediaLibrary.SearchTracksAsync(userId, query, songCount.GetValueOrDefault(), songOffset.GetValueOrDefault(), musicFolderId, true, cancellationToken).ConfigureAwait(false);
+                trackSearchTask = MediaLibrary.SearchTracksAsync(userId, query, songCount.GetValueOrDefault(), songOffset.GetValueOrDefault(), musicFolderId, true, cancellationToken);
+                tasks.Add(trackSearchTask);
+            }
+
+            await Task.WhenAll(tasks);
+
+            if (artistsSearchTask != null && artistsSearchTask.Status == TaskStatus.RanToCompletion)
+            {
+                artists = artistsSearchTask.Result;
+            }
+
+            if (albumSearchTask != null && albumSearchTask.Status == TaskStatus.RanToCompletion)
+            {
+                albums = albumSearchTask.Result;
+            }
+
+            if (trackSearchTask != null && trackSearchTask.Status == TaskStatus.RanToCompletion)
+            {
+                tracks = trackSearchTask.Result;
             }
 
             cancellationToken.ThrowIfCancellationRequested();
