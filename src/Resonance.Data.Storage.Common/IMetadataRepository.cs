@@ -106,7 +106,7 @@ namespace Resonance.Data.Storage
 
         Task<Playlist> GetPlaylistAsync(Guid userId, Guid id, bool getTracks, CancellationToken cancellationToken);
 
-        Task<List<Playlist>> GetPlaylistsAsync(Guid userId, string username, bool getTracks, CancellationToken cancellationToken);
+        Task<IEnumerable<Playlist>> GetPlaylistsAsync(Guid userId, string username, bool getTracks, CancellationToken cancellationToken);
 
         Task<PlayQueue> GetPlayQueueAsync(Guid userId, CancellationToken cancellationToken);
 

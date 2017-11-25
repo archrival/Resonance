@@ -4,21 +4,20 @@ using Newtonsoft.Json;
 using Resonance.Common;
 using Subsonic.Common.Classes;
 using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Linq;
 
 namespace Resonance.SubsonicCompat
 {
     public class SubsonicFilter
     {
-        public static async Task<IActionResult> ConvertToResultFormatAsync(Response response, SubsonicQueryParameters queryParameters)
+        public static IActionResult ConvertToResultFormat(Response response, SubsonicQueryParameters queryParameters)
         {
             if (response == null || queryParameters == null)
             {
                 return null;
             }
 
-            var xmlString = await response.SerializeToXmlAsync();
+            var xmlString = response.SerializeToXml();
 
             switch (queryParameters.Format)
             {

@@ -6,7 +6,7 @@ namespace Resonance.Common
 {
     public static class CompressionExtensions
     {
-        public static Stream CompressFiles(IEnumerable<string> files, CompressionLevel compressionLevel)
+        public static Stream CompressFilesToZipArchiveStream(IEnumerable<string> files, CompressionLevel compressionLevel)
         {
             var memoryStream = new MemoryStream();
 

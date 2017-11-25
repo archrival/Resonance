@@ -25,6 +25,111 @@ namespace Resonance.Common
         private static readonly byte[] WMV_WMA = { 48, 38, 178, 117, 142, 102, 207, 17, 166, 217, 0, 170, 0, 98, 206, 108 };
         private static readonly byte[] ZIP_DOCX = { 80, 75, 3, 4 };
 
+        public static string GetDefaultMimeTypeForExtension(string extension)
+        {
+            var mime = "application/octet-stream";
+
+            switch (extension.ToLowerInvariant())
+            {
+                case "bmp":
+                    mime = "image/bmp";
+                    break;
+
+                case "doc":
+                    mime = "application/msword";
+                    break;
+
+                case "exe":
+                case "dll":
+                    mime = "application/x-msdownload";
+                    break;
+
+                case "gif":
+                    mime = "image/gif";
+                    break;
+
+                case "ico":
+                    mime = "image/x-icon";
+                    break;
+
+                case "jpg":
+                    mime = "image/jpeg";
+                    break;
+
+                case "mp3":
+                case "mp2":
+                    mime = "audio/mpeg";
+                    break;
+
+                case "ogg":
+                    mime = "video/ogg";
+                    break;
+
+                case "ogx":
+                    mime = "application/ogg";
+                    break;
+
+                case "oga":
+                    mime = "audio/ogg";
+                    break;
+
+                case "pdf":
+                    mime = "application/pdf";
+                    break;
+
+                case "png":
+                    mime = "image/png";
+                    break;
+
+                case "rar":
+                    mime = "application/x-rar-compressed";
+                    break;
+
+                case "swf":
+                    mime = "application/x-shockwave-flash";
+                    break;
+
+                case "tif":
+                case "tiff":
+                    mime = "image/tiff";
+                    break;
+
+                case "torrent":
+                    mime = "application/x-bittorrent";
+                    break;
+
+                case "ttf":
+                    mime = "application/x-font-ttf";
+                    break;
+
+                case "wav":
+                    mime = "audio/x-wav";
+                    break;
+
+                case "avi":
+                    mime = "video/x-msvideo";
+                    break;
+
+                case "wma":
+                    mime = "audio/x-ms-wma";
+                    break;
+
+                case "wmv":
+                    mime = "video/x-ms-wmv";
+                    break;
+
+                case "zip":
+                    mime = "application/x-zip-compressed";
+                    break;
+
+                case "docx":
+                    mime = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+                    break;
+            }
+
+            return mime;
+        }
+
         public static string GetMimeType(Stream stream, string extension)
         {
             var bytes = new byte[maxByteCount];
@@ -46,89 +151,6 @@ namespace Resonance.Common
             return GetMimeType(bytes, fileName);
         }
 
-        public static string GetDefaultMimeTypeForExtension(string extension)
-        {
-            var mime = "application/octet-stream";
-
-            switch (extension.ToLowerInvariant())
-            {
-                case "bmp":
-                    mime = "image/bmp";
-                    break;
-                case "doc":
-                    mime = "application/msword";
-                    break;
-                case "exe":
-                case "dll":
-                    mime = "application/x-msdownload";
-                    break;
-                case "gif":
-                    mime = "image/gif";
-                    break;
-                case "ico":
-                    mime = "image/x-icon";
-                    break;
-                case "jpg":
-                    mime = "image/jpeg";
-                    break;
-                case "mp3":
-                case "mp2":
-                    mime = "audio/mpeg";
-                    break;
-                case "ogg":
-                    mime = "video/ogg";
-                    break;
-                case "ogx":
-                    mime = "application/ogg";
-                    break;
-                case "oga":
-                    mime = "audio/ogg";
-                    break;
-                case "pdf":
-                    mime = "application/pdf";
-                    break;
-                case "png":
-                    mime = "image/png";
-                    break;
-                case "rar":
-                    mime = "application/x-rar-compressed";
-                    break;
-                case "swf":
-                    mime = "application/x-shockwave-flash";
-                    break;
-                case "tif":
-                case "tiff":
-                    mime = "image/tiff";
-                    break;
-                case "torrent":
-                    mime = "application/x-bittorrent";
-                    break;
-                case "ttf":
-                    mime = "application/x-font-ttf";
-                    break;
-                case "wav":
-                    mime = "audio/x-wav";
-                    break;
-                case "avi":
-                    mime = "video/x-msvideo";
-                    break;
-                case "wma":
-                    mime = "audio/x-ms-wma";
-                    break;
-                case "wmv":
-                    mime = "video/x-ms-wmv";
-                    break;
-                case "zip":
-                    mime = "application/x-zip-compressed";
-                    break;
-                case "docx":
-                    mime = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
-                    break;
-            }
-
-            return mime;
-        }
-
         public static string GetMimeType(byte[] file, string fileName)
         {
             var mime = "application/octet-stream";
@@ -137,10 +159,38 @@ namespace Resonance.Common
 
             if (!string.IsNullOrWhiteSpace(fileName))
             {
-                extension = Path.GetExtension(fileName) == null ? string.Empty : Path.GetExtension(fileName).ToUpper();
+                string pathExtension = Path.GetExtension(fileName);
+                extension = pathExtension == null ? string.Empty : pathExtension.ToUpper();
             }
 
-            if (file.Take(2).SequenceEqual(BMP))
+            if (file.Take(3).SequenceEqual(MP3))
+            {
+                mime = "audio/mpeg";
+            }
+            else if (file.Take(14).SequenceEqual(OGG))
+            {
+                if (extension == ".OGX")
+                {
+                    mime = "application/ogg";
+                }
+                else if (extension == ".OGA")
+                {
+                    mime = "audio/ogg";
+                }
+                else
+                {
+                    mime = "video/ogg";
+                }
+            }
+            else if (file.Take(16).SequenceEqual(PNG))
+            {
+                mime = "image/png";
+            }
+            else if (file.Take(3).SequenceEqual(JPG))
+            {
+                mime = "image/jpeg";
+            }
+            else if (file.Take(2).SequenceEqual(BMP))
             {
                 mime = "image/bmp";
             }
@@ -160,36 +210,9 @@ namespace Resonance.Common
             {
                 mime = "image/x-icon";
             }
-            else if (file.Take(3).SequenceEqual(JPG))
-            {
-                mime = "image/jpeg";
-            }
-            else if (file.Take(3).SequenceEqual(MP3))
-            {
-                mime = "audio/mpeg";
-            }
-            else if (file.Take(14).SequenceEqual(OGG))
-            {
-                if (extension == ".OGX")
-                {
-                    mime = "application/ogg";
-                }
-                else if (extension == ".OGA")
-                {
-                    mime = "audio/ogg";
-                }
-                else
-                {
-                    mime = "video/ogg";
-                }
-            }
             else if (file.Take(7).SequenceEqual(PDF))
             {
                 mime = "application/pdf";
-            }
-            else if (file.Take(16).SequenceEqual(PNG))
-            {
-                mime = "image/png";
             }
             else if (file.Take(7).SequenceEqual(RAR))
             {

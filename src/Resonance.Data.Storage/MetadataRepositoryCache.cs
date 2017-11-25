@@ -39,36 +39,36 @@ namespace Resonance.Data.Storage
             return await GetAlbumAsync(userId, artists, name, collectionId, populate, cancellationToken);
         }
 
-        public async Task<MediaBundle<Album>> GetAlbumAsync(Guid userId, HashSet<Artist> artists, string name, Guid collectionId, bool populate, CancellationToken cancellationToken)
+        public Task<MediaBundle<Album>> GetAlbumAsync(Guid userId, HashSet<Artist> artists, string name, Guid collectionId, bool populate, CancellationToken cancellationToken)
         {
             var repositoryCache = new AlbumRepositoryCache(_metadataRepository, userId, artists, name, collectionId, populate);
-            return await repositoryCache.GetResultAsync(cancellationToken, UseCache).ConfigureAwait(false);
+            return repositoryCache.GetResultAsync(cancellationToken, UseCache);
         }
 
-        public async Task<MediaBundle<Album>> GetAlbumAsync(Guid userId, Guid id, bool populate, CancellationToken cancellationToken)
+        public Task<MediaBundle<Album>> GetAlbumAsync(Guid userId, Guid id, bool populate, CancellationToken cancellationToken)
         {
             var repositoryCache = new AlbumRepositoryIdCache(_metadataRepository, userId, id, populate);
             repositoryCache.SetAddNullToCache(false);
-            return await repositoryCache.GetResultAsync(cancellationToken, UseCache).ConfigureAwait(false);
+            return repositoryCache.GetResultAsync(cancellationToken, UseCache);
         }
 
-        public async Task<IEnumerable<MediaBundle<Album>>> GetAlbumsByArtistAsync(Guid userId, Guid artistId, bool populate, CancellationToken cancellationToken)
+        public Task<IEnumerable<MediaBundle<Album>>> GetAlbumsByArtistAsync(Guid userId, Guid artistId, bool populate, CancellationToken cancellationToken)
         {
             var repositoryCache = new AlbumRepositoryByArtistIdCache(_metadataRepository, userId, artistId, populate);
-            return await repositoryCache.GetResultAsync(cancellationToken, UseCache).ConfigureAwait(false);
+            return repositoryCache.GetResultAsync(cancellationToken, UseCache);
         }
 
-        public async Task<MediaBundle<Artist>> GetArtistAsync(Guid userId, Guid id, CancellationToken cancellationToken)
+        public Task<MediaBundle<Artist>> GetArtistAsync(Guid userId, Guid id, CancellationToken cancellationToken)
         {
             var repositoryCache = new ArtistRepositoryIdCache(_metadataRepository, userId, id);
             repositoryCache.SetAddNullToCache(false);
-            return await repositoryCache.GetResultAsync(cancellationToken, UseCache).ConfigureAwait(false);
+            return repositoryCache.GetResultAsync(cancellationToken, UseCache);
         }
 
-        public async Task<MediaBundle<Artist>> GetArtistAsync(Guid userId, string artist, Guid collectionId, CancellationToken cancellationToken)
+        public Task<MediaBundle<Artist>> GetArtistAsync(Guid userId, string artist, Guid collectionId, CancellationToken cancellationToken)
         {
             var repositoryCache = new ArtistRepositoryCache(_metadataRepository, userId, artist, collectionId);
-            return await repositoryCache.GetResultAsync(cancellationToken, UseCache).ConfigureAwait(false);
+            return repositoryCache.GetResultAsync(cancellationToken, UseCache);
         }
 
         public async Task<IEnumerable<MediaBundle<Artist>>> GetArtistsAsync(Guid userId, Guid? collectionId, CancellationToken cancellationToken)
@@ -102,10 +102,10 @@ namespace Resonance.Data.Storage
             return artists.Any() ? artists : null;
         }
 
-        public async Task<Genre> GetGenreAsync(string genre, Guid collectionId, CancellationToken cancellationToken)
+        public Task<Genre> GetGenreAsync(string genre, Guid collectionId, CancellationToken cancellationToken)
         {
             var repositoryCache = new GenreRepositoryCache(_metadataRepository, genre, collectionId);
-            return await repositoryCache.GetResultAsync(cancellationToken, UseCache).ConfigureAwait(false);
+            return repositoryCache.GetResultAsync(cancellationToken, UseCache);
         }
 
         public async Task<Dictionary<string, Tuple<int, int>>> GetGenreCountsAsync(Guid? collectionId, CancellationToken cancellationToken)
@@ -157,37 +157,37 @@ namespace Resonance.Data.Storage
             return genres.Any() ? genres : null;
         }
 
-        public async Task<Playlist> GetPlaylistAsync(Guid userId, Guid id, bool getTracks, CancellationToken cancellationToken)
+        public Task<Playlist> GetPlaylistAsync(Guid userId, Guid id, bool getTracks, CancellationToken cancellationToken)
         {
             var repositoryCache = new PlaylistRepositoryIdCache(_metadataRepository, userId, id, getTracks);
             repositoryCache.SetAddNullToCache(false);
-            return await repositoryCache.GetResultAsync(cancellationToken, UseCache).ConfigureAwait(false);
+            return repositoryCache.GetResultAsync(cancellationToken, UseCache);
         }
 
-        public async Task<IEnumerable<Playlist>> GetPlaylistsAsync(Guid userId, string username, bool getTracks, CancellationToken cancellationToken)
+        public Task<IEnumerable<Playlist>> GetPlaylistsAsync(Guid userId, string username, bool getTracks, CancellationToken cancellationToken)
         {
             var repositoryCache = new PlaylistsRepositoryIdCache(_metadataRepository, userId, username, getTracks);
             repositoryCache.SetAddNullToCache(false);
-            return await repositoryCache.GetResultAsync(cancellationToken, UseCache).ConfigureAwait(false);
+            return repositoryCache.GetResultAsync(cancellationToken, UseCache);
         }
 
-        public async Task<MediaBundle<Track>> GetTrackAsync(Guid userId, string artist, string track, Guid? collectionId, bool populate, CancellationToken cancellationToken)
+        public Task<MediaBundle<Track>> GetTrackAsync(Guid userId, string artist, string track, Guid? collectionId, bool populate, CancellationToken cancellationToken)
         {
             var repositoryCache = new TrackRepositoryArtistAndTrackCache(_metadataRepository, userId, artist, track, collectionId, populate);
-            return await repositoryCache.GetResultAsync(cancellationToken, UseCache).ConfigureAwait(false);
+            return repositoryCache.GetResultAsync(cancellationToken, UseCache);
         }
 
-        public async Task<MediaBundle<Track>> GetTrackAsync(Guid userId, string path, Guid collectionId, bool populate, bool updateCollection, CancellationToken cancellationToken)
+        public Task<MediaBundle<Track>> GetTrackAsync(Guid userId, string path, Guid collectionId, bool populate, bool updateCollection, CancellationToken cancellationToken)
         {
             var repositoryCache = new TrackRepositoryPathCache(_metadataRepository, this, _tagReaderFactory, userId, path, collectionId, populate, updateCollection);
-            return await repositoryCache.GetResultAsync(cancellationToken, UseCache).ConfigureAwait(false);
+            return repositoryCache.GetResultAsync(cancellationToken, UseCache);
         }
 
-        public async Task<MediaBundle<Track>> GetTrackAsync(Guid userId, Guid id, bool populate, CancellationToken cancellationToken)
+        public Task<MediaBundle<Track>> GetTrackAsync(Guid userId, Guid id, bool populate, CancellationToken cancellationToken)
         {
             var repositoryCache = new TrackRepositoryIdCache(_metadataRepository, userId, id, populate);
             repositoryCache.SetAddNullToCache(false);
-            return await repositoryCache.GetResultAsync(cancellationToken, UseCache).ConfigureAwait(false);
+            return repositoryCache.GetResultAsync(cancellationToken, UseCache);
         }
 
         public void RemovePlaylistFromCache(Guid userId, Guid id, bool getTracks)

@@ -8,9 +8,9 @@ namespace Resonance.Data.Storage
     {
         public Func<CancellationToken, Task<T>> Method { get; set; }
 
-        public virtual async Task<T> GetResult(CancellationToken cancellationToken)
+        public virtual Task<T> GetResult(CancellationToken cancellationToken)
         {
-            return await Method(cancellationToken);
+            return Method(cancellationToken);
         }
     }
 }

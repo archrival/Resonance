@@ -388,7 +388,7 @@ namespace Resonance.SubsonicCompat.Controllers
 
                         var zipFileName = $"{artistName}{albumMediaBundle.Media.Name}.zip";
 
-                        return File(CompressionExtensions.CompressFiles(albumMediaBundle.Media.Tracks.Select(t => t.Media.Path), CompressionLevel.NoCompression), "application/zip", zipFileName);
+                        return File(CompressionExtensions.CompressFilesToZipArchiveStream(albumMediaBundle.Media.Tracks.Select(t => t.Media.Path), CompressionLevel.NoCompression), "application/zip", zipFileName);
                     }
                     break;
 

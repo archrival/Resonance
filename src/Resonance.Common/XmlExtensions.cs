@@ -3,7 +3,6 @@ using System.Collections.Concurrent;
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Serialization;
 
@@ -55,22 +54,13 @@ namespace Resonance.Common
             return result;
         }
 
-        /// <summary>
-        /// Deserialize XML string into object type specified.
-        /// </summary>
-        /// <typeparam name="T">Object type to deserialize the XML into.</typeparam>
-        /// <param name="xml">XML string to deserialize.</param>
-        /// <param name="ignoreNamespace"></param>
-        /// <returns>Deserialized object T</returns>
-        public static async Task<T> DeserializeFromXmlAsync<T>(this string xml, bool ignoreNamespace = true) where T : class, new()
-        {
-            await Task.CompletedTask;
-
-            return xml.DeserializeFromXml<T>(ignoreNamespace);
-        }
-
         public static string SerializeToXml<T>(this T graph, bool ignoreNamespace = true) where T : class, new()
         {
+            if (graph == null)
+            {
+                return null;
+            }
+
             var xmlSerializer = GetXmlSerializer(graph.GetType());
             var xmlSerializerNamespaces = ignoreNamespace ? IgnoredXmlSerializerNamespaces : XmlSerializerNamespaces;
 
@@ -82,13 +72,6 @@ namespace Resonance.Common
                 xmlSerializer.Serialize(xmlWriter, graph, xmlSerializerNamespaces);
                 return stringBuilder.ToString();
             }
-        }
-
-        public static async Task<string> SerializeToXmlAsync<T>(this T xml, bool ignoreNamespace = true) where T : class, new()
-        {
-            await Task.CompletedTask;
-
-            return SerializeToXml(xml, ignoreNamespace);
         }
 
         private static XmlSerializer GetXmlSerializer(Type type)

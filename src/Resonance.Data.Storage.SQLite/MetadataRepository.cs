@@ -1359,7 +1359,7 @@ namespace Resonance.Data.Storage.SQLite
             return playlist;
         }
 
-        public async Task<List<Playlist>> GetPlaylistsAsync(Guid userId, string username, bool getTracks, CancellationToken cancellationToken)
+        public async Task<IEnumerable<Playlist>> GetPlaylistsAsync(Guid userId, string username, bool getTracks, CancellationToken cancellationToken)
         {
             var builder = new SqlBuilder();
 

@@ -53,11 +53,11 @@ namespace Resonance.SubsonicCompat
             return response;
         }
 
-        public static async Task<IActionResult> GetActionResultAsync(this ActionContext context, Response response)
+        public static IActionResult GetActionResult(this ActionContext context, Response response)
         {
             var queryParameters = context.GetSubsonicQueryParameters();
 
-            return await SubsonicFilter.ConvertToResultFormatAsync(response, queryParameters).ConfigureAwait(false);
+            return SubsonicFilter.ConvertToResultFormat(response, queryParameters);
         }
 
         public static AuthorizationContext GetAuthorizationContext(this ActionContext context)

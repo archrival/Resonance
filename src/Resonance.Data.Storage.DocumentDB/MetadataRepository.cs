@@ -395,7 +395,7 @@ namespace Resonance.Data.Storage.DocumentDB
             throw new NotImplementedException();
         }
 
-        public Task<List<Playlist>> GetPlaylistsAsync(Guid userId, string username, bool getTracks, CancellationToken cancellationToken)
+        public Task<IEnumerable<Playlist>> GetPlaylistsAsync(Guid userId, string username, bool getTracks, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }

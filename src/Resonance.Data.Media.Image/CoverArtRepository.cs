@@ -8,8 +8,6 @@ using SixLabors.Primitives;
 using System.Collections.Concurrent;
 using System.IO;
 using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Resonance.Data.Media.Image
 {
@@ -30,10 +28,8 @@ namespace Resonance.Data.Media.Image
             _fullCoverArtPath = Path.Combine(_coverArtPath, Full);
         }
 
-        public async Task<CoverArt> GetCoverArtAsync(Track track, int? size, CancellationToken cancellationToken)
+        public CoverArt GetCoverArt(Track track, int? size)
         {
-            await Task.CompletedTask;
-
             var fullTrackCoverPath = Path.Combine(_fullCoverArtPath, track.Id.ToString("n"));
             var coverArtPath = size.HasValue ? Path.Combine(_coverArtPath, size.Value.ToString()) : _fullCoverArtPath;
             var trackCoverArtPath = Path.Combine(coverArtPath, track.Id.ToString("n"));
@@ -57,11 +53,10 @@ namespace Resonance.Data.Media.Image
                 {
                     WriteCoverArtToDisk(fullTrackCoverPath, coverArt.CoverArtData);
                 }
-            }
-
-            if (coverArt == null)
-            {
-                return null;
+                else
+                {
+                    return null;
+                }
             }
 
             // Resize the image if requested
@@ -95,15 +90,20 @@ namespace Resonance.Data.Media.Image
         {
             var lockObject = ProcessingFiles.GetOrAdd(trackCoverArtPath, new object());
 
-            lock (lockObject)
+            try
             {
-                if (!(File.Exists(trackCoverArtPath) && track.DateFileModified.ToUniversalTime() < File.GetLastWriteTimeUtc(trackCoverArtPath)))
+                lock (lockObject)
                 {
-                    return null;
+                    if (!(File.Exists(trackCoverArtPath) && track.DateFileModified.ToUniversalTime() < File.GetLastWriteTimeUtc(trackCoverArtPath)))
+                    {
+                        return null;
+                    }
                 }
             }
-
-            ProcessingFiles.TryRemove(trackCoverArtPath, out lockObject);
+            finally
+            {
+                ProcessingFiles.TryRemove(trackCoverArtPath, out lockObject);
+            }
 
             // Return the album art on disk if the file exists and is newer than the last modified date of the track
 
@@ -127,17 +127,22 @@ namespace Resonance.Data.Media.Image
 
             byte[] result;
 
-            lock (lockObject)
+            try
             {
-                using (var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
+                lock (lockObject)
                 {
-                    result = new byte[stream.Length];
+                    using (var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
+                    {
+                        result = new byte[stream.Length];
 
-                    stream.Read(result, 0, (int)stream.Length);
+                        stream.Read(result, 0, (int)stream.Length);
+                    }
                 }
             }
-
-            ProcessingFiles.TryRemove(path, out lockObject);
+            finally
+            {
+                ProcessingFiles.TryRemove(path, out lockObject);
+            }
 
             return result;
         }
@@ -146,20 +151,27 @@ namespace Resonance.Data.Media.Image
         {
             var lockObject = ProcessingFiles.GetOrAdd(path, new object());
 
-            lock (lockObject)
+            try
             {
-                if (!Directory.Exists(Path.GetDirectoryName(path)))
+                lock (lockObject)
                 {
-                    Directory.CreateDirectory(Path.GetDirectoryName(path));
-                }
+                    string parentDirectory = Path.GetDirectoryName(path);
 
-                using (var stream = new FileStream(path, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None))
-                {
-                    stream.Write(bytes, 0, bytes.Length);
+                    if (!Directory.Exists(parentDirectory))
+                    {
+                        Directory.CreateDirectory(parentDirectory);
+                    }
+
+                    using (var stream = new FileStream(path, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None))
+                    {
+                        stream.Write(bytes, 0, bytes.Length);
+                    }
                 }
             }
-
-            ProcessingFiles.TryRemove(path, out lockObject);
+            finally
+            {
+                ProcessingFiles.TryRemove(path, out lockObject);
+            }
         }
     }
 }

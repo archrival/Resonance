@@ -26,7 +26,7 @@ namespace Resonance.SubsonicCompat
 
             if (!authorizationContext.IsAuthenticated)
             {
-                context.Result = await context.GetActionResultAsync(authorizationContext.CreateAuthorizationFailureResponse()).ConfigureAwait(false);
+                context.Result = context.GetActionResult(authorizationContext.CreateAuthorizationFailureResponse());
             }
             else
             {
@@ -43,7 +43,7 @@ namespace Resonance.SubsonicCompat
                         authorizationContext.ErrorCode = (int)ErrorCode.UserNotAuthorized;
                         authorizationContext.Status = SubsonicConstants.UserIsNotAuthorizedForTheGivenOperation;
 
-                        context.Result = await context.GetActionResultAsync(authorizationContext.CreateAuthorizationFailureResponse()).ConfigureAwait(false);
+                        context.Result = context.GetActionResult(authorizationContext.CreateAuthorizationFailureResponse());
                     }
                 }
 

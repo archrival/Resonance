@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Resonance.SubsonicCompat
 {
@@ -20,13 +21,13 @@ namespace Resonance.SubsonicCompat
         {
             var subsonicQueryParameters = new SubsonicQueryParameters();
 
-            foreach (var kvp in collection)
+            Parallel.ForEach(collection, new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount / 2 }, kvp =>
             {
                 var value = kvp.Value.FirstOrDefault();
 
                 if (string.IsNullOrEmpty(value))
                 {
-                    continue;
+                    return;
                 }
 
                 switch (kvp.Key)
@@ -71,7 +72,7 @@ namespace Resonance.SubsonicCompat
                         subsonicQueryParameters.Callback = value;
                         break;
                 }
-            }
+            });
 
             return subsonicQueryParameters;
         }
