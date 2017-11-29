@@ -65,7 +65,7 @@ namespace Resonance.SubsonicCompat.Controllers
 
             if (username != authorizationContext.User.Name)
             {
-                if (!authorizationContext.Roles.Contains(Role.Administrator))
+                if (!authorizationContext.IsInRole(Role.Administrator))
                 {
                     authorizationContext.ErrorCode = (int)ErrorCode.UserNotAuthorized;
                     authorizationContext.Status = SubsonicConstants.UserIsNotAuthorizedForTheGivenOperation;

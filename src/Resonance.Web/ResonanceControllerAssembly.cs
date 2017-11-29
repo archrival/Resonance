@@ -9,7 +9,7 @@ namespace Resonance.Web
         {
             services
                 .AddMvc()
-                .AddApplicationPart(typeof(ResonanceControllerAssembly).Assembly);
+                .AddApplicationPart(GetType().Assembly);
         }
     }
 }
