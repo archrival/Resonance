@@ -12,6 +12,12 @@ namespace Resonance.Data.Storage
 {
     public class MetadataRepositoryCache : IMetadataRepositoryCache
     {
+        private static readonly MemoryCacheEntryOptions _defaultMemoryCacheEntryOptions = new MemoryCacheEntryOptions
+        {
+            SlidingExpiration = TimeSpan.FromMinutes(5),
+            AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(30)
+        };
+
         private readonly IMemoryCache _memoryCache;
         private readonly IMetadataRepository _metadataRepository;
         private readonly ITagReaderFactory _tagReaderFactory;
@@ -80,11 +86,7 @@ namespace Resonance.Data.Storage
 
             artists = await _metadataRepository.GetArtistsAsync(userId, collectionId, cancellationToken).ConfigureAwait(false);
 
-            _memoryCache.Set(CacheTypes.Artists, artists, new MemoryCacheEntryOptions
-            {
-                SlidingExpiration = TimeSpan.FromMinutes(5),
-                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(30)
-            });
+            _memoryCache.Set(CacheTypes.Artists, artists, _defaultMemoryCacheEntryOptions);
 
             return artists;
         }
@@ -117,11 +119,7 @@ namespace Resonance.Data.Storage
 
             genreCounts = await _metadataRepository.GetGenreCountsAsync(collectionId, cancellationToken).ConfigureAwait(false);
 
-            _memoryCache.Set(CacheTypes.GenreCounts, genreCounts, new MemoryCacheEntryOptions
-            {
-                SlidingExpiration = TimeSpan.FromMinutes(5),
-                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(30)
-            });
+            _memoryCache.Set(CacheTypes.GenreCounts, genreCounts, _defaultMemoryCacheEntryOptions);
 
             return genreCounts;
         }
@@ -135,11 +133,7 @@ namespace Resonance.Data.Storage
 
             genres = await _metadataRepository.GetGenresAsync(collectionId, cancellationToken).ConfigureAwait(false);
 
-            _memoryCache.Set(CacheTypes.Genres, genres, new MemoryCacheEntryOptions
-            {
-                SlidingExpiration = TimeSpan.FromMinutes(5),
-                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(30)
-            });
+            _memoryCache.Set(CacheTypes.Genres, genres, _defaultMemoryCacheEntryOptions);
 
             return genres;
         }
