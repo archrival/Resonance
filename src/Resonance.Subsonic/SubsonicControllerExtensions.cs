@@ -5,7 +5,6 @@ using Subsonic.Common.Classes;
 using Subsonic.Common.Enums;
 using System;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Resonance.SubsonicCompat
 {
@@ -62,7 +61,7 @@ namespace Resonance.SubsonicCompat
 
         public static AuthorizationContext GetAuthorizationContext(this ActionContext context)
         {
-            return context.HttpContext.Items[SubsonicConstants.AuthenticationContext] as AuthorizationContext;
+            return context.HttpContext.Items[SubsonicConstants.AuthorizationContext] as AuthorizationContext;
         }
 
         public static SubsonicQueryParameters GetSubsonicQueryParameters(this ActionContext context)

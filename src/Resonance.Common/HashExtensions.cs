@@ -7,6 +7,12 @@ namespace Resonance.Common
 {
     public static class HashExtensions
     {
+        private static readonly MD5 _md5 = MD5.Create();
+        private static readonly SHA1 _sha1 = SHA1.Create();
+        private static readonly SHA256 _sha256 = SHA256.Create();
+        private static readonly SHA384 _sha384 = SHA384.Create();
+        private static readonly SHA512 _sha512 = SHA512.Create();
+
         public static string ComputeHash(string plainText, HashType hashType, byte[] saltBytes)
         {
             // If salt is not specified, generate it.
@@ -32,23 +38,23 @@ namespace Resonance.Common
             switch (hashType)
             {
                 case HashType.SHA1:
-                    hash = SHA1.Create();
+                    hash = _sha1;
                     break;
 
                 case HashType.SHA256:
-                    hash = SHA256.Create();
+                    hash = _sha256;
                     break;
 
                 case HashType.SHA384:
-                    hash = SHA384.Create();
+                    hash = _sha384;
                     break;
 
                 case HashType.SHA512:
-                    hash = SHA512.Create();
+                    hash = _sha512;
                     break;
 
                 default:
-                    hash = MD5.Create();
+                    hash = _md5;
                     break;
             }
 
@@ -109,23 +115,23 @@ namespace Resonance.Common
             switch (hashType)
             {
                 case HashType.SHA1:
-                    hashAlgorithm = SHA1.Create();
+                    hashAlgorithm = _sha1;
                     break;
 
                 case HashType.SHA256:
-                    hashAlgorithm = SHA256.Create();
+                    hashAlgorithm = _sha256;
                     break;
 
                 case HashType.SHA384:
-                    hashAlgorithm = SHA384.Create();
+                    hashAlgorithm = _sha384;
                     break;
 
                 case HashType.SHA512:
-                    hashAlgorithm = SHA512.Create();
+                    hashAlgorithm = _sha512;
                     break;
 
                 default:
-                    hashAlgorithm = MD5.Create();
+                    hashAlgorithm = _md5;
                     break;
             }
 
@@ -135,8 +141,6 @@ namespace Resonance.Common
             {
                 sb.Append(b.ToString("x2"));
             }
-
-            hashAlgorithm.Dispose();
 
             return sb.ToString();
         }
@@ -151,24 +155,6 @@ namespace Resonance.Common
             encoding = encoding ?? Encoding.UTF8;
 
             return GetHash(encoding.GetBytes(value), hashType);
-        }
-
-        public static string GetMd5Hash(this string value)
-        {
-            using (var md5 = MD5.Create())
-            {
-                md5.Initialize();
-                var hash = md5.ComputeHash(Encoding.UTF8.GetBytes(value));
-
-                var sBuilder = new StringBuilder();
-
-                foreach (var t in hash)
-                {
-                    sBuilder.Append(t.ToString("x2"));
-                }
-
-                return sBuilder.ToString();
-            }
         }
 
         public static bool VerifyHash(string plainText, HashType hashType, string hashValue)

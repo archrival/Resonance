@@ -3,6 +3,7 @@ using Resonance.Common.Web;
 using Resonance.Data.Storage;
 using Subsonic.Common.Enums;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -19,15 +20,15 @@ namespace Resonance.SubsonicCompat
 
         public async Task<AuthorizationContext> AuthorizeRequestAsync(SubsonicQueryParameters parameters, CancellationToken cancellationToken)
         {
-            var authenticationContext = new AuthorizationContext();
+            var authorizationContext = new AuthorizationContext();
 
             if (parameters == null || string.IsNullOrWhiteSpace(parameters.Username) || string.IsNullOrWhiteSpace(parameters.ClientName))
             {
-                authenticationContext.IsAuthenticated = false;
-                authenticationContext.ErrorCode = (int)ErrorCode.RequiredParameterMissing;
-                authenticationContext.Status = SubsonicConstants.RequiredParameterIsMissing;
+                authorizationContext.IsAuthenticated = false;
+                authorizationContext.ErrorCode = (int)ErrorCode.RequiredParameterMissing;
+                authorizationContext.Status = SubsonicConstants.RequiredParameterIsMissing;
 
-                return authenticationContext;
+                return authorizationContext;
             }
 
             var user = await _metadataRepository.GetUserAsync(parameters.Username, cancellationToken).ConfigureAwait(false);
@@ -36,11 +37,11 @@ namespace Resonance.SubsonicCompat
             {
                 user?.Dispose();
 
-                authenticationContext.IsAuthenticated = false;
-                authenticationContext.ErrorCode = (int)ErrorCode.WrongUsernameOrPassword;
-                authenticationContext.Status = SubsonicConstants.WrongUsernameOrPassword;
+                authorizationContext.IsAuthenticated = false;
+                authorizationContext.ErrorCode = (int)ErrorCode.WrongUsernameOrPassword;
+                authorizationContext.Status = SubsonicConstants.WrongUsernameOrPassword;
 
-                return authenticationContext;
+                return authorizationContext;
             }
 
             cancellationToken.ThrowIfCancellationRequested();
@@ -53,34 +54,34 @@ namespace Resonance.SubsonicCompat
             }
             else if (parameters.AuthenticationToken != null && parameters.Salt != null)
             {
-                authorizationSuccess = parameters.AuthenticationToken == $"{user.Password.DecryptToString(Constants.ResonanceKey)}{parameters.Salt}".GetMd5Hash();
+                authorizationSuccess = parameters.AuthenticationToken == $"{user.Password.DecryptToString(Constants.ResonanceKey)}{parameters.Salt}".GetHash(HashType.MD5, Encoding.UTF8);
             }
 
             user.Password = null;
 
-            authenticationContext.User = user;
+            authorizationContext.User = user;
 
             if (!authorizationSuccess)
             {
-                authenticationContext.IsAuthenticated = false;
-                authenticationContext.ErrorCode = (int)ErrorCode.WrongUsernameOrPassword;
-                authenticationContext.Status = SubsonicConstants.WrongUsernameOrPassword;
+                authorizationContext.IsAuthenticated = false;
+                authorizationContext.ErrorCode = (int)ErrorCode.WrongUsernameOrPassword;
+                authorizationContext.Status = SubsonicConstants.WrongUsernameOrPassword;
             }
             else
             {
-                authenticationContext.IsAuthenticated = true;
+                authorizationContext.IsAuthenticated = true;
 
                 if (user.Roles == null || !user.Roles.Any())
                 {
-                    authenticationContext.Roles = await _metadataRepository.GetRolesForUserAsync(user.Id, cancellationToken).ConfigureAwait(false);
+                    authorizationContext.Roles = await _metadataRepository.GetRolesForUserAsync(user.Id, cancellationToken).ConfigureAwait(false);
                 }
                 else
                 {
-                    authenticationContext.Roles = user.Roles;
+                    authorizationContext.Roles = user.Roles;
                 }
             }
 
-            return authenticationContext;
+            return authorizationContext;
         }
     }
 }
