@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Resonance.Common.Web;
+using Subsonic.Common;
 using Subsonic.Common.Classes;
 using Subsonic.Common.Enums;
 using System;
@@ -10,7 +11,7 @@ namespace Resonance.SubsonicCompat
 {
     public static class SubsonicControllerExtensions
     {
-        public static Response DefaultResponse => new Response { Status = ResponseStatus.Ok, Version = SubsonicConstants.ServerVersion };
+        public static Response DefaultResponse => new Response { Status = ResponseStatus.Ok, Version = SubsonicApiVersion.Max.ToString(3) };
 
         public static Response CreateAuthorizationFailureResponse(this AuthorizationContext authenticationContext)
         {

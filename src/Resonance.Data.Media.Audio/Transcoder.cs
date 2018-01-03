@@ -16,7 +16,7 @@ namespace Resonance.Data.Media.Audio
         public Stream TranscodeAudio(string file, string format, int bitrate, CancellationToken cancellationToken)
         {
             return StartProcess(string.Format(_transcodeSettings.Arguments, file, bitrate, format));
-       }
+        }
 
         private Stream StartProcess(string args)
         {

@@ -1,5 +1,5 @@
-﻿using System;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
+﻿using Microsoft.AspNetCore.Mvc.ModelBinding;
+using System;
 
 namespace Resonance.Common.Web
 {

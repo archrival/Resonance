@@ -70,10 +70,10 @@ namespace Resonance.Data.Storage
 
         public static bool operator ==(ArtistRepositoryDelegate left, ArtistRepositoryDelegate right)
         {
-            if (ReferenceEquals(null, left))
-                return ReferenceEquals(null, right);
+            if (left is null)
+                return right is null;
 
-            if (ReferenceEquals(null, right))
+            if (right is null)
                 return false;
 
             return left.PropertiesEqual(right, nameof(CollectionId), nameof(UserId), nameof(Artist));

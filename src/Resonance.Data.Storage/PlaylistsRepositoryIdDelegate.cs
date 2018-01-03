@@ -34,10 +34,10 @@ namespace Resonance.Data.Storage
 
         public static bool operator ==(PlaylistsRepositoryIdDelegate left, PlaylistsRepositoryIdDelegate right)
         {
-            if (ReferenceEquals(null, left))
-                return ReferenceEquals(null, right);
+            if (left is null)
+                return right is null;
 
-            if (ReferenceEquals(null, right))
+            if (right is null)
                 return false;
 
             var propertiesEqual = left.PropertiesEqual(right, nameof(GetTracks), nameof(UserId), nameof(Username));
