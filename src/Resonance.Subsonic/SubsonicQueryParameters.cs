@@ -30,7 +30,7 @@ namespace Resonance.SubsonicCompat
                     return;
                 }
 
-                switch (kvp.Key)
+                switch (kvp.Key.ToLowerInvariant())
                 {
                     case "u":
                         subsonicQueryParameters.Username = value;

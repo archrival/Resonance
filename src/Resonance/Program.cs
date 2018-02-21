@@ -10,7 +10,6 @@ namespace Resonance
         public static void Main(string[] args)
         {
             ServicePointManager.DefaultConnectionLimit = Environment.ProcessorCount * 12;
-            ServicePointManager.UseNagleAlgorithm = true;
 
             var host = ResonanceWebHostBuilderExtensions.GetWebHostBuilder()
                 .UseStartup<Startup>()

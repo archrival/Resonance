@@ -28,32 +28,6 @@ namespace Resonance.Common
 
         private static ConcurrentDictionary<Type, XmlSerializer> XmlSerializers => XmlSerializersLazy.Value;
 
-        /// <summary>
-        /// Deserialize XML string into object type specified.
-        /// </summary>
-        /// <typeparam name="T">Object type to deserialize the XML into.</typeparam>
-        /// <param name="xml">XML string to deserialize.</param>
-        /// <param name="ignoreNamespace"></param>
-        /// <returns>Deserialized object T</returns>
-        public static T DeserializeFromXml<T>(this string xml, bool ignoreNamespace = true) where T : class, new()
-        {
-            T result;
-
-            if (ignoreNamespace)
-            {
-                xml = IgnoreNamespacesRegex.Replace(xml, string.Empty);
-            }
-
-            var xmlSerializer = GetXmlSerializer(typeof(T));
-
-            using (var stringReader = new StringReader(xml))
-            {
-                result = (T)xmlSerializer.Deserialize(stringReader);
-            }
-
-            return result;
-        }
-
         public static string SerializeToXml<T>(this T graph, bool ignoreNamespace = true) where T : class, new()
         {
             if (graph == null)

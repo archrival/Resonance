@@ -7,11 +7,11 @@ namespace Resonance.Common
 {
     public static class HashExtensions
     {
-        private static readonly MD5 _md5 = MD5.Create();
-        private static readonly SHA1 _sha1 = SHA1.Create();
-        private static readonly SHA256 _sha256 = SHA256.Create();
-        private static readonly SHA384 _sha384 = SHA384.Create();
-        private static readonly SHA512 _sha512 = SHA512.Create();
+        private static readonly Lazy<MD5> _md5 = new Lazy<MD5>(() => MD5.Create());
+        private static readonly Lazy<SHA1> _sha1 = new Lazy<SHA1>(() => SHA1.Create());
+        private static readonly Lazy<SHA256> _sha256 = new Lazy<SHA256>(() => SHA256.Create());
+        private static readonly Lazy<SHA384> _sha384 = new Lazy<SHA384>(() => SHA384.Create());
+        private static readonly Lazy<SHA512> _sha512 = new Lazy<SHA512>(() => SHA512.Create());
 
         public static string ComputeHash(string plainText, HashType hashType, byte[] saltBytes)
         {
@@ -26,11 +26,15 @@ namespace Resonance.Common
 
             // Copy plain text bytes into resulting array.
             for (var i = 0; i < plainTextBytes.Length; i++)
+            {
                 plainTextWithSaltBytes[i] = plainTextBytes[i];
+            }
 
             // Append salt bytes to the resulting array.
             for (var i = 0; i < saltBytes.Length; i++)
+            {
                 plainTextWithSaltBytes[plainTextBytes.Length + i] = saltBytes[i];
+            }
 
             HashAlgorithm hash;
 
@@ -38,23 +42,23 @@ namespace Resonance.Common
             switch (hashType)
             {
                 case HashType.SHA1:
-                    hash = _sha1;
+                    hash = _sha1.Value;
                     break;
 
                 case HashType.SHA256:
-                    hash = _sha256;
+                    hash = _sha256.Value;
                     break;
 
                 case HashType.SHA384:
-                    hash = _sha384;
+                    hash = _sha384.Value;
                     break;
 
                 case HashType.SHA512:
-                    hash = _sha512;
+                    hash = _sha512.Value;
                     break;
 
                 default:
-                    hash = _md5;
+                    hash = _md5.Value;
                     break;
             }
 
@@ -66,11 +70,15 @@ namespace Resonance.Common
 
             // Copy hash bytes into resulting array.
             for (var i = 0; i < hashBytes.Length; i++)
+            {
                 hashWithSaltBytes[i] = hashBytes[i];
+            }
 
             // Append salt bytes to the result.
             for (var i = 0; i < saltBytes.Length; i++)
+            {
                 hashWithSaltBytes[hashBytes.Length + i] = saltBytes[i];
+            }
 
             // Convert result into a base64-encoded string.
             var hashValue = Convert.ToBase64String(hashWithSaltBytes);
@@ -115,23 +123,23 @@ namespace Resonance.Common
             switch (hashType)
             {
                 case HashType.SHA1:
-                    hashAlgorithm = _sha1;
+                    hashAlgorithm = _sha1.Value;
                     break;
 
                 case HashType.SHA256:
-                    hashAlgorithm = _sha256;
+                    hashAlgorithm = _sha256.Value;
                     break;
 
                 case HashType.SHA384:
-                    hashAlgorithm = _sha384;
+                    hashAlgorithm = _sha384.Value;
                     break;
 
                 case HashType.SHA512:
-                    hashAlgorithm = _sha512;
+                    hashAlgorithm = _sha512.Value;
                     break;
 
                 default:
-                    hashAlgorithm = _md5;
+                    hashAlgorithm = _md5.Value;
                     break;
             }
 
@@ -201,7 +209,9 @@ namespace Resonance.Common
 
             // Copy salt from the end of the hash to the new array.
             for (var i = 0; i < saltBytes.Length; i++)
+            {
                 saltBytes[i] = hashWithSaltBytes[hashSizeInBytes + i];
+            }
 
             // Compute a new hash string.
             var expectedHashString = ComputeHash(plainText, hashType, saltBytes);

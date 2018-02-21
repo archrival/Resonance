@@ -13,7 +13,6 @@ namespace Resonance.Windows
         public static void Main(string[] args)
         {
             ServicePointManager.DefaultConnectionLimit = Environment.ProcessorCount * 12;
-            ServicePointManager.UseNagleAlgorithm = true;
 
             System.IO.Directory.SetCurrentDirectory(System.AppDomain.CurrentDomain.BaseDirectory);
 

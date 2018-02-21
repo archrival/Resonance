@@ -20,6 +20,8 @@ namespace Resonance.SubsonicCompat
 {
     public static class SubsonicModelExtensions
     {
+        private const string Separator = " / ";
+
         public static AlbumID3 ToSubsonicAlbumID3(this MediaBundle<Album> albumMediaBundle)
         {
             var subsonicAlbum = new AlbumID3();
@@ -31,7 +33,7 @@ namespace Resonance.SubsonicCompat
             if (artist != null)
             {
                 subsonicAlbum.ArtistId = artist.Media.Id.ToString("n");
-                subsonicAlbum.Artist = string.Join(" / ", album.Artists.Select(a => a.Media.Name));
+                subsonicAlbum.Artist = string.Join(Separator, album.Artists.Select(a => a.Media.Name));
             }
 
             if (album.Tracks != null)
@@ -46,7 +48,7 @@ namespace Resonance.SubsonicCompat
 
             if (album.Genres?.Any() == true)
             {
-                subsonicAlbum.Genre = string.Join(" / ", album.Genres.Select(g => g.Name));
+                subsonicAlbum.Genre = string.Join(Separator, album.Genres.Select(g => g.Name));
             }
 
             var disposition = albumMediaBundle.Dispositions.FirstOrDefault();
@@ -76,7 +78,7 @@ namespace Resonance.SubsonicCompat
             if (artist != null)
             {
                 subsonicAlbum.ArtistId = artist.Media.Id.ToString("n");
-                subsonicAlbum.Artist = string.Join(" / ", album.Artists.Select(a => a.Media.Name));
+                subsonicAlbum.Artist = string.Join(Separator, album.Artists.Select(a => a.Media.Name));
             }
 
             if (album.Tracks != null)
@@ -91,7 +93,7 @@ namespace Resonance.SubsonicCompat
 
             if (album.Genres?.Any() == true)
             {
-                subsonicAlbum.Genre = string.Join(" / ", album.Genres.Select(g => g.Name));
+                subsonicAlbum.Genre = string.Join(Separator, album.Genres.Select(g => g.Name));
             }
 
             var disposition = albumMediaBundle.Dispositions.FirstOrDefault();
@@ -255,7 +257,7 @@ namespace Resonance.SubsonicCompat
             if (artist != null)
             {
                 subsonicChild.ArtistId = artist.Media.Id.ToString("n");
-                subsonicChild.Artist = string.Join(" / ", album.Artists.Select(a => a.Media.Name));
+                subsonicChild.Artist = string.Join(Separator, album.Artists.Select(a => a.Media.Name));
                 subsonicChild.Parent = subsonicChild.ArtistId;
             }
 
@@ -272,7 +274,7 @@ namespace Resonance.SubsonicCompat
 
             if (album.Genres?.Any() == true)
             {
-                subsonicChild.Genre = string.Join(" / ", album.Genres.Select(g => g.Name));
+                subsonicChild.Genre = string.Join(Separator, album.Genres.Select(g => g.Name));
             }
 
             var disposition = albumMediaBundle.Dispositions.FirstOrDefault();
@@ -341,7 +343,7 @@ namespace Resonance.SubsonicCompat
             if (artist != null)
             {
                 nowPlayingEntry.ArtistId = artist.Media.Id.ToString("n");
-                nowPlayingEntry.Artist = string.Join(" / ", track.Artists.Select(a => a.Media.Name));
+                nowPlayingEntry.Artist = string.Join(Separator, track.Artists.Select(a => a.Media.Name));
             }
 
             nowPlayingEntry.BitRate = track.Bitrate;
@@ -353,7 +355,7 @@ namespace Resonance.SubsonicCompat
 
             if (track.Genres.Count > 0)
             {
-                nowPlayingEntry.Genre = string.Join(" / ", track.Genres.Select(g => g.Name));
+                nowPlayingEntry.Genre = string.Join(Separator, track.Genres.Select(g => g.Name));
             }
 
             var parentDirectory = Directory.GetParent(track.Path);
@@ -486,7 +488,7 @@ namespace Resonance.SubsonicCompat
             if (artist != null)
             {
                 subsonicSong.ArtistId = artist.Media.Id.ToString("n");
-                subsonicSong.Artist = string.Join(" / ", track.Artists.Select(a => a.Media.Name));
+                subsonicSong.Artist = string.Join(Separator, track.Artists.Select(a => a.Media.Name));
             }
 
             subsonicSong.BitRate = track.Bitrate;
@@ -498,7 +500,7 @@ namespace Resonance.SubsonicCompat
 
             if (track.Genres?.Any() == true)
             {
-                subsonicSong.Genre = string.Join(" / ", track.Genres.Select(g => g.Name));
+                subsonicSong.Genre = string.Join(Separator, track.Genres.Select(g => g.Name));
             }
 
             var parentDirectory = Directory.GetParent(track.Path);
