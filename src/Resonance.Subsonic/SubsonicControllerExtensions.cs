@@ -11,7 +11,7 @@ namespace Resonance.SubsonicCompat
 {
     public static class SubsonicControllerExtensions
     {
-        public static Response DefaultResponse => new Response { Status = ResponseStatus.Ok, Version = SubsonicApiVersion.Max.ToString(3) };
+        public static Response DefaultResponse => new Response { Status = ResponseStatus.Ok, Version = SubsonicApiVersion.VersionMax.ToString(3) };
 
         public static Response CreateAuthorizationFailureResponse(this AuthorizationContext authenticationContext)
         {

@@ -37,6 +37,7 @@ namespace Resonance.SubsonicCompat.Controllers
         [HttpGet("addChatMessage.view"), HttpPost("addChatMessage.view")]
         [ServiceFilter(typeof(SubsonicAsyncAuthorizationFilter))]
         [ServiceFilter(typeof(SubsonicAsyncResultFilter))]
+        [Authorize(Policy = PolicyConstants.Authorized)]
         public async Task<Response> AddChatMessageAsync([ResonanceParameter] string message, CancellationToken cancellationToken)
         {
             var authorizationContext = ControllerContext.GetAuthorizationContext();
@@ -107,6 +108,7 @@ namespace Resonance.SubsonicCompat.Controllers
         [HttpGet("createBookmark.view"), HttpPost("createBookmark.view")]
         [ServiceFilter(typeof(SubsonicAsyncAuthorizationFilter))]
         [ServiceFilter(typeof(SubsonicAsyncResultFilter))]
+        [Authorize(Policy = PolicyConstants.Authorized)]
         public async Task<Response> CreateBookmarkAsync([ResonanceParameter] Guid id, [ResonanceParameter] long position, [ResonanceParameter] string comment, CancellationToken cancellationToken)
         {
             var authorizationContext = ControllerContext.GetAuthorizationContext();
@@ -145,6 +147,7 @@ namespace Resonance.SubsonicCompat.Controllers
         [HttpGet("createPlaylist.view"), HttpPost("createPlaylist.view")]
         [ServiceFilter(typeof(SubsonicAsyncAuthorizationFilter))]
         [ServiceFilter(typeof(SubsonicAsyncResultFilter))]
+        [Authorize(Policy = PolicyConstants.Authorized)]
         public async Task<Response> CreatePlaylistAsync([ResonanceParameter] Guid? playlistId, [ResonanceParameter] string name, [ResonanceParameter(Name = "songId")] List<Guid> songIds, CancellationToken cancellationToken)
         {
             var authorizationContext = ControllerContext.GetAuthorizationContext();
@@ -300,6 +303,7 @@ namespace Resonance.SubsonicCompat.Controllers
         [HttpGet("deleteBookmark.view"), HttpPost("deleteBookmark.view")]
         [ServiceFilter(typeof(SubsonicAsyncAuthorizationFilter))]
         [ServiceFilter(typeof(SubsonicAsyncResultFilter))]
+        [Authorize(Policy = PolicyConstants.Authorized)]
         public async Task<Response> DeleteBookmarkAsync([ResonanceParameter] Guid id, CancellationToken cancellationToken)
         {
             var userId = ControllerContext.GetAuthorizationContext().User.Id;
@@ -323,6 +327,7 @@ namespace Resonance.SubsonicCompat.Controllers
         [HttpGet("deletePlaylist.view"), HttpPost("deletePlaylist.view")]
         [ServiceFilter(typeof(SubsonicAsyncAuthorizationFilter))]
         [ServiceFilter(typeof(SubsonicAsyncResultFilter))]
+        [Authorize(Policy = PolicyConstants.Authorized)]
         public async Task<Response> DeletePlaylistAsync([ResonanceParameter] Guid id, CancellationToken cancellationToken)
         {
             var userId = ControllerContext.GetAuthorizationContext().User.Id;
@@ -413,6 +418,7 @@ namespace Resonance.SubsonicCompat.Controllers
         [HttpGet("getAlbum.view"), HttpPost("getAlbum.view")]
         [ServiceFilter(typeof(SubsonicAsyncAuthorizationFilter))]
         [ServiceFilter(typeof(SubsonicAsyncResultFilter))]
+        [Authorize(Policy = PolicyConstants.Authorized)]
         public async Task<Response> GetAlbumAsync([ResonanceParameter] Guid id, CancellationToken cancellationToken)
         {
             var userId = ControllerContext.GetAuthorizationContext().User.Id;
@@ -432,6 +438,7 @@ namespace Resonance.SubsonicCompat.Controllers
         [HttpGet("getAlbumInfo2.view"), HttpPost("getAlbumInfo2.view")]
         [ServiceFilter(typeof(SubsonicAsyncAuthorizationFilter))]
         [ServiceFilter(typeof(SubsonicAsyncResultFilter))]
+        [Authorize(Policy = PolicyConstants.Authorized)]
         public async Task<Response> GetAlbumInfo2Async([ResonanceParameter] Guid id, CancellationToken cancellationToken)
         {
             var userId = ControllerContext.GetAuthorizationContext().User.Id;
@@ -469,6 +476,7 @@ namespace Resonance.SubsonicCompat.Controllers
         [HttpGet("getAlbumInfo.view"), HttpPost("getAlbumInfo.view")]
         [ServiceFilter(typeof(SubsonicAsyncAuthorizationFilter))]
         [ServiceFilter(typeof(SubsonicAsyncResultFilter))]
+        [Authorize(Policy = PolicyConstants.Authorized)]
         public async Task<Response> GetAlbumInfoAsync([ResonanceParameter] Guid id, CancellationToken cancellationToken)
         {
             var userId = ControllerContext.GetAuthorizationContext().User.Id;
@@ -506,6 +514,7 @@ namespace Resonance.SubsonicCompat.Controllers
         [HttpGet("getAlbumList2.view"), HttpPost("getAlbumList2.view")]
         [ServiceFilter(typeof(SubsonicAsyncAuthorizationFilter))]
         [ServiceFilter(typeof(SubsonicAsyncResultFilter))]
+        [Authorize(Policy = PolicyConstants.Authorized)]
         public async Task<Response> GetAlbumList2Async([ResonanceParameter] AlbumListType type, [ResonanceParameter] int? size, [ResonanceParameter] int? offset, [ResonanceParameter] int? fromYear, [ResonanceParameter] int? toYear, [ResonanceParameter] string genre, [ResonanceParameter] Guid? musicFolderId, CancellationToken cancellationToken)
         {
             var userId = ControllerContext.GetAuthorizationContext().User.Id;
@@ -546,6 +555,7 @@ namespace Resonance.SubsonicCompat.Controllers
         [HttpGet("getAlbumList.view"), HttpPost("getAlbumList.view")]
         [ServiceFilter(typeof(SubsonicAsyncAuthorizationFilter))]
         [ServiceFilter(typeof(SubsonicAsyncResultFilter))]
+        [Authorize(Policy = PolicyConstants.Authorized)]
         public async Task<Response> GetAlbumListAsync([ResonanceParameter] AlbumListType type, [ResonanceParameter] int? size, [ResonanceParameter] int? offset, [ResonanceParameter] int? fromYear, [ResonanceParameter] int? toYear, [ResonanceParameter] string genre, [ResonanceParameter] Guid? musicFolderId, CancellationToken cancellationToken)
         {
             var userId = ControllerContext.GetAuthorizationContext().User.Id;
@@ -586,6 +596,7 @@ namespace Resonance.SubsonicCompat.Controllers
         [HttpGet("getArtist.view"), HttpPost("getArtist.view")]
         [ServiceFilter(typeof(SubsonicAsyncAuthorizationFilter))]
         [ServiceFilter(typeof(SubsonicAsyncResultFilter))]
+        [Authorize(Policy = PolicyConstants.Authorized)]
         public async Task<Response> GetArtistAsync([ResonanceParameter] Guid id, CancellationToken cancellationToken)
         {
             var userId = ControllerContext.GetAuthorizationContext().User.Id;
@@ -609,6 +620,7 @@ namespace Resonance.SubsonicCompat.Controllers
         [HttpGet("getArtistInfo2.view"), HttpPost("getArtistInfo2.view")]
         [ServiceFilter(typeof(SubsonicAsyncAuthorizationFilter))]
         [ServiceFilter(typeof(SubsonicAsyncResultFilter))]
+        [Authorize(Policy = PolicyConstants.Authorized)]
         public async Task<Response> GetArtistInfo2Async([ResonanceParameter] Guid id, [ResonanceParameter] int? count, [ResonanceParameter] bool includeNotPresent, CancellationToken cancellationToken)
         {
             var userId = ControllerContext.GetAuthorizationContext().User.Id;
@@ -664,6 +676,7 @@ namespace Resonance.SubsonicCompat.Controllers
         [HttpGet("getArtistInfo.view"), HttpPost("getArtistInfo.view")]
         [ServiceFilter(typeof(SubsonicAsyncAuthorizationFilter))]
         [ServiceFilter(typeof(SubsonicAsyncResultFilter))]
+        [Authorize(Policy = PolicyConstants.Authorized)]
         public async Task<Response> GetArtistInfoAsync([ResonanceParameter] Guid id, [ResonanceParameter] int? count, [ResonanceParameter] bool includeNotPresent, CancellationToken cancellationToken)
         {
             var userId = ControllerContext.GetAuthorizationContext().User.Id;
@@ -719,6 +732,7 @@ namespace Resonance.SubsonicCompat.Controllers
         [HttpGet("getArtists.view"), HttpPost("getArtists.view")]
         [ServiceFilter(typeof(SubsonicAsyncAuthorizationFilter))]
         [ServiceFilter(typeof(SubsonicAsyncResultFilter))]
+        [Authorize(Policy = PolicyConstants.Authorized)]
         public async Task<Response> GetArtistsAsync([ResonanceParameter(Name = "musicFolderId")] Guid? collectionId, CancellationToken cancellationToken)
         {
             var userId = ControllerContext.GetAuthorizationContext().User.Id;
@@ -784,6 +798,7 @@ namespace Resonance.SubsonicCompat.Controllers
         [HttpGet("getBookmarks.view"), HttpPost("getBookmarks.view")]
         [ServiceFilter(typeof(SubsonicAsyncAuthorizationFilter))]
         [ServiceFilter(typeof(SubsonicAsyncResultFilter))]
+        [Authorize(Policy = PolicyConstants.Authorized)]
         public async Task<Response> GetBookmarksAsync(CancellationToken cancellationToken)
         {
             var userId = ControllerContext.GetAuthorizationContext().User.Id;
@@ -794,10 +809,11 @@ namespace Resonance.SubsonicCompat.Controllers
 
             return SubsonicControllerExtensions.CreateResponse(ItemChoiceType.Bookmarks, subsonicBookmarks);
         }
-
+        
         [HttpGet("getChatMessages.view"), HttpPost("getChatMessages.view")]
         [ServiceFilter(typeof(SubsonicAsyncAuthorizationFilter))]
         [ServiceFilter(typeof(SubsonicAsyncResultFilter))]
+        [Authorize(Policy = PolicyConstants.Authorized)]
         public async Task<Response> GetChatMessagesAsync([ResonanceParameter] long? since, CancellationToken cancellationToken)
         {
             DateTime? dateTimeSince = null;
@@ -929,6 +945,7 @@ namespace Resonance.SubsonicCompat.Controllers
         [HttpGet("getGenres.view"), HttpPost("getGenres.view")]
         [ServiceFilter(typeof(SubsonicAsyncAuthorizationFilter))]
         [ServiceFilter(typeof(SubsonicAsyncResultFilter))]
+        [Authorize(Policy = PolicyConstants.Authorized)]
         public async Task<Response> GetGenresAsync(CancellationToken cancellationToken)
         {
             var genres = await MediaLibrary.GetGenresAsync(null, cancellationToken).ConfigureAwait(false);
@@ -945,6 +962,7 @@ namespace Resonance.SubsonicCompat.Controllers
         [HttpGet("getIndexes.view"), HttpPost("getIndexes.view")]
         [ServiceFilter(typeof(SubsonicAsyncAuthorizationFilter))]
         [ServiceFilter(typeof(SubsonicAsyncResultFilter))]
+        [Authorize(Policy = PolicyConstants.Authorized)]
         public async Task<Response> GetIndexesAsync([ResonanceParameter] Guid? musicFolderId, [ResonanceParameter] long? ifModifiedSince, CancellationToken cancellationToken)
         {
             var userId = ControllerContext.GetAuthorizationContext().User.Id;
@@ -1010,6 +1028,7 @@ namespace Resonance.SubsonicCompat.Controllers
         [HttpGet("getInternetRadioStations.view"), HttpPost("getInternetRadioStations.view")]
         [ServiceFilter(typeof(SubsonicAsyncAuthorizationFilter))]
         [ServiceFilter(typeof(SubsonicAsyncResultFilter))]
+        [Authorize(Policy = PolicyConstants.Authorized)]
         public async Task<Response> GetInternetRadioStationsAsync(CancellationToken cancellationToken)
         {
             var radioStations = await MetadataRepository.GetRadioStationsAsync(cancellationToken).ConfigureAwait(false);
@@ -1025,6 +1044,7 @@ namespace Resonance.SubsonicCompat.Controllers
         [HttpGet("getLicense.view"), HttpPost("getLicense.view")]
         [ServiceFilter(typeof(SubsonicAsyncAuthorizationFilter))]
         [ServiceFilter(typeof(SubsonicAsyncResultFilter))]
+        [Authorize(Policy = PolicyConstants.Authorized)]
         public async Task<Response> GetLicense(CancellationToken cancellationToken)
         {
             await Task.CompletedTask;
@@ -1041,6 +1061,7 @@ namespace Resonance.SubsonicCompat.Controllers
         [HttpGet("getMusicDirectory.view"), HttpPost("getMusicDirectory.view")]
         [ServiceFilter(typeof(SubsonicAsyncAuthorizationFilter))]
         [ServiceFilter(typeof(SubsonicAsyncResultFilter))]
+        [Authorize(Policy = PolicyConstants.Authorized)]
         public async Task<Response> GetMusicDirectoryAsync([ResonanceParameter] Guid id, CancellationToken cancellationToken)
         {
             var userId = ControllerContext.GetAuthorizationContext().User.Id;
@@ -1120,6 +1141,7 @@ namespace Resonance.SubsonicCompat.Controllers
         [HttpGet("getMusicFolders.view"), HttpPost("getMusicFolders.view")]
         [ServiceFilter(typeof(SubsonicAsyncAuthorizationFilter))]
         [ServiceFilter(typeof(SubsonicAsyncResultFilter))]
+        [Authorize(Policy = PolicyConstants.Authorized)]
         public async Task<Response> GetMusicFoldersAsync(CancellationToken cancellationToken)
         {
             var collections = await SettingsRepository.GetCollectionsAsync(cancellationToken).ConfigureAwait(false);
@@ -1141,6 +1163,7 @@ namespace Resonance.SubsonicCompat.Controllers
         [HttpGet("getNowPlaying.view"), HttpPost("getNowPlaying.view")]
         [ServiceFilter(typeof(SubsonicAsyncAuthorizationFilter))]
         [ServiceFilter(typeof(SubsonicAsyncResultFilter))]
+        [Authorize(Policy = PolicyConstants.Authorized)]
         public async Task<Response> GetNowPlayingAsync(CancellationToken cancellationToken)
         {
             var userId = ControllerContext.GetAuthorizationContext().User.Id;
@@ -1182,6 +1205,7 @@ namespace Resonance.SubsonicCompat.Controllers
         [HttpGet("getPlaylist.view"), HttpPost("getPlaylist.view")]
         [ServiceFilter(typeof(SubsonicAsyncAuthorizationFilter))]
         [ServiceFilter(typeof(SubsonicAsyncResultFilter))]
+        [Authorize(Policy = PolicyConstants.Authorized)]
         public async Task<Response> GetPlaylistAsync([ResonanceParameter] Guid id, CancellationToken cancellationToken)
         {
             var userId = ControllerContext.GetAuthorizationContext().User.Id;
@@ -1210,6 +1234,7 @@ namespace Resonance.SubsonicCompat.Controllers
         [HttpGet("getPlaylists.view"), HttpPost("getPlaylists.view")]
         [ServiceFilter(typeof(SubsonicAsyncAuthorizationFilter))]
         [ServiceFilter(typeof(SubsonicAsyncResultFilter))]
+        [Authorize(Policy = PolicyConstants.Authorized)]
         public async Task<Response> GetPlaylistsAsync([ResonanceParameter] string username, CancellationToken cancellationToken)
         {
             var userId = ControllerContext.GetAuthorizationContext().User.Id;
@@ -1231,6 +1256,7 @@ namespace Resonance.SubsonicCompat.Controllers
         [HttpGet("getPlayQueue.view"), HttpPost("getPlayQueue.view")]
         [ServiceFilter(typeof(SubsonicAsyncAuthorizationFilter))]
         [ServiceFilter(typeof(SubsonicAsyncResultFilter))]
+        [Authorize(Policy = PolicyConstants.Authorized)]
         public async Task<Response> GetPlayQueueAsync(CancellationToken cancellationToken)
         {
             var userId = ControllerContext.GetAuthorizationContext().User.Id;
@@ -1243,6 +1269,7 @@ namespace Resonance.SubsonicCompat.Controllers
         [HttpGet("getPodcasts.view"), HttpPost("getPodcasts.view")]
         [ServiceFilter(typeof(SubsonicAsyncAuthorizationFilter))]
         [ServiceFilter(typeof(SubsonicAsyncResultFilter))]
+        [Authorize(Policy = PolicyConstants.Authorized)]
         public async Task<Response> GetPodcasts(CancellationToken cancellationToken)
         {
             await Task.CompletedTask;
@@ -1255,6 +1282,7 @@ namespace Resonance.SubsonicCompat.Controllers
         [HttpGet("getRandomSongs.view"), HttpPost("getRandomSongs.view")]
         [ServiceFilter(typeof(SubsonicAsyncAuthorizationFilter))]
         [ServiceFilter(typeof(SubsonicAsyncResultFilter))]
+        [Authorize(Policy = PolicyConstants.Authorized)]
         public async Task<Response> GetRandomSongsAsync([ResonanceParameter] int? size, [ResonanceParameter] string genre, [ResonanceParameter] int? fromYear, [ResonanceParameter] int? toYear, [ResonanceParameter] Guid? musicFolderId, CancellationToken cancellationToken)
         {
             var userId = ControllerContext.GetAuthorizationContext().User.Id;
@@ -1281,6 +1309,7 @@ namespace Resonance.SubsonicCompat.Controllers
         [HttpGet("getScanStatus.view"), HttpPost("getScanStatus.view")]
         [ServiceFilter(typeof(SubsonicAsyncAuthorizationFilter))]
         [ServiceFilter(typeof(SubsonicAsyncResultFilter))]
+        [Authorize(Policy = PolicyConstants.Authorized)]
         public async Task<Response> GetScanStatusAsync(CancellationToken cancellationToken)
         {
             await Task.CompletedTask;
@@ -1305,6 +1334,7 @@ namespace Resonance.SubsonicCompat.Controllers
         [HttpGet("getSimilarSongs2.view"), HttpPost("getSimilarSongs2.view")]
         [ServiceFilter(typeof(SubsonicAsyncAuthorizationFilter))]
         [ServiceFilter(typeof(SubsonicAsyncResultFilter))]
+        [Authorize(Policy = PolicyConstants.Authorized)]
         public async Task<Response> GetSimilarSongs2Async([ResonanceParameter] Guid id, [ResonanceParameter] int? count, CancellationToken cancellationToken)
         {
             var userId = ControllerContext.GetAuthorizationContext().User.Id;
@@ -1326,6 +1356,7 @@ namespace Resonance.SubsonicCompat.Controllers
         [HttpGet("getSimilarSongs.view"), HttpPost("getSimilarSongs.view")]
         [ServiceFilter(typeof(SubsonicAsyncAuthorizationFilter))]
         [ServiceFilter(typeof(SubsonicAsyncResultFilter))]
+        [Authorize(Policy = PolicyConstants.Authorized)]
         public async Task<Response> GetSimilarSongsAsync([ResonanceParameter] Guid id, [ResonanceParameter] int? count, CancellationToken cancellationToken)
         {
             var userId = ControllerContext.GetAuthorizationContext().User.Id;
@@ -1347,6 +1378,7 @@ namespace Resonance.SubsonicCompat.Controllers
         [HttpGet("getSong.view"), HttpPost("getSong.view")]
         [ServiceFilter(typeof(SubsonicAsyncAuthorizationFilter))]
         [ServiceFilter(typeof(SubsonicAsyncResultFilter))]
+        [Authorize(Policy = PolicyConstants.Authorized)]
         public async Task<Response> GetSongAsync([ResonanceParameter] Guid id, CancellationToken cancellationToken)
         {
             var userId = ControllerContext.GetAuthorizationContext().User.Id;
@@ -1368,6 +1400,7 @@ namespace Resonance.SubsonicCompat.Controllers
         [HttpGet("getSongsByGenre.view"), HttpPost("getSongsByGenre.view")]
         [ServiceFilter(typeof(SubsonicAsyncAuthorizationFilter))]
         [ServiceFilter(typeof(SubsonicAsyncResultFilter))]
+        [Authorize(Policy = PolicyConstants.Authorized)]
         public async Task<Response> GetSongsByGenreAsync([ResonanceParameter] string genre, [ResonanceParameter] int? count, [ResonanceParameter] int? offset, [ResonanceParameter] Guid? musicFolderId, CancellationToken cancellationToken)
         {
             var userId = ControllerContext.GetAuthorizationContext().User.Id;
@@ -1394,6 +1427,7 @@ namespace Resonance.SubsonicCompat.Controllers
         [HttpGet("getStarred2.view"), HttpPost("getStarred2.view")]
         [ServiceFilter(typeof(SubsonicAsyncAuthorizationFilter))]
         [ServiceFilter(typeof(SubsonicAsyncResultFilter))]
+        [Authorize(Policy = PolicyConstants.Authorized)]
         public async Task<Response> GetStarred2Async([ResonanceParameter(Name = "musicFolderId")] Guid? collectionId, CancellationToken cancellationToken)
         {
             var userId = ControllerContext.GetAuthorizationContext().User.Id;
@@ -1432,6 +1466,7 @@ namespace Resonance.SubsonicCompat.Controllers
         [HttpGet("getStarred.view"), HttpPost("getStarred.view")]
         [ServiceFilter(typeof(SubsonicAsyncAuthorizationFilter))]
         [ServiceFilter(typeof(SubsonicAsyncResultFilter))]
+        [Authorize(Policy = PolicyConstants.Authorized)]
         public async Task<Response> GetStarredAsync([ResonanceParameter(Name = "musicFolderId")] Guid? collectionId, CancellationToken cancellationToken)
         {
             var userId = ControllerContext.GetAuthorizationContext().User.Id;
@@ -1470,6 +1505,7 @@ namespace Resonance.SubsonicCompat.Controllers
         [HttpGet("getTopSongs.view"), HttpPost("getTopSongs.view")]
         [ServiceFilter(typeof(SubsonicAsyncAuthorizationFilter))]
         [ServiceFilter(typeof(SubsonicAsyncResultFilter))]
+        [Authorize(Policy = PolicyConstants.Authorized)]
         public async Task<Response> GetTopSongsAsync([ResonanceParameter] string artist, [ResonanceParameter] int? count, CancellationToken cancellationToken)
         {
             var userId = ControllerContext.GetAuthorizationContext().User.Id;
@@ -1503,6 +1539,7 @@ namespace Resonance.SubsonicCompat.Controllers
         [HttpGet("getUser.view"), HttpPost("getUser.view")]
         [ServiceFilter(typeof(SubsonicAsyncAuthorizationFilter))]
         [ServiceFilter(typeof(SubsonicAsyncResultFilter))]
+        [Authorize(Policy = PolicyConstants.Authorized)]
         public async Task<Response> GetUserAsync([ResonanceParameter] string username, CancellationToken cancellationToken)
         {
             var authorizationContext = ControllerContext.GetAuthorizationContext();
@@ -1565,6 +1602,7 @@ namespace Resonance.SubsonicCompat.Controllers
         [HttpGet("getVideoInfo.view"), HttpPost("getVideoInfo.view")]
         [ServiceFilter(typeof(SubsonicAsyncAuthorizationFilter))]
         [ServiceFilter(typeof(SubsonicAsyncResultFilter))]
+        [Authorize(Policy = PolicyConstants.Authorized)]
         public async Task<Response> GetVideoInfo([ResonanceParameter] Guid id, CancellationToken cancellationToken)
         {
             await Task.CompletedTask;
@@ -1576,6 +1614,7 @@ namespace Resonance.SubsonicCompat.Controllers
         [HttpGet("getVideos.view"), HttpPost("getVideos.view")]
         [ServiceFilter(typeof(SubsonicAsyncAuthorizationFilter))]
         [ServiceFilter(typeof(SubsonicAsyncResultFilter))]
+        [Authorize(Policy = PolicyConstants.Authorized)]
         public async Task<Response> GetVideos(CancellationToken cancellationToken)
         {
             await Task.CompletedTask;
@@ -1620,6 +1659,7 @@ namespace Resonance.SubsonicCompat.Controllers
         [HttpGet("ping.view"), HttpPost("ping.view")]
         [ServiceFilter(typeof(SubsonicAsyncAuthorizationFilter))]
         [ServiceFilter(typeof(SubsonicAsyncResultFilter))]
+        [Authorize(Policy = PolicyConstants.Authorized)]
         public async Task<Response> PingAsync(CancellationToken cancellationToken)
         {
             await Task.CompletedTask;
@@ -1630,6 +1670,7 @@ namespace Resonance.SubsonicCompat.Controllers
         [HttpGet("savePlayQueue.view"), HttpPost("savePlayQueue.view")]
         [ServiceFilter(typeof(SubsonicAsyncAuthorizationFilter))]
         [ServiceFilter(typeof(SubsonicAsyncResultFilter))]
+        [Authorize(Policy = PolicyConstants.Authorized)]
         public async Task<Response> SavePlayQueueAsync([ResonanceParameter(Name = "id")] List<Guid> ids, [ResonanceParameter] Guid? current, [ResonanceParameter] int? position, CancellationToken cancellationToken)
         {
             var queryParameters = ControllerContext.GetSubsonicQueryParameters();
@@ -1697,6 +1738,7 @@ namespace Resonance.SubsonicCompat.Controllers
         [HttpGet("search.view"), HttpPost("search.view")]
         [ServiceFilter(typeof(SubsonicAsyncAuthorizationFilter))]
         [ServiceFilter(typeof(SubsonicAsyncResultFilter))]
+        [Authorize(Policy = PolicyConstants.Authorized)]
         public async Task<Response> Search([ResonanceParameter] string artist, [ResonanceParameter] string album, [ResonanceParameter] string title, [ResonanceParameter] string any, [ResonanceParameter] int? count, [ResonanceParameter] int? offset, [ResonanceParameter] long? newerThan, CancellationToken cancellationToken)
         {
             await Task.CompletedTask;
@@ -1709,6 +1751,7 @@ namespace Resonance.SubsonicCompat.Controllers
         [HttpGet("search2.view"), HttpPost("search2.view")]
         [ServiceFilter(typeof(SubsonicAsyncAuthorizationFilter))]
         [ServiceFilter(typeof(SubsonicAsyncResultFilter))]
+        [Authorize(Policy = PolicyConstants.Authorized)]
         public async Task<Response> Search2Async([ResonanceParameter] string query, [ResonanceParameter] int? artistCount, [ResonanceParameter] int? artistOffset, [ResonanceParameter] int? albumCount, [ResonanceParameter] int? albumOffset, [ResonanceParameter] int? songCount, [ResonanceParameter] int? songOffset, [ResonanceParameter] Guid? musicFolderId, CancellationToken cancellationToken)
         {
             if (query.EndsWith("*") && query.Length == 2)
@@ -1810,6 +1853,7 @@ namespace Resonance.SubsonicCompat.Controllers
         [HttpGet("search3.view"), HttpPost("search3.view")]
         [ServiceFilter(typeof(SubsonicAsyncAuthorizationFilter))]
         [ServiceFilter(typeof(SubsonicAsyncResultFilter))]
+        [Authorize(Policy = PolicyConstants.Authorized)]
         public async Task<Response> Search3Async([ResonanceParameter] string query, [ResonanceParameter] int? artistCount, [ResonanceParameter] int? artistOffset, [ResonanceParameter] int? albumCount, [ResonanceParameter] int? albumOffset, [ResonanceParameter] int? songCount, [ResonanceParameter] int? songOffset, [ResonanceParameter] Guid? musicFolderId, CancellationToken cancellationToken)
         {
             if (query.EndsWith("*") && query.Length == 2)
@@ -1911,6 +1955,7 @@ namespace Resonance.SubsonicCompat.Controllers
         [HttpGet("setRating.view"), HttpPost("setRating.view")]
         [ServiceFilter(typeof(SubsonicAsyncAuthorizationFilter))]
         [ServiceFilter(typeof(SubsonicAsyncResultFilter))]
+        [Authorize(Policy = PolicyConstants.Authorized)]
         public async Task<Response> SetRatingAsync([ResonanceParameter] Guid id, [ResonanceParameter] int rating, CancellationToken cancellationToken)
         {
             var userId = ControllerContext.GetAuthorizationContext().User.Id;
@@ -1938,6 +1983,7 @@ namespace Resonance.SubsonicCompat.Controllers
         [HttpGet("star.view"), HttpPost("star.view")]
         [ServiceFilter(typeof(SubsonicAsyncAuthorizationFilter))]
         [ServiceFilter(typeof(SubsonicAsyncResultFilter))]
+        [Authorize(Policy = PolicyConstants.Authorized)]
         [ResponseCache(NoStore = true)]
         public async Task<Response> StarAsync([ResonanceParameter] Guid? id, [ResonanceParameter] Guid? albumId, [ResonanceParameter] Guid? artistId, CancellationToken cancellationToken)
         {
@@ -1981,6 +2027,7 @@ namespace Resonance.SubsonicCompat.Controllers
         [HttpGet("startScan.view"), HttpPost("startScan.view")]
         [ServiceFilter(typeof(SubsonicAsyncAuthorizationFilter))]
         [ServiceFilter(typeof(SubsonicAsyncResultFilter))]
+        [Authorize(Policy = PolicyConstants.Administration)]
         public async Task<Response> StartScanAsync(CancellationToken cancellationToken)
         {
             await Task.CompletedTask;
@@ -2066,6 +2113,7 @@ namespace Resonance.SubsonicCompat.Controllers
         [HttpGet("unstar.view"), HttpPost("unstar.view")]
         [ServiceFilter(typeof(SubsonicAsyncAuthorizationFilter))]
         [ServiceFilter(typeof(SubsonicAsyncResultFilter))]
+        [Authorize(Policy = PolicyConstants.Authorized)]
         [ResponseCache(NoStore = true)]
         public async Task<Response> UnStarAsync([ResonanceParameter] Guid? id, [ResonanceParameter] Guid? albumId, [ResonanceParameter] Guid? artistId, CancellationToken cancellationToken)
         {
@@ -2129,6 +2177,7 @@ namespace Resonance.SubsonicCompat.Controllers
         [HttpGet("updatePlaylist.view"), HttpPost("updatePlaylist.view")]
         [ServiceFilter(typeof(SubsonicAsyncAuthorizationFilter))]
         [ServiceFilter(typeof(SubsonicAsyncResultFilter))]
+        [Authorize(Policy = PolicyConstants.Authorized)]
         public async Task<Response> UpdatePlaylistAsync([ResonanceParameter] Guid playlistId, [ResonanceParameter] string name, [ResonanceParameter] string comment, [ResonanceParameter(Name = "public")] bool? isPublic, [ResonanceParameter(Name = "songIdToAdd")] List<Guid> songIdsToAdd, [ResonanceParameter(Name = "songIndexToRemove")] List<int> songIndexesToRemove, CancellationToken cancellationToken)
         {
             var userId = ControllerContext.GetAuthorizationContext().User.Id;
