@@ -4,11 +4,13 @@
     <TargetFramework>netcoreapp2.0</TargetFramework>
     <PreserveCompilationContext>true</PreserveCompilationContext>
     <AssemblyName>Resonance</AssemblyName>
-    <OutputType>exe</OutputType>
+    <OutputType>Exe</OutputType>
     <PackageId>resonance</PackageId>
     <RuntimeIdentifiers>win10-x64;osx.10.10-x64;ubuntu.14.04-x64;ubuntu.16.04-x64;ubuntu.16.10-x64</RuntimeIdentifiers>
     <ApplicationInsightsResourceId>/subscriptions/ba152101-00b8-45a2-a809-fd3d9f25f523/resourcegroups/Default-ApplicationInsights-EastUS/providers/microsoft.insights/components/Resonance</ApplicationInsightsResourceId>
     <ApplicationInsightsAnnotationResourceId>/subscriptions/ba152101-00b8-45a2-a809-fd3d9f25f523/resourcegroups/Default-ApplicationInsights-EastUS/providers/microsoft.insights/components/Resonance</ApplicationInsightsAnnotationResourceId>
+    <ApplicationIcon />
+    <StartupObject>Resonance.Program</StartupObject>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -36,7 +38,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.2.0" />
+    <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.2.1" />
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="2.0.0" />
     <PackageReference Include="System.Net.Primitives" Version="4.3.0" />
     <PackageReference Include="System.Threading.ThreadPool" Version="4.3.0" />

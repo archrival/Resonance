@@ -29,7 +29,9 @@ namespace Resonance.Data.Models
             var mediaInfoId = result.Id;
 
             if (mediaInfoId == null)
+            {
                 return mediaInfo;
+            }
 
             mediaInfo.Id = DynamicExtensions.GetGuidFromDynamic(mediaInfoId);
             mediaInfo.MediaId = DynamicExtensions.GetGuidFromDynamic(result.MediaId);

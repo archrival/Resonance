@@ -26,8 +26,6 @@ namespace Resonance.Data.Storage.DocumentDB
             _port = port;
 
             _client = new DocumentClient(new Uri(Uri), key, new ConnectionPolicy { EnableEndpointDiscovery = false });
-
-            CreateSchemaAsync().Wait();
         }
 
         private string Uri => string.Format("https://{0}:{1}", _server, _port);
@@ -69,6 +67,11 @@ namespace Resonance.Data.Storage.DocumentDB
         public Task ClearCollectionAsync<T>(Guid? collectionId, CancellationToken cancellationToken) where T : ModelBase, ICollectionIdentifier
         {
             throw new NotImplementedException();
+        }
+
+        public async Task ConfigureAsync()
+        {
+            await CreateSchemaAsync();
         }
 
         public Task DeleteAlbumReferencesAsync(CancellationToken cancellationToken)

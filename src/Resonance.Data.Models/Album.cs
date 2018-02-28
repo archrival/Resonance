@@ -37,34 +37,19 @@ namespace Resonance.Data.Models
             return album;
         }
 
+        public void AddArtists(IEnumerable<MediaBundle<Artist>> artists)
+        {
+            CollectionExtensions.AddValuesToCollection(Artists, artists);
+        }
+
         public void AddTrack(MediaBundle<Track> track)
         {
             Discs = Math.Max(Discs, track.Media.DiscNumber);
             Duration = Duration.Add(track.Media.Duration);
-
-            if (Tracks == null)
-            {
-                Tracks = new HashSet<MediaBundle<Track>>();
-            }
-
             ReleaseDate = Math.Max(ReleaseDate, track.Media.ReleaseDate);
 
-            Tracks.Add(track);
-
-            if (track.Media.Genres == null)
-                return;
-
-            if (Genres == null)
-            {
-                Genres = new HashSet<Genre>(track.Media.Genres);
-            }
-            else
-            {
-                foreach (var genre in track.Media.Genres)
-                {
-                    Genres.Add(genre);
-                }
-            }
+            CollectionExtensions.AddValueToCollection(Tracks, track);
+            CollectionExtensions.AddValuesToCollection(Genres, track.Media.Genres);
         }
     }
 }

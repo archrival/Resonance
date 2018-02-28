@@ -8,6 +8,7 @@ namespace Resonance.Common
     public static class HashExtensions
     {
         private static readonly Lazy<MD5> _md5 = new Lazy<MD5>(() => MD5.Create());
+        private static readonly Random _random = new Random();
         private static readonly Lazy<SHA1> _sha1 = new Lazy<SHA1>(() => SHA1.Create());
         private static readonly Lazy<SHA256> _sha256 = new Lazy<SHA256>(() => SHA256.Create());
         private static readonly Lazy<SHA384> _sha384 = new Lazy<SHA384>(() => SHA384.Create());
@@ -94,8 +95,7 @@ namespace Resonance.Common
             const int maxSaltSize = 24;
 
             // Generate a random number for the size of the salt.
-            var random = new Random();
-            var saltSize = random.Next(minSaltSize, maxSaltSize);
+            var saltSize = _random.Next(minSaltSize, maxSaltSize);
 
             // Allocate a byte array, which will hold the salt.
             var saltBytes = new byte[saltSize];

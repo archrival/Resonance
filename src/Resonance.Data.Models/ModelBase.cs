@@ -24,10 +24,14 @@ namespace Resonance.Data.Models
         public static bool operator ==(ModelBase left, ModelBase right)
         {
             if (ReferenceEquals(null, left))
+            {
                 return ReferenceEquals(null, right);
+            }
 
             if (ReferenceEquals(null, right))
+            {
                 return false;
+            }
 
             return left.PropertiesEqual(right, nameof(Id));
         }

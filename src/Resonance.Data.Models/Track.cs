@@ -128,5 +128,15 @@ namespace Resonance.Data.Models
 
             return track;
         }
+
+        public void AddArtists(IEnumerable<MediaBundle<Artist>> artists)
+        {
+            CollectionExtensions.AddValuesToCollection(Artists, artists);
+        }
+
+        public void AddGenres(IEnumerable<Genre> genres)
+        {
+            CollectionExtensions.AddValuesToCollection(Genres, genres);
+        }
     }
 }

@@ -31,13 +31,11 @@ namespace Resonance.Data.Storage.SQLite
         {
             _path = path;
             _database = database;
+
             _dbConnection = GetConnection();
-            _dbConnection.Open();
-            _dbConnection.ExecuteAsync("PRAGMA foreign_keys = ON; PRAGMA journal_mode = TRUNCATE; PRAGMA optimize;").ConfigureAwait(false).GetAwaiter().GetResult();
+
             _assembly = GetType().GetTypeInfo().Assembly;
             _assemblyName = _assembly.GetName().Name;
-
-            CreateSchemaAsync().ConfigureAwait(false).GetAwaiter().GetResult();
         }
 
         public Task AddChatAsync(Chat chat, CancellationToken cancellationToken)
@@ -83,6 +81,14 @@ namespace Resonance.Data.Storage.SQLite
         public Task ClearCollectionAsync<T>(Guid? collectionId, CancellationToken cancellationToken) where T : ModelBase, ICollectionIdentifier
         {
             throw new NotImplementedException();
+        }
+
+        public async Task ConfigureAsync()
+        {
+            _dbConnection.Open();
+
+            await _dbConnection.ExecuteAsync("PRAGMA foreign_keys = ON; PRAGMA journal_mode = TRUNCATE; PRAGMA optimize;").ConfigureAwait(false);
+            await CreateSchemaAsync().ConfigureAwait(false);
         }
 
         public async Task DeleteAlbumReferencesAsync(CancellationToken cancellationToken)
@@ -2712,7 +2718,8 @@ namespace Resonance.Data.Storage.SQLite
             if (album.Media.Artists == null)
             {
                 var albumArtists = await GetArtistsByAlbumAsync(userId, album.Media.Id, cancellationToken).ConfigureAwait(false);
-                album.Media.Artists = new HashSet<MediaBundle<Artist>>(albumArtists);
+
+                album.Media.AddArtists(albumArtists);
             }
 
             if (album.Media.Tracks == null)
@@ -2722,6 +2729,7 @@ namespace Resonance.Data.Storage.SQLite
                 foreach (var track in albumTracks.OrderBy(t => t.Media.DiscNumber).ThenBy(t => t.Media.Number))
                 {
                     await PopulateTrackAsync(userId, track, cancellationToken).ConfigureAwait(false);
+
                     album.Media.AddTrack(track);
                 }
             }
@@ -2729,16 +2737,33 @@ namespace Resonance.Data.Storage.SQLite
 
         private async Task PopulateTrackAsync(Guid userId, MediaBundle<Track> track, CancellationToken cancellationToken)
         {
+            Task<IEnumerable<MediaBundle<Artist>>> getArtistsTask = null;
+            Task<IEnumerable<Genre>> getGenresTask = null;
+
+            var tasks = new List<Task>();
+
             if (track.Media.Artists == null)
             {
-                var trackArtists = await GetArtistsByTrackAsync(userId, track.Media.Id, cancellationToken).ConfigureAwait(false);
-                track.Media.Artists = new HashSet<MediaBundle<Artist>>(trackArtists);
+                getArtistsTask = GetArtistsByTrackAsync(userId, track.Media.Id, cancellationToken);
+                tasks.Add(getArtistsTask);
             }
 
             if (track.Media.Genres == null)
             {
-                var trackGenres = await GetGenresByTrackAsync(track.Media.Id, cancellationToken).ConfigureAwait(false);
-                track.Media.Genres = new HashSet<Genre>(trackGenres);
+                getGenresTask = GetGenresByTrackAsync(track.Media.Id, cancellationToken);
+                tasks.Add(getGenresTask);
+            }
+
+            await Task.WhenAll(tasks);
+
+            if (getArtistsTask != null)
+            {
+                track.Media.AddArtists(getArtistsTask.Result);
+            }
+
+            if (getGenresTask != null)
+            {
+                track.Media.AddGenres(getGenresTask.Result);
             }
         }
     }

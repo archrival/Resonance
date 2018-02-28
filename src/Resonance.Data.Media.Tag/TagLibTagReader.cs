@@ -174,16 +174,16 @@ namespace Resonance.Data.Media.Tag
 
         private void ReadMediaProperties()
         {
-            var codec = _fileTag.Properties.Codecs.FirstOrDefault();
-
             var duration = _fileTag.Properties.Duration;
 
-            if (codec == null || !(codec is TagLib.Mpeg.AudioHeader))
+            var mpegCodec = _fileTag.Properties.Codecs.FirstOrDefault(c => c is TagLib.Mpeg.AudioHeader);
+
+            if (mpegCodec == null)
             {
                 return;
             }
 
-            var mpegAudioHeader = (TagLib.Mpeg.AudioHeader)codec;
+            var mpegAudioHeader = (TagLib.Mpeg.AudioHeader)mpegCodec;
 
             // Read VBR header to get accurate audio info
             var vbriHeader = mpegAudioHeader.VBRIHeader;

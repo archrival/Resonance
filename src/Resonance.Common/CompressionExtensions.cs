@@ -19,6 +19,7 @@ namespace Resonance.Common
             }
 
             memoryStream.Position = 0;
+
             return memoryStream;
         }
     }

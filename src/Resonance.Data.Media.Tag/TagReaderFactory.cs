@@ -1,5 +1,4 @@
 ﻿using Resonance.Data.Media.Common;
-using System;
 
 namespace Resonance.Data.Media.Tag
 {
@@ -7,7 +6,7 @@ namespace Resonance.Data.Media.Tag
     {
         public ITagReader CreateTagReader(string path, bool readMediaPropertes = true, bool readCoverArt = true)
         {
-            var tagReader = Activator.CreateInstance<TTagReader>();
+            var tagReader = new TTagReader();
 
             tagReader.ReadTag(path, readMediaPropertes, readCoverArt);
 

@@ -56,6 +56,8 @@ namespace Resonance.Data.Storage
                 throw new Exception(string.Format("Unable to create instance of type '{0}' in assembly '{1}'", _settings.TypeName, _settings.AssemblyName));
             }
 
+            metadataRepository.ConfigureAsync().GetAwaiter().GetResult();
+
             return metadataRepository;
         }
     }
