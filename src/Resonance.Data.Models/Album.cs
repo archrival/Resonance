@@ -39,7 +39,7 @@ namespace Resonance.Data.Models
 
         public void AddArtists(IEnumerable<MediaBundle<Artist>> artists)
         {
-            CollectionExtensions.AddValuesToCollection(Artists, artists);
+            Artists = CollectionExtensions.AddValuesToCollection(Artists, artists);
         }
 
         public void AddTrack(MediaBundle<Track> track)
@@ -48,8 +48,8 @@ namespace Resonance.Data.Models
             Duration = Duration.Add(track.Media.Duration);
             ReleaseDate = Math.Max(ReleaseDate, track.Media.ReleaseDate);
 
-            CollectionExtensions.AddValueToCollection(Tracks, track);
-            CollectionExtensions.AddValuesToCollection(Genres, track.Media.Genres);
+            Tracks = CollectionExtensions.AddValueToCollection(Tracks, track);
+            Genres = CollectionExtensions.AddValuesToCollection(Genres, track.Media.Genres);
         }
     }
 }

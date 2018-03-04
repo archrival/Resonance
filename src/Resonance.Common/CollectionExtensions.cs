@@ -4,11 +4,11 @@ namespace Resonance.Common
 {
     public static class CollectionExtensions
     {
-        public static void AddValuesToCollection<T, CollectionType>(CollectionType collection, IEnumerable<T> values) where CollectionType : ICollection<T>, new()
+        public static CollectionType AddValuesToCollection<T, CollectionType>(CollectionType collection, IEnumerable<T> values) where CollectionType : ICollection<T>, new()
         {
             if (values == null)
             {
-                return;
+                return collection;
             }
 
             if (collection == null)
@@ -20,9 +20,11 @@ namespace Resonance.Common
             {
                 collection.Add(value);
             }
+
+            return collection;
         }
 
-        public static void AddValueToCollection<T, CollectionType>(CollectionType collection, T value) where CollectionType : ICollection<T>, new()
+        public static CollectionType AddValueToCollection<T, CollectionType>(CollectionType collection, T value) where CollectionType : ICollection<T>, new()
         {
             if (collection == null)
             {
@@ -30,6 +32,8 @@ namespace Resonance.Common
             }
 
             collection.Add(value);
+
+            return collection;
         }
     }
 }

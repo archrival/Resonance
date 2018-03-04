@@ -131,12 +131,12 @@ namespace Resonance.Data.Models
 
         public void AddArtists(IEnumerable<MediaBundle<Artist>> artists)
         {
-            CollectionExtensions.AddValuesToCollection(Artists, artists);
+            Artists = CollectionExtensions.AddValuesToCollection(Artists, artists);
         }
 
         public void AddGenres(IEnumerable<Genre> genres)
         {
-            CollectionExtensions.AddValuesToCollection(Genres, genres);
+            Genres = CollectionExtensions.AddValuesToCollection(Genres, genres);
         }
     }
 }
