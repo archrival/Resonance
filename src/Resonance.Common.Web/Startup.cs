@@ -66,16 +66,8 @@ namespace Resonance.Common.Web
                     opt.SerializerSettings.StringEscapeHandling = StringEscapeHandling.Default;
                 });
 
-            services.AddAuthentication(options =>
-            {
-                options.DefaultAuthenticateScheme = ResonanceAuthenticationConstants.ResonanceAuthenticationScheme;
-                options.DefaultChallengeScheme = ResonanceAuthenticationConstants.ResonanceAuthenticationScheme;
-            })
-            .AddResonanceAuthenticationScheme(o => { });
-
             services.AddAuthorization(options =>
             {
-                options.AddPolicy(PolicyConstants.Authorized, policy => policy.RequireAuthenticatedUser());
                 options.AddPolicy(PolicyConstants.Administration, policy => policy.RequireRole(Enum.GetName(typeof(Role), Role.Administrator)));
                 options.AddPolicy(PolicyConstants.ModifyUserSettings, policy => policy.RequireRole(Enum.GetName(typeof(Role), Role.Administrator), Enum.GetName(typeof(Role), Role.Settings)));
                 options.AddPolicy(PolicyConstants.Scrobble, policy => policy.RequireRole(Enum.GetName(typeof(Role), Role.Administrator), Enum.GetName(typeof(Role), Role.Playback)));

@@ -32,7 +32,7 @@ namespace Resonance.SubsonicCompat.Controllers
 
             var authenticationContext = await _subsonicAuthorization.AuthorizeRequestAsync(queryParameters, cancellationToken).ConfigureAwait(false);
 
-            if (!authenticationContext.IsAuthenticated || !authenticationContext.IsInRole(Role.Settings))
+            if (!authenticationContext.IsAuthorized || !authenticationContext.IsInRole(Role.Settings))
             {
                 return StatusCode(401);
             }

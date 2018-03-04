@@ -24,7 +24,7 @@ namespace Resonance.SubsonicCompat
 
             if (parameters == null || string.IsNullOrWhiteSpace(parameters.Username) || string.IsNullOrWhiteSpace(parameters.ClientName))
             {
-                authorizationContext.IsAuthenticated = false;
+                authorizationContext.IsAuthorized = false;
                 authorizationContext.ErrorCode = (int)ErrorCode.RequiredParameterMissing;
                 authorizationContext.Status = SubsonicConstants.RequiredParameterIsMissing;
 
@@ -37,7 +37,7 @@ namespace Resonance.SubsonicCompat
             {
                 user?.Dispose();
 
-                authorizationContext.IsAuthenticated = false;
+                authorizationContext.IsAuthorized = false;
                 authorizationContext.ErrorCode = (int)ErrorCode.WrongUsernameOrPassword;
                 authorizationContext.Status = SubsonicConstants.WrongUsernameOrPassword;
 
@@ -63,13 +63,13 @@ namespace Resonance.SubsonicCompat
 
             if (!authorizationSuccess)
             {
-                authorizationContext.IsAuthenticated = false;
+                authorizationContext.IsAuthorized = false;
                 authorizationContext.ErrorCode = (int)ErrorCode.WrongUsernameOrPassword;
                 authorizationContext.Status = SubsonicConstants.WrongUsernameOrPassword;
             }
             else
             {
-                authorizationContext.IsAuthenticated = true;
+                authorizationContext.IsAuthorized = true;
 
                 if (user.Roles == null || !user.Roles.Any())
                 {

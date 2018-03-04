@@ -11,7 +11,7 @@ namespace Resonance.Common.Web
     {
         public int? ErrorCode { get; set; }
         public override IIdentity Identity => new GenericIdentity(User.Name);
-        public bool IsAuthenticated { get; set; }
+        public bool IsAuthorized { get; set; }
         public IEnumerable<Role> Roles { get; set; }
         public string Status { get; set; }
         public User User { get; set; }

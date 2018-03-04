@@ -24,12 +24,10 @@ namespace Resonance.SubsonicCompat
 
             var authorizationContext = await _subsonicAuthorization.AuthorizeRequestAsync(queryParameters, context.HttpContext.GetCancellationToken()).ConfigureAwait(false);
 
-            if (!authorizationContext.IsAuthenticated)
-            {
-                // Immediately set the HTTP result to a failed authorization response
-                context.Result = context.GetActionResult(authorizationContext.CreateAuthorizationFailureResponse());
-            }
-            else
+            context.HttpContext.Items.Add(SubsonicConstants.SubsonicQueryParameters, queryParameters);
+            context.HttpContext.Items.Add(SubsonicConstants.AuthorizationContext, authorizationContext);
+
+            if (authorizationContext.IsAuthorized)
             {
                 var authorizeFilter = context.Filters.OfType<AuthorizeFilter>().FirstOrDefault();
 
@@ -48,8 +46,6 @@ namespace Resonance.SubsonicCompat
                     }
                 }
 
-                context.HttpContext.Items.Add(SubsonicConstants.SubsonicQueryParameters, queryParameters);
-                context.HttpContext.Items.Add(SubsonicConstants.AuthorizationContext, authorizationContext);
                 context.HttpContext.User = authorizationContext;
             }
         }
