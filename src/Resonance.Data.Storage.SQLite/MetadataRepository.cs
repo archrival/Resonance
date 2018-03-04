@@ -1439,7 +1439,7 @@ namespace Resonance.Data.Storage.SQLite
 
             foreach (var trackToPlayQueueResult in trackToPlayQueueResults)
             {
-                var trackId = DynamicExtensions.GetGuidFromDynamic(trackToPlayQueueResult.TrackId);
+                var trackId = DynamicExtensions.GetGuidFromDynamic(trackToPlayQueueResult.TrackId) ?? Guid.Empty;
 
                 var track = await GetTrackAsync(userId, trackId, true, cancellationToken).ConfigureAwait(false);
 
