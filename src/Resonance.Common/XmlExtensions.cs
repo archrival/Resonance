@@ -2,7 +2,6 @@
 using System.Collections.Concurrent;
 using System.IO;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Xml;
 using System.Xml.Serialization;
 
@@ -12,7 +11,6 @@ namespace Resonance.Common
     {
         private static readonly XmlQualifiedName EmptyNamespace = new XmlQualifiedName(string.Empty, string.Empty);
         private static readonly XmlSerializerNamespaces IgnoredXmlSerializerNamespaces = new XmlSerializerNamespaces(new[] { EmptyNamespace });
-        private static readonly Regex IgnoreNamespacesRegex = new Regex(@"(xmlns:?[^=]*=[""][^""]*[""])", RegexOptions.IgnoreCase | RegexOptions.Multiline);
         private static readonly XmlSerializerNamespaces XmlSerializerNamespaces = new XmlSerializerNamespaces();
         private static readonly Lazy<ConcurrentDictionary<Type, XmlSerializer>> XmlSerializersLazy = new Lazy<ConcurrentDictionary<Type, XmlSerializer>>();
 

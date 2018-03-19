@@ -147,14 +147,6 @@ namespace Resonance.Common
     /// <summary>Converts XML to and from JSON.</summary>
     public class XObjectConverter : JsonConverter
     {
-        private const string CDataName = "#cdata-section";
-        private const string CommentName = "#comment";
-        private const string DeclarationName = "?xml";
-        private const string JsonNamespaceUri = "http://james.newtonking.com/projects/json";
-        private const string SignificantWhitespaceName = "#significant-whitespace";
-        private const string TextName = "#text";
-        private const string WhitespaceName = "#whitespace";
-
         private Func<string, string, object> _getValue;
 
         /// <summary>
@@ -309,24 +301,24 @@ namespace Resonance.Common
             }
             if (reader.TokenType == JsonToken.Integer)
             {
-                if (reader.Value is BigInteger)
-                    return ((BigInteger)reader.Value).ToString(CultureInfo.InvariantCulture);
+                if (reader.Value is BigInteger integer)
+                    return integer.ToString(CultureInfo.InvariantCulture);
                 return XmlConvert.ToString(Convert.ToInt64(reader.Value, CultureInfo.InvariantCulture));
             }
             if (reader.TokenType == JsonToken.Float)
             {
-                if (reader.Value is decimal)
-                    return XmlConvert.ToString((decimal)reader.Value);
-                if (reader.Value is float)
-                    return XmlConvert.ToString((float)reader.Value);
+                if (reader.Value is decimal @decimal)
+                    return XmlConvert.ToString(@decimal);
+                if (reader.Value is float f)
+                    return XmlConvert.ToString(f);
                 return XmlConvert.ToString(Convert.ToDouble(reader.Value, CultureInfo.InvariantCulture));
             }
             if (reader.TokenType == JsonToken.Boolean)
                 return XmlConvert.ToString(Convert.ToBoolean(reader.Value, CultureInfo.InvariantCulture));
             if (reader.TokenType == JsonToken.Date)
             {
-                if (reader.Value is DateTimeOffset)
-                    return XmlConvert.ToString((DateTimeOffset)reader.Value);
+                if (reader.Value is DateTimeOffset offset)
+                    return XmlConvert.ToString(offset);
                 var dateTime = Convert.ToDateTime(reader.Value, CultureInfo.InvariantCulture);
                 return XmlConvert.ToString(dateTime, Utils.ToDateTimeFormat(dateTime.Kind));
             }
@@ -1127,37 +1119,37 @@ namespace Resonance.Common
 
         internal static IXmlNode WrapNode(XObject node)
         {
-            if (node is XDocument)
+            if (node is XDocument document)
             {
-                return new XDocumentWrapper((XDocument)node);
+                return new XDocumentWrapper(document);
             }
-            if (node is XElement)
+            if (node is XElement element)
             {
-                return new XElementWrapper((XElement)node);
+                return new XElementWrapper(element);
             }
-            if (node is XContainer)
+            if (node is XContainer container)
             {
-                return new XContainerWrapper((XContainer)node);
+                return new XContainerWrapper(container);
             }
-            if (node is XProcessingInstruction)
+            if (node is XProcessingInstruction instruction)
             {
-                return new XProcessingInstructionWrapper((XProcessingInstruction)node);
+                return new XProcessingInstructionWrapper(instruction);
             }
-            if (node is XText)
+            if (node is XText text)
             {
-                return new XTextWrapper((XText)node);
+                return new XTextWrapper(text);
             }
-            if (node is XComment)
+            if (node is XComment comment)
             {
-                return new XCommentWrapper((XComment)node);
+                return new XCommentWrapper(comment);
             }
-            if (node is XAttribute)
+            if (node is XAttribute attribute)
             {
-                return new XAttributeWrapper((XAttribute)node);
+                return new XAttributeWrapper(attribute);
             }
-            if (node is XDocumentType)
+            if (node is XDocumentType type)
             {
-                return new XDocumentTypeWrapper((XDocumentType)node);
+                return new XDocumentTypeWrapper(type);
             }
             return new XObjectWrapper(node);
         }
@@ -1187,7 +1179,7 @@ namespace Resonance.Common
 
         public string Version => Declaration.Version;
 
-        internal XDeclaration Declaration { get; private set; }
+        internal XDeclaration Declaration { get; }
     }
 
     internal class XDocumentTypeWrapper : XObjectWrapper, IXmlDocumentType
@@ -1250,8 +1242,7 @@ namespace Resonance.Common
 
         public override IXmlNode AppendChild(IXmlNode newChild)
         {
-            var declarationWrapper = newChild as XDeclarationWrapper;
-            if (declarationWrapper != null)
+            if (newChild is XDeclarationWrapper declarationWrapper)
             {
                 Document.Declaration = declarationWrapper.Declaration;
                 return declarationWrapper;

@@ -12,7 +12,7 @@ namespace Resonance.Data.Storage
 {
     public class MetadataRepositoryCache : IMetadataRepositoryCache
     {
-        private static readonly MemoryCacheEntryOptions _defaultMemoryCacheEntryOptions = new MemoryCacheEntryOptions
+        private static readonly MemoryCacheEntryOptions DefaultMemoryCacheEntryOptions = new MemoryCacheEntryOptions
         {
             SlidingExpiration = TimeSpan.FromMinutes(5),
             AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(30)
@@ -86,7 +86,7 @@ namespace Resonance.Data.Storage
 
             artists = await _metadataRepository.GetArtistsAsync(userId, collectionId, cancellationToken).ConfigureAwait(false);
 
-            _memoryCache.Set(CacheTypes.Artists, artists, _defaultMemoryCacheEntryOptions);
+            _memoryCache.Set(CacheTypes.Artists, artists, DefaultMemoryCacheEntryOptions);
 
             return artists;
         }
@@ -119,7 +119,7 @@ namespace Resonance.Data.Storage
 
             genreCounts = await _metadataRepository.GetGenreCountsAsync(collectionId, cancellationToken).ConfigureAwait(false);
 
-            _memoryCache.Set(CacheTypes.GenreCounts, genreCounts, _defaultMemoryCacheEntryOptions);
+            _memoryCache.Set(CacheTypes.GenreCounts, genreCounts, DefaultMemoryCacheEntryOptions);
 
             return genreCounts;
         }
@@ -133,7 +133,7 @@ namespace Resonance.Data.Storage
 
             genres = await _metadataRepository.GetGenresAsync(collectionId, cancellationToken).ConfigureAwait(false);
 
-            _memoryCache.Set(CacheTypes.Genres, genres, _defaultMemoryCacheEntryOptions);
+            _memoryCache.Set(CacheTypes.Genres, genres, DefaultMemoryCacheEntryOptions);
 
             return genres;
         }

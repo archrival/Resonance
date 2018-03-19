@@ -10,6 +10,7 @@ using Subsonic.Common.Classes;
 using Subsonic.Common.Enums;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -25,12 +26,10 @@ namespace Resonance.SubsonicCompat.Controllers
     {
         private static readonly HttpClient HttpClient = new HttpClient();
         private static readonly Regex IndexRegex = new Regex("[a-zA-Z]");
-        private readonly SubsonicAuthorization _subsonicAuthorization;
         private readonly ITranscoder _transcoder;
 
         public SubsonicRestController(IMediaLibrary mediaLibrary, IMetadataRepository metadataRepository, ISettingsRepository settingsRepository, ITranscoder transcoder) : base(mediaLibrary, metadataRepository, settingsRepository)
         {
-            _subsonicAuthorization = new SubsonicAuthorization(metadataRepository);
             _transcoder = transcoder;
         }
 
@@ -500,7 +499,7 @@ namespace Resonance.SubsonicCompat.Controllers
                 return SubsonicControllerExtensions.CreateFailureResponse(ErrorCode.RequestedDataNotFound, SubsonicConstants.AlbumNotFound);
             }
 
-            var subsonicAlbum = album.ToSubsonicAlbumWithSongsID3();
+            var subsonicAlbum = album.ToSubsonicAlbumWithSongsId3();
 
             return SubsonicControllerExtensions.CreateResponse(ItemChoiceType.Album, subsonicAlbum);
         }
@@ -630,7 +629,7 @@ namespace Resonance.SubsonicCompat.Controllers
 
             cancellationToken.ThrowIfCancellationRequested();
 
-            var children = albumMediaBundles.Select(albumMediaBundle => albumMediaBundle.ToSubsonicAlbumID3()).ToList();
+            var children = albumMediaBundles.Select(albumMediaBundle => albumMediaBundle.ToSubsonicAlbumId3()).ToList();
 
             var albumList2 = new AlbumList2
             {
@@ -712,7 +711,7 @@ namespace Resonance.SubsonicCompat.Controllers
 
             cancellationToken.ThrowIfCancellationRequested();
 
-            var subsonicArtist = artist.ToSubsonicArtistWithAlbumsID3(albumMediaBundles);
+            var subsonicArtist = artist.ToSubsonicArtistWithAlbumsId3(albumMediaBundles);
 
             return SubsonicControllerExtensions.CreateResponse(ItemChoiceType.Artist, subsonicArtist);
         }
@@ -771,7 +770,7 @@ namespace Resonance.SubsonicCompat.Controllers
                 cancellationToken.ThrowIfCancellationRequested();
 
                 var artistModel = await MediaLibrary.GetArtistAsync(userId, similarArtist.MediaId, cancellationToken).ConfigureAwait(false);
-                subsonicSimilarArtists.Add(artistModel.ToSubsonicArtistID3());
+                subsonicSimilarArtists.Add(artistModel.ToSubsonicArtistId3());
             }
 
             artistInfo.SimilarArtists = subsonicSimilarArtists;
@@ -793,7 +792,7 @@ namespace Resonance.SubsonicCompat.Controllers
 
             var userId = authorizationContext.User.Id;
 
-            count = SetBounds(count, 20, 500);
+            var retrievalCount = SetBounds(count, 20, 500);
 
             var artistInfo = new ArtistInfo();
 
@@ -824,7 +823,7 @@ namespace Resonance.SubsonicCompat.Controllers
 
             cancellationToken.ThrowIfCancellationRequested();
 
-            var similarArtists = await MediaLibrary.GetSimilarArtistsAsync(userId, artist.Media, true, count.Value, artist.Media.CollectionId, cancellationToken).ConfigureAwait(false);
+            var similarArtists = await MediaLibrary.GetSimilarArtistsAsync(userId, artist.Media, true, retrievalCount, artist.Media.CollectionId, cancellationToken).ConfigureAwait(false);
 
             var subsonicSimilarArtists = new List<Subsonic.Common.Classes.Artist>();
 
@@ -867,7 +866,7 @@ namespace Resonance.SubsonicCompat.Controllers
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                var subsonicArtist = artist.ToSubsonicArtistID3();
+                var subsonicArtist = artist.ToSubsonicArtistId3();
 
                 var firstChar = artist.Media.Name.ToUpperInvariant().First();
                 var indexKey = firstChar;
@@ -1681,14 +1680,14 @@ namespace Resonance.SubsonicCompat.Controllers
 
             if (artists != null)
             {
-                starred.Artists = artists.Select(a => a.ToSubsonicArtistID3()).ToList();
+                starred.Artists = artists.Select(a => a.ToSubsonicArtistId3()).ToList();
             }
 
             cancellationToken.ThrowIfCancellationRequested();
 
             if (albums != null)
             {
-                starred.Albums = albums.Select(a => a.ToSubsonicAlbumID3()).ToList();
+                starred.Albums = albums.Select(a => a.ToSubsonicAlbumId3()).ToList();
             }
 
             cancellationToken.ThrowIfCancellationRequested();
@@ -2248,14 +2247,14 @@ namespace Resonance.SubsonicCompat.Controllers
 
             if (artists != null)
             {
-                searchResult3.Artists = artists.Select(a => a.ToSubsonicArtistID3()).ToList();
+                searchResult3.Artists = artists.Select(a => a.ToSubsonicArtistId3()).ToList();
             }
 
             cancellationToken.ThrowIfCancellationRequested();
 
             if (albums != null)
             {
-                searchResult3.Albums = albums.Select(a => a.ToSubsonicAlbumID3()).ToList();
+                searchResult3.Albums = albums.Select(a => a.ToSubsonicAlbumId3()).ToList();
             }
 
             cancellationToken.ThrowIfCancellationRequested();
@@ -2443,7 +2442,7 @@ namespace Resonance.SubsonicCompat.Controllers
                 if (estimateContentLength)
                 {
                     var estimatedLength = Math.Round(((track.Duration.TotalSeconds * maxBitRate.Value) / 8), 0) * 1024;
-                    HttpContext.Response.Headers.Add("Content-Length", estimatedLength.ToString());
+                    HttpContext.Response.Headers.Add("Content-Length", estimatedLength.ToString(CultureInfo.InvariantCulture));
                 }
 
                 return File(_transcoder.TranscodeAudio(track.Path, streamFormat, maxBitRate.Value, cancellationToken), MimeType.GetDefaultMimeTypeForExtension(streamFormat), Path.ChangeExtension(Path.GetFileName(track.Path), streamFormat));
@@ -2692,7 +2691,7 @@ namespace Resonance.SubsonicCompat.Controllers
             return SubsonicControllerExtensions.DefaultResponse;
         }
 
-        private static int? SetBounds(int? size, int min, int max)
+        private static int SetBounds(int? size, int min, int max)
         {
             if (!size.HasValue)
             {
@@ -2709,7 +2708,7 @@ namespace Resonance.SubsonicCompat.Controllers
                 size = min;
             }
 
-            return size;
+            return size.Value;
         }
 
         private async Task<IEnumerable<MediaBundle<Album>>> GetAlbumListInternalAsync(Guid userId, AlbumListType type, int? size, int? offset, int? fromYear, int? toYear, string genre, Guid? musicFolderId, CancellationToken cancellationToken)

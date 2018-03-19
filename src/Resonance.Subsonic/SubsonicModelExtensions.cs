@@ -22,7 +22,7 @@ namespace Resonance.SubsonicCompat
     {
         private const string Separator = " / ";
 
-        public static AlbumID3 ToSubsonicAlbumID3(this MediaBundle<Album> albumMediaBundle)
+        public static AlbumID3 ToSubsonicAlbumId3(this MediaBundle<Album> albumMediaBundle)
         {
             var subsonicAlbum = new AlbumID3();
 
@@ -67,7 +67,7 @@ namespace Resonance.SubsonicCompat
             return subsonicAlbum;
         }
 
-        public static AlbumWithSongsID3 ToSubsonicAlbumWithSongsID3(this MediaBundle<Album> albumMediaBundle)
+        public static AlbumWithSongsID3 ToSubsonicAlbumWithSongsId3(this MediaBundle<Album> albumMediaBundle)
         {
             var subsonicAlbum = new AlbumWithSongsID3();
 
@@ -140,7 +140,7 @@ namespace Resonance.SubsonicCompat
             return subsonicArtist;
         }
 
-        public static ArtistID3 ToSubsonicArtistID3(this MediaBundle<Data.Models.Artist> artistMediaBundle)
+        public static ArtistID3 ToSubsonicArtistId3(this MediaBundle<Data.Models.Artist> artistMediaBundle)
         {
             var subsonicArtist = new ArtistID3();
 
@@ -163,7 +163,7 @@ namespace Resonance.SubsonicCompat
             return subsonicArtist;
         }
 
-        public static ArtistWithAlbumsID3 ToSubsonicArtistWithAlbumsID3(this MediaBundle<Data.Models.Artist> artistMediaBundle, IEnumerable<MediaBundle<Album>> albumMediaBundles)
+        public static ArtistWithAlbumsID3 ToSubsonicArtistWithAlbumsId3(this MediaBundle<Data.Models.Artist> artistMediaBundle, IEnumerable<MediaBundle<Album>> albumMediaBundles)
         {
             var subsonicArtist = new ArtistWithAlbumsID3();
 
@@ -183,7 +183,7 @@ namespace Resonance.SubsonicCompat
                 }
             }
 
-            var subsonicArtistAlbums = albumMediaBundles.Select(a => a.ToSubsonicAlbumID3()).AsParallel().ToList();
+            var subsonicArtistAlbums = albumMediaBundles.Select(a => a.ToSubsonicAlbumId3()).AsParallel().ToList();
 
             subsonicArtist.Albums = subsonicArtistAlbums;
             subsonicArtist.AlbumCount = subsonicArtistAlbums.Count;

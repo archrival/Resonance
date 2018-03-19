@@ -18,7 +18,7 @@ namespace Resonance.Common.Web
 
         public bool IsInRole(Role role, bool administrator = true)
         {
-            return Roles.Any(r => r.Equals(role) || administrator ? r.Equals(Role.Administrator) : true);
+            return Roles.Any(r => !r.Equals(role) && !administrator || r.Equals(Role.Administrator));
         }
 
         public override bool IsInRole(string role)

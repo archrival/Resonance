@@ -7,12 +7,12 @@ namespace Resonance.Common
 {
     public static class HashExtensions
     {
-        private static readonly Lazy<MD5> _md5 = new Lazy<MD5>(() => MD5.Create());
-        private static readonly Random _random = new Random();
-        private static readonly Lazy<SHA1> _sha1 = new Lazy<SHA1>(() => SHA1.Create());
-        private static readonly Lazy<SHA256> _sha256 = new Lazy<SHA256>(() => SHA256.Create());
-        private static readonly Lazy<SHA384> _sha384 = new Lazy<SHA384>(() => SHA384.Create());
-        private static readonly Lazy<SHA512> _sha512 = new Lazy<SHA512>(() => SHA512.Create());
+        private static readonly Lazy<MD5> Md5 = new Lazy<MD5>(MD5.Create);
+        private static readonly Random Random = new Random();
+        private static readonly Lazy<SHA1> Sha1 = new Lazy<SHA1>(SHA1.Create);
+        private static readonly Lazy<SHA256> Sha256 = new Lazy<SHA256>(SHA256.Create);
+        private static readonly Lazy<SHA384> Sha384 = new Lazy<SHA384>(SHA384.Create);
+        private static readonly Lazy<SHA512> Sha512 = new Lazy<SHA512>(SHA512.Create);
 
         public static string ComputeHash(string plainText, HashType hashType, byte[] saltBytes)
         {
@@ -43,23 +43,23 @@ namespace Resonance.Common
             switch (hashType)
             {
                 case HashType.SHA1:
-                    hash = _sha1.Value;
+                    hash = Sha1.Value;
                     break;
 
                 case HashType.SHA256:
-                    hash = _sha256.Value;
+                    hash = Sha256.Value;
                     break;
 
                 case HashType.SHA384:
-                    hash = _sha384.Value;
+                    hash = Sha384.Value;
                     break;
 
                 case HashType.SHA512:
-                    hash = _sha512.Value;
+                    hash = Sha512.Value;
                     break;
 
                 default:
-                    hash = _md5.Value;
+                    hash = Md5.Value;
                     break;
             }
 
@@ -95,7 +95,7 @@ namespace Resonance.Common
             const int maxSaltSize = 24;
 
             // Generate a random number for the size of the salt.
-            var saltSize = _random.Next(minSaltSize, maxSaltSize);
+            var saltSize = Random.Next(minSaltSize, maxSaltSize);
 
             // Allocate a byte array, which will hold the salt.
             var saltBytes = new byte[saltSize];
@@ -123,23 +123,23 @@ namespace Resonance.Common
             switch (hashType)
             {
                 case HashType.SHA1:
-                    hashAlgorithm = _sha1.Value;
+                    hashAlgorithm = Sha1.Value;
                     break;
 
                 case HashType.SHA256:
-                    hashAlgorithm = _sha256.Value;
+                    hashAlgorithm = Sha256.Value;
                     break;
 
                 case HashType.SHA384:
-                    hashAlgorithm = _sha384.Value;
+                    hashAlgorithm = Sha384.Value;
                     break;
 
                 case HashType.SHA512:
-                    hashAlgorithm = _sha512.Value;
+                    hashAlgorithm = Sha512.Value;
                     break;
 
                 default:
-                    hashAlgorithm = _md5.Value;
+                    hashAlgorithm = Md5.Value;
                     break;
             }
 
@@ -171,7 +171,7 @@ namespace Resonance.Common
             var hashWithSaltBytes = Convert.FromBase64String(hashValue);
 
             // We must know size of hash (without salt).
-            int hashSizeInBits, hashSizeInBytes;
+            int hashSizeInBits;
 
             // Size of hash is based on the specified algorithm.
             switch (hashType)
@@ -198,7 +198,7 @@ namespace Resonance.Common
             }
 
             // Convert size of hash from bits to bytes.
-            hashSizeInBytes = hashSizeInBits / 8;
+            var hashSizeInBytes = hashSizeInBits / 8;
 
             // Make sure that the specified hash value is long enough.
             if (hashWithSaltBytes.Length < hashSizeInBytes)

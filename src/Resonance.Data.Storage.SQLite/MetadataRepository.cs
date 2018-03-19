@@ -18,7 +18,7 @@ namespace Resonance.Data.Storage.SQLite
 {
     public class MetadataRepository : IMetadataRepository
     {
-        private static Regex SearchRegex = new Regex(@"\*$");
+        private static readonly Regex SearchRegex = new Regex(@"\*$");
         private readonly Assembly _assembly;
         private readonly string _assemblyName;
         private readonly string _database;
@@ -1439,7 +1439,7 @@ namespace Resonance.Data.Storage.SQLite
 
             foreach (var trackToPlayQueueResult in trackToPlayQueueResults)
             {
-                var trackId = DynamicExtensions.GetGuidFromDynamic(trackToPlayQueueResult.TrackId) ?? Guid.Empty;
+                var trackId = DynamicExtensions.GetGuidFromDynamic(trackToPlayQueueResult.TrackId);
 
                 var track = await GetTrackAsync(userId, trackId, true, cancellationToken).ConfigureAwait(false);
 
@@ -1483,12 +1483,7 @@ namespace Resonance.Data.Storage.SQLite
 
             var results = await _dbConnection.QueryAsync(commandDefinition).ConfigureAwait(false);
 
-            if (results == null)
-            {
-                return null;
-            }
-
-            return results.Select(r => (RadioStation)RadioStation.FromDynamic(r));
+            return results?.Select(r => (RadioStation)RadioStation.FromDynamic(r));
         }
 
         public async Task<IEnumerable<MediaBundle<Album>>> GetRandomAlbumsAsync(Guid userId, int size, int offset, string genre, int? fromYear, int? toYear, Guid? collectionId, bool populate, CancellationToken cancellationToken)
@@ -2016,10 +2011,10 @@ namespace Resonance.Data.Storage.SQLite
 
             var fileInfoCommand = new CommandDefinition(GetScript("Marker_Upsert"), new
             {
-                TrackId = marker.TrackId,
+                marker.TrackId,
                 UserId = marker.User.Id,
-                Position = marker.Position,
-                Comment = marker.Comment
+                marker.Position,
+                marker.Comment
             }, _transaction, cancellationToken: cancellationToken);
 
             return _dbConnection.ExecuteAsync(fileInfoCommand);

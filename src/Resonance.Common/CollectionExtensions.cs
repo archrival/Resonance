@@ -4,7 +4,7 @@ namespace Resonance.Common
 {
     public static class CollectionExtensions
     {
-        public static CollectionType AddValuesToCollection<T, CollectionType>(CollectionType collection, IEnumerable<T> values) where CollectionType : ICollection<T>, new()
+        public static TCollectionType AddValuesToCollection<T, TCollectionType>(TCollectionType collection, IEnumerable<T> values) where TCollectionType : ICollection<T>, new()
         {
             if (values == null)
             {
@@ -13,7 +13,7 @@ namespace Resonance.Common
 
             if (collection == null)
             {
-                collection = new CollectionType();
+                collection = new TCollectionType();
             }
 
             foreach (var value in values)
@@ -24,11 +24,11 @@ namespace Resonance.Common
             return collection;
         }
 
-        public static CollectionType AddValueToCollection<T, CollectionType>(CollectionType collection, T value) where CollectionType : ICollection<T>, new()
+        public static TCollectionType AddValueToCollection<T, TCollectionType>(TCollectionType collection, T value) where TCollectionType : ICollection<T>, new()
         {
             if (collection == null)
             {
-                collection = new CollectionType();
+                collection = new TCollectionType();
             }
 
             collection.Add(value);

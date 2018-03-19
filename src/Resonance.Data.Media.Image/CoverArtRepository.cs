@@ -45,7 +45,7 @@ namespace Resonance.Data.Media.Image
 
             if (coverArt == null)
             {
-                var tagReader = _tagReaderFactory.CreateTagReader(track.Path, false, true);
+                var tagReader = _tagReaderFactory.CreateTagReader(track.Path, false);
 
                 coverArt = tagReader.CoverArt.FirstOrDefault(ca => ca.CoverArtType == CoverArtType.Front || ca.CoverArtType == CoverArtType.Other);
 

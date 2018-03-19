@@ -85,7 +85,7 @@
     <PackageReference Include="Dapper.Contrib" Version="1.50.4" />
     <PackageReference Include="Dapper" Version="1.50.4" />
     <PackageReference Include="Dapper.SqlBuilder" Version="1.50.4" />
-    <PackageReference Include="Microsoft.Data.Sqlite" Version="2.0.0" />
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="2.0.1" />
     <PackageReference Include="System.Net.NameResolution" Version="4.3.0" />
     <PackageReference Include="System.Threading.ThreadPool" Version="4.3.0" />
   </ItemGroup>
