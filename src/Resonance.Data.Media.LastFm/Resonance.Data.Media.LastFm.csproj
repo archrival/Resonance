@@ -19,6 +19,6 @@
 
   <ItemGroup>
     <PackageReference Include="Inflatable.Lastfm" Version="1.0.1.307" />
-    <PackageReference Include="Newtonsoft.Json" Version="11.0.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
   </ItemGroup>
 </Project>
