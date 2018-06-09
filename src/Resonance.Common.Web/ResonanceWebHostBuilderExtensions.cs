@@ -130,10 +130,6 @@ namespace Resonance.Common.Web
                         });
                     }
                 })
-                .UseLibuv(options =>
-                {
-                    options.ThreadCount = threadCount;
-                })
                 .UseContentRoot(Directory.GetCurrentDirectory());
 
             return webHostBuilder;

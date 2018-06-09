@@ -4,6 +4,7 @@ using Resonance.Data.Models;
 using Resonance.Data.Storage;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Processing;
+using SixLabors.ImageSharp.Processing.Transforms;
 using SixLabors.Primitives;
 using System.Collections.Concurrent;
 using System.IO;
