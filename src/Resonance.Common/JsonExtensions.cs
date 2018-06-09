@@ -17,7 +17,7 @@ namespace Resonance.Common
         /// <returns>A JSON string of the XNode.</returns>
         public static string SerializeXObject(this XObject node, Formatting formatting, bool omitRootObject, bool prependOutput, Func<string, string, object> getValueFunc)
         {
-            var xmlNodeConverter = new XObjectConverter()
+            var xmlNodeConverter = new XObjectConverter
             {
                 OmitRootObject = omitRootObject,
                 PrependOutput = prependOutput,

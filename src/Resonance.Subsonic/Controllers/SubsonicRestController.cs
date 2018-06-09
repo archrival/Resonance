@@ -2441,7 +2441,7 @@ namespace Resonance.SubsonicCompat.Controllers
 
                 if (estimateContentLength)
                 {
-                    var estimatedLength = Math.Round(((track.Duration.TotalSeconds * maxBitRate.Value) / 8), 0) * 1024;
+                    var estimatedLength = Math.Round(track.Duration.TotalSeconds * maxBitRate.Value / 8, 0) * 1024;
                     HttpContext.Response.Headers.Add("Content-Length", estimatedLength.ToString(CultureInfo.InvariantCulture));
                 }
 

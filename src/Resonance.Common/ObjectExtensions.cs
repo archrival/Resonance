@@ -1,4 +1,6 @@
-﻿using System.Linq;
+﻿using System;
+using System.Collections.Concurrent;
+using System.Linq;
 using System.Reflection;
 
 namespace Resonance.Common
@@ -7,12 +9,15 @@ namespace Resonance.Common
     {
         private const int HashFactor = 17;
         private const int HashSeed = 73;
+        private static readonly ConcurrentDictionary<Type, PropertyInfo[]> TypeToProperties = new ConcurrentDictionary<Type, PropertyInfo[]>();
 
         public static int GetHashCodeForObject<T>(this T graph, params object[] objects)
         {
             var hash = HashSeed;
 
-            hash = hash * HashFactor + typeof(T).GetHashCode();
+            var type = graph == null ? typeof(T) : graph.GetType();
+
+            hash = hash * HashFactor + type.GetHashCode();
 
             return objects.Where(obj => obj != null).Aggregate(hash, (current, obj) => current * HashFactor + obj.GetHashCode());
         }
@@ -28,7 +33,9 @@ namespace Resonance.Common
 
             foreach (var propertyName in propertyNames)
             {
-                var property = type.GetProperty(propertyName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+                var properties = TypeToProperties.GetOrAdd(type, t => t.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance));
+
+                var property = properties.FirstOrDefault(p => p.Name == propertyName);
 
                 if (property == null)
                 {

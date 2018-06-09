@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Server.Kestrel.Https;
 using Microsoft.AspNetCore.Server.Kestrel.Transport.Abstractions.Internal;
 using Microsoft.Extensions.Configuration;
-using System;
 using System.IO;
 using System.Net;
 using System.Security.Authentication;
@@ -21,8 +20,6 @@ namespace Resonance.Common.Web
             var configuration = builder.Build();
 
             var noDelay = true;
-            var threadCount = 64;
-            var allowSynchronousIO = false;
             var addServerHeader = true;
             var httpEnabled = false;
             var httpAddress = IPAddress.Any;
@@ -40,7 +37,6 @@ namespace Resonance.Common.Web
 
                 if (kestrelSettings != null)
                 {
-                    threadCount = kestrelSettings.GetValue("ThreadCount", Environment.ProcessorCount);
                     noDelay = kestrelSettings.GetValue("NoDelay", true);
                     addServerHeader = kestrelSettings.GetValue("AddServerHeader", true);
                 }
@@ -112,7 +108,6 @@ namespace Resonance.Common.Web
             var webHostBuilder = new WebHostBuilder()
                 .UseKestrel(options =>
                 {
-                    options.AllowSynchronousIO = allowSynchronousIO;
                     options.ApplicationSchedulingMode = SchedulingMode.Default;
                     options.AddServerHeader = addServerHeader;
 

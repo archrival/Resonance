@@ -156,9 +156,9 @@ namespace Resonance.Data.Media.Image
             {
                 lock (lockObject)
                 {
-                    string parentDirectory = Path.GetDirectoryName(path);
+                    var parentDirectory = Path.GetDirectoryName(path);
 
-                    if (!Directory.Exists(parentDirectory))
+                    if (parentDirectory != null && !Directory.Exists(parentDirectory))
                     {
                         Directory.CreateDirectory(parentDirectory);
                     }

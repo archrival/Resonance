@@ -23,6 +23,11 @@ namespace Resonance.Data.Media.LastFm
         {
             var artist = album.Artists.FirstOrDefault();
 
+            if (artist == null)
+            {
+                return null;
+            }
+
             var response = await _client.Album.GetInfoAsync(artist.Media.Name, album.Name).ConfigureAwait(false);
 
             if (response.Status != LastResponseStatus.Successful)

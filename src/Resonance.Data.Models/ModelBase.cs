@@ -4,15 +4,15 @@ using System;
 
 namespace Resonance.Data.Models
 {
-    public class ModelBase
+    public abstract class ModelBase
     {
-        public ModelBase()
+        protected ModelBase()
         {
             Id = Guid.NewGuid();
         }
 
         [JsonProperty("id")]
-        public virtual Guid Id { get; set; }
+        public Guid Id { get; set; }
 
         #region HashCode and Equality Overrides
 
@@ -23,12 +23,12 @@ namespace Resonance.Data.Models
 
         public static bool operator ==(ModelBase left, ModelBase right)
         {
-            if (ReferenceEquals(null, left))
+            if (left is null)
             {
-                return ReferenceEquals(null, right);
+                return right is null;
             }
 
-            if (ReferenceEquals(null, right))
+            if (right is null)
             {
                 return false;
             }

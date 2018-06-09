@@ -8,11 +8,11 @@ namespace Resonance.Data.Models
     [JsonObject("track")]
     public class Track : MediaBase
     {
-        public Track() : base()
+        public Track()
         {
         }
 
-        public Track(Album album) : base()
+        public Track(Album album)
         {
             AlbumId = album.Id;
         }

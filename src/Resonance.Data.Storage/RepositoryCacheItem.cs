@@ -43,7 +43,7 @@ namespace Resonance.Data.Storage
 
             result = await RepositoryDelegate.GetResult(cancellationToken);
 
-            if (!useCache || (result == null && !AddNullToCache))
+            if (!useCache || result == null && !AddNullToCache)
             {
                 return result;
             }

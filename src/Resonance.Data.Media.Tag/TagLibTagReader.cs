@@ -13,9 +13,6 @@ namespace Resonance.Data.Media.Tag
     {
         private readonly bool _useUtc;
         private TagLib.File _fileTag;
-        private string _hash;
-        private HashType _hashType;
-        private string _path;
 
         public TagLibTagReader()
         {
@@ -55,9 +52,9 @@ namespace Resonance.Data.Media.Tag
 
         public string[] Genres => _fileTag.Tag.Genres;
 
-        public string Hash => _hash;
+        public string Hash { get; private set; }
 
-        public HashType HashType => _hashType;
+        public HashType HashType { get; private set; }
 
         public string MusicBrainzAlbumId => _fileTag.Tag.MusicBrainzReleaseId;
 
@@ -65,7 +62,7 @@ namespace Resonance.Data.Media.Tag
 
         public string MusicBrainzTrackId => _fileTag.Tag.MusicBrainzTrackId;
 
-        public string Path => _path;
+        public string Path { get; private set; }
 
         public uint ReleaseDate => _fileTag.Tag.Year;
 
@@ -87,9 +84,9 @@ namespace Resonance.Data.Media.Tag
 
         public void ReadTag(string path, bool readMediaProperties = true, bool readCoverArt = true, HashType hashType = HashType.None)
         {
-            _path = path;
-            _hashType = hashType;
-            _fileTag = TagLib.File.Create(_path);
+            Path = path;
+            HashType = hashType;
+            _fileTag = TagLib.File.Create(Path);
 
             if (readMediaProperties)
             {
@@ -111,7 +108,7 @@ namespace Resonance.Data.Media.Tag
 
             if (hashType != HashType.None)
             {
-                _hash = HashExtensions.GetFileHash(path, _hashType);
+                Hash = HashExtensions.GetFileHash(path, HashType);
             }
         }
 

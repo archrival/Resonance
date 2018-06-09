@@ -160,7 +160,7 @@ namespace Resonance.Common
             if (!string.IsNullOrWhiteSpace(fileName))
             {
                 string pathExtension = Path.GetExtension(fileName);
-                extension = pathExtension == null ? string.Empty : pathExtension.ToUpper();
+                extension = pathExtension.ToUpper();
             }
 
             if (file.Take(3).SequenceEqual(MP3))

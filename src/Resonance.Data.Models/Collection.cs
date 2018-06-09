@@ -44,10 +44,10 @@ namespace Resonance.Data.Models
 
         public static bool operator ==(Collection left, Collection right)
         {
-            if (ReferenceEquals(null, left))
-                return ReferenceEquals(null, right);
+            if (left is null)
+                return right is null;
 
-            if (ReferenceEquals(null, right))
+            if (right is null)
                 return false;
 
             if (left.Id.Equals(right.Id))
@@ -66,16 +66,16 @@ namespace Resonance.Data.Models
         public override int GetHashCode()
         {
             int hash = HashSeed;
-            hash = (hash * HashFactor) + typeof(Collection).GetHashCode();
+            hash = hash * HashFactor + typeof(Collection).GetHashCode();
 
             if (Id != null)
-                hash = (hash * HashFactor) + Id.GetHashCode();
+                hash = hash * HashFactor + Id.GetHashCode();
 
             if (Name != null)
-                hash = (hash * HashFactor) + Name.GetHashCode();
+                hash = hash * HashFactor + Name.GetHashCode();
 
             if (Path != null)
-                hash = (hash * HashFactor) + Path.GetHashCode();
+                hash = hash * HashFactor + Path.GetHashCode();
 
             return hash;
         }

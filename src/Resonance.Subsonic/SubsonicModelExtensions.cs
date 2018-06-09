@@ -109,7 +109,7 @@ namespace Resonance.SubsonicCompat
             subsonicAlbum.Created = album.DateAdded;
             subsonicAlbum.Name = album.Name;
 
-            subsonicAlbum.Songs = album.Tracks.Select(t => t.ToSubsonicSong(albumMediaBundle)).ToList();
+            subsonicAlbum.Songs = album.Tracks?.Select(t => t.ToSubsonicSong(albumMediaBundle)).ToList();
 
             return subsonicAlbum;
         }

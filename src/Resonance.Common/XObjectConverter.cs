@@ -508,7 +508,7 @@ namespace Resonance.Common
             var dictionary = new Dictionary<string, string>();
             var flag1 = false;
             var flag2 = false;
-            if (reader.TokenType != JsonToken.String && reader.TokenType != JsonToken.Null && (reader.TokenType != JsonToken.Boolean && reader.TokenType != JsonToken.Integer) && (reader.TokenType != JsonToken.Float && reader.TokenType != JsonToken.Date && reader.TokenType != JsonToken.StartConstructor))
+            if (reader.TokenType != JsonToken.String && reader.TokenType != JsonToken.Null && reader.TokenType != JsonToken.Boolean && reader.TokenType != JsonToken.Integer && reader.TokenType != JsonToken.Float && reader.TokenType != JsonToken.Date && reader.TokenType != JsonToken.StartConstructor)
             {
                 while (!flag1 && !flag2 && reader.Read())
                 {
@@ -521,7 +521,7 @@ namespace Resonance.Common
                                 switch (str1[0])
                                 {
                                     case '$':
-                                        if (str1 == "$values" || str1 == "$id" || (str1 == "$ref" || str1 == "$type") || str1 == "$value")
+                                        if (str1 == "$values" || str1 == "$id" || str1 == "$ref" || str1 == "$type" || str1 == "$value")
                                         {
                                             var prefix = manager.LookupPrefix("http://james.newtonking.com/projects/json");
                                             if (prefix == null)
@@ -583,7 +583,7 @@ namespace Resonance.Common
 
         private static string ResolveFullName(IXmlNode node, XmlNamespaceManager manager)
         {
-            var str = node.NamespaceUri == null || (node.LocalName == "xmlns" && node.NamespaceUri == "http://www.w3.org/2000/xmlns/") ? null : manager.LookupPrefix(node.NamespaceUri);
+            var str = node.NamespaceUri == null || node.LocalName == "xmlns" && node.NamespaceUri == "http://www.w3.org/2000/xmlns/" ? null : manager.LookupPrefix(node.NamespaceUri);
             if (!string.IsNullOrEmpty(str))
                 return str + ":" + XmlConvert.DecodeName(node.LocalName);
             return XmlConvert.DecodeName(node.LocalName);
@@ -610,7 +610,7 @@ namespace Resonance.Common
                 var attribute = !string.IsNullOrEmpty(prefix) ? document.CreateAttribute(str, manager.LookupNamespace(prefix) ?? string.Empty, attributeNameValue.Value) : document.CreateAttribute(str, attributeNameValue.Value);
                 element.SetAttributeNode(attribute);
             }
-            if (reader.TokenType == JsonToken.String || reader.TokenType == JsonToken.Integer || (reader.TokenType == JsonToken.Float || reader.TokenType == JsonToken.Boolean) || reader.TokenType == JsonToken.Date)
+            if (reader.TokenType == JsonToken.String || reader.TokenType == JsonToken.Integer || reader.TokenType == JsonToken.Float || reader.TokenType == JsonToken.Boolean || reader.TokenType == JsonToken.Date)
             {
                 var xmlValue = ConvertTokenToXmlValue(reader);
                 if (xmlValue == null)
@@ -811,7 +811,7 @@ namespace Resonance.Common
                 {
                     if (propertyName != "$values")
                     {
-                        if (propertyName == "$id" || propertyName == "$ref" || (propertyName == "$type" || propertyName == "$value"))
+                        if (propertyName == "$id" || propertyName == "$ref" || propertyName == "$type" || propertyName == "$value")
                         {
                             var attributeName = propertyName.Substring(1);
                             var attributePrefix = manager.LookupPrefix("http://james.newtonking.com/projects/json");
@@ -917,7 +917,7 @@ namespace Resonance.Common
                 case XmlNodeType.ProcessingInstruction:
                 case XmlNodeType.Whitespace:
                 case XmlNodeType.SignificantWhitespace:
-                    if ((node.NamespaceUri == "http://www.w3.org/2000/xmlns/" && node.Value == "http://james.newtonking.com/projects/json") || (node.NamespaceUri == "http://james.newtonking.com/projects/json" && node.LocalName == "Array"))
+                    if (node.NamespaceUri == "http://www.w3.org/2000/xmlns/" && node.Value == "http://james.newtonking.com/projects/json" || node.NamespaceUri == "http://james.newtonking.com/projects/json" && node.LocalName == "Array")
                         break;
 
                     var propertyName = GetPropertyName(node, manager);
