@@ -389,16 +389,18 @@ namespace Resonance.Data.Storage
                          {
                              var fileExists = File.Exists(track.Media.Path);
 
-                             if (track.Media.Visible != fileExists)
+                             if (track.Media.Visible == fileExists)
                              {
-                                 track.Media.Visible = fileExists;
+                                 continue;
+                             }
 
-                                 await _metadataRepository.InsertOrUpdateFileInfoAsync(track.Media, cancellationToken).ConfigureAwait(false);
+                             track.Media.Visible = fileExists;
 
-                                 if (!fileExists)
-                                 {
-                                     await _metadataRepository.DeleteTrackReferencesAsync(track.Media, cancellationToken).ConfigureAwait(false);
-                                 }
+                             await _metadataRepository.InsertOrUpdateFileInfoAsync(track.Media, cancellationToken).ConfigureAwait(false);
+
+                             if (!fileExists)
+                             {
+                                 await _metadataRepository.DeleteTrackReferencesAsync(track.Media, cancellationToken).ConfigureAwait(false);
                              }
                          }
 
@@ -409,7 +411,7 @@ namespace Resonance.Data.Storage
                  {
                      _metadataRepository.EndTransaction(false, cancellationToken);
 
-                     File.WriteAllText(string.Format("{0}.txt", Guid.NewGuid().ToString("n")), ex.ToString());
+                     File.WriteAllText($"{Guid.NewGuid():n}.txt", ex.ToString());
                  }
                  finally
                  {

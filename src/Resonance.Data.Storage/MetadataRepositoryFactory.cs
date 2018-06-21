@@ -30,7 +30,7 @@ namespace Resonance.Data.Storage
 
             if (type == null)
             {
-                throw new Exception(string.Format("Unable to find type '{0}' in assembly '{1}'", _settings.TypeName, _settings.AssemblyName));
+                throw new Exception($"Unable to find type '{_settings.TypeName}' in assembly '{_settings.AssemblyName}'");
             }
 
             IMetadataRepository metadataRepository;
@@ -53,7 +53,7 @@ namespace Resonance.Data.Storage
 
             if (metadataRepository == null)
             {
-                throw new Exception(string.Format("Unable to create instance of type '{0}' in assembly '{1}'", _settings.TypeName, _settings.AssemblyName));
+                throw new Exception($"Unable to create instance of type '{_settings.TypeName}' in assembly '{_settings.AssemblyName}'");
             }
 
             metadataRepository.ConfigureAsync().GetAwaiter().GetResult();

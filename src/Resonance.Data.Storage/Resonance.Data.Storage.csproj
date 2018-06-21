@@ -4,13 +4,6 @@
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <DefineConstants>RELEASE;NETSTANDARD2_0</DefineConstants>
-    <LangVersion>latest</LangVersion>
-    <DebugType>pdbonly</DebugType>
-    <DebugSymbols>true</DebugSymbols>
-  </PropertyGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\Resonance.Common\Resonance.Common.csproj" />
     <ProjectReference Include="..\Resonance.Data.Media.LastFm\Resonance.Data.Media.LastFm.csproj" />

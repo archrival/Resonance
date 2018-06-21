@@ -66,7 +66,7 @@ namespace Resonance.Common
                 return int.Parse(value);
             }
 
-            return (int)value;
+            return Convert.ToInt32(value);
         }
 
         public static long GetLongFromDynamic(dynamic value)
@@ -86,7 +86,7 @@ namespace Resonance.Common
                 return long.Parse(value);
             }
 
-            return (long)value;
+            return Convert.ToInt64(value);
         }
     }
 }

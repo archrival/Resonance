@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>net471</TargetFramework>
+    <TargetFramework>net472</TargetFramework>
     <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
     <ApplicationInsightsResourceId>/subscriptions/ba152101-00b8-45a2-a809-fd3d9f25f523/resourcegroups/Default-ApplicationInsights-EastUS/providers/microsoft.insights/components/Resonance</ApplicationInsightsResourceId>
     <ApplicationInsightsAnnotationResourceId>/subscriptions/ba152101-00b8-45a2-a809-fd3d9f25f523/resourceGroups/Default-ApplicationInsights-EastUS/providers/microsoft.insights/components/Resonance</ApplicationInsightsAnnotationResourceId>
@@ -9,11 +9,6 @@
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <PlatformTarget>x64</PlatformTarget>
-    <DocumentationFile></DocumentationFile>
-    <DefineConstants>RELEASE;NET47</DefineConstants>
-    <LangVersion>latest</LangVersion>
-    <DebugType>pdbonly</DebugType>
-    <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -28,8 +23,8 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.3.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Hosting.WindowsServices" Version="2.1.0" />
-    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="2.1.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Hosting.WindowsServices" Version="2.1.1" />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="2.1.1" />
     <PackageReference Include="System.Numerics.Vectors" Version="4.5.0" />
   </ItemGroup>
   <ItemGroup>

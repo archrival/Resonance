@@ -84,7 +84,7 @@ namespace Resonance.Data.Storage
                 return artists;
             }
 
-            artists = await _metadataRepository.GetArtistsAsync(userId, collectionId, cancellationToken).ConfigureAwait(false);
+            artists = (await _metadataRepository.GetArtistsAsync(userId, collectionId, cancellationToken).ConfigureAwait(false)).ToList();
 
             _memoryCache.Set(CacheTypes.Artists, artists, DefaultMemoryCacheEntryOptions);
 
@@ -131,7 +131,7 @@ namespace Resonance.Data.Storage
                 return genres;
             }
 
-            genres = await _metadataRepository.GetGenresAsync(collectionId, cancellationToken).ConfigureAwait(false);
+            genres = (await _metadataRepository.GetGenresAsync(collectionId, cancellationToken).ConfigureAwait(false)).ToList();
 
             _memoryCache.Set(CacheTypes.Genres, genres, DefaultMemoryCacheEntryOptions);
 

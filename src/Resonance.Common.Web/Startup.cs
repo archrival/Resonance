@@ -123,6 +123,11 @@ namespace Resonance.Common.Web
 
                 var type = assembly.DefinedTypes.FirstOrDefault(a => a.Name == typeNameValue);
 
+                if (type?.FullName == null)
+                {
+                    throw new Exception();
+                }
+
                 if (assembly.CreateInstance(type.FullName) is IResonanceControllerAssembly instance)
                 {
                     instance.ConfigureServices(services);
